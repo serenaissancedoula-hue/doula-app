@@ -59,3 +59,24 @@ carteBebe=function(g){const w=Math.max(4,Math.min(42,g.w)),f=fruit(w),M=mouvemen
   const mv='<div class="banner acc">'+icon('fa-person-swimming')+'<div class="small"><b>Comment bébé bouge en ce moment :</b> '+M[2]+'</div></div>';
   const i=h.indexOf('<div class="fruit-l">');if(i>=0)h=h.slice(0,i)+stats+mv+h.slice(i);
   return h.replace(' (moyenne)</p>',' en moyenne. Chaque bébé grandit à son rythme.</p>')};
+
+/* La carte montre bébé et son cœur qui bat en permanence. Toucher bébé l'ouvre en plein écran :
+   le son du cœur part tout de suite, et on peut le tourner du doigt. */
+const _carteBebeR2=carteBebe;
+carteBebe=function(g){let h=_carteBebeR2(g);
+  h=h.replace(/<div class="row" style="justify-content:center;gap:8px;flex-wrap:wrap">[\s\S]*?<\/button><\/div>/,'');
+  h=h.replace(/<p class="xs muted" style="text-align:center">Glissez[\s\S]*?<\/p>/,'<p class="xs muted" style="text-align:center">'+icon('fa-hand-pointer')+' Touchez bébé pour le voir en grand et entendre son cœur.</p>');
+  return h};
+function ouvrirBebePE(){const st=stage();if(st.k!=='preg')return;const w=Math.max(4,Math.min(42,st.g.w)),f=fruit(w),b=bpm(w),M=mouvement(w);
+  const d=document.createElement('div');d.id='bebePE';d.setAttribute('role','dialog');d.setAttribute('aria-label','Mon bébé en plein écran');
+  d.innerHTML='<button class="pe-fermer" data-act="bebePEFermer" aria-label="Fermer">'+icon('fa-xmark')+'</button><div class="pe-haut"><span class="pe-sem">Semaine '+w+'</span><span class="pe-taille">'+cm(f[1])+' cm · '+(f[2]?poidsTexte(f[2]):'moins de 1 g')+(b?' · '+b+' bpm':'')+'</span></div>'+svgBebe(w,'bebeZonePE')+
+    '<p class="pe-mv">'+esc(M[2])+'</p><div class="pe-bas">'+(b?'<button class="pe-btn" data-act="bebePESon" aria-label="Couper ou remettre le son">'+icon('fa-volume-high')+'</button>':'')+'<button class="pe-btn" data-act="bebeTourner" aria-label="Tourner">'+icon('fa-rotate-right')+'</button><button class="pe-btn" data-act="bebeMiroir" aria-label="Retourner">'+icon('fa-arrows-left-right')+'</button></div><p class="pe-aide">Glissez le doigt pour faire tourner bébé. Son du cœur : illustration, pas le vrai cœur de votre bébé.</p>';
+  document.body.appendChild(d);document.body.style.overflow='hidden';
+  if(b){try{coeurArreter();coeurDemarrer(b);S.sonCoeur=true}catch(e){}}}
+function fermerBebePE(){coeurArreter();S.sonCoeur=false;const d=$('#bebePE');if(d)d.remove();document.body.style.overflow=''}
+document.addEventListener('click',e=>{const z=e.target.closest('.bebe-carte .bebe-zone:not(.nn)');if(z&&!e.target.closest('#bebePE')){ouvrirBebePE();return}
+  const b=e.target.closest('[data-act]');if(!b)return;
+  if(b.dataset.act==='bebePEFermer')fermerBebePE();
+  else if(b.dataset.act==='bebePESon'){const st=stage();if(S.sonCoeur){coeurArreter();S.sonCoeur=false;b.innerHTML=icon('fa-volume-xmark')}else{coeurDemarrer(bpm(st.g.w));S.sonCoeur=true;b.innerHTML=icon('fa-volume-high')}}
+  else if(b.dataset.act==='bebeMiroir'&&$('#bebePE')){const st=stage(),w=Math.max(4,Math.min(42,st.g.w));const z=$('#bebeZonePE');if(z)z.outerHTML=svgBebe(w,'bebeZonePE')}},true);
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&$('#bebePE'))fermerBebePE()});

@@ -79,7 +79,7 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-act]');if(
 function tournerVisuel(){document.querySelectorAll('.bebe-zone .tourne').forEach(g=>g.setAttribute('transform','rotate('+(S.bebeRot||0)+' 100 100)'))}
 /* Tourner du doigt */
 let glisse=null;
-document.addEventListener('pointerdown',e=>{const z=e.target.closest('.bebe-zone:not(.nn)');if(!z)return;const r=z.getBoundingClientRect();glisse={cx:r.left+r.width/2,cy:r.top+r.height/2,a0:Math.atan2(e.clientY-(r.top+r.height/2),e.clientX-(r.left+r.width/2)),rot0:S.bebeRot||0};z.setPointerCapture&&z.setPointerCapture(e.pointerId)});
+document.addEventListener('pointerdown',e=>{const z=e.target.closest('#bebePE .bebe-zone');if(!z)return;const r=z.getBoundingClientRect();glisse={cx:r.left+r.width/2,cy:r.top+r.height/2,a0:Math.atan2(e.clientY-(r.top+r.height/2),e.clientX-(r.left+r.width/2)),rot0:S.bebeRot||0};z.setPointerCapture&&z.setPointerCapture(e.pointerId)});
 document.addEventListener('pointermove',e=>{if(!glisse)return;const a=Math.atan2(e.clientY-glisse.cy,e.clientX-glisse.cx);S.bebeRot=Math.round(glisse.rot0+(a-glisse.a0)*180/Math.PI);tournerVisuel()});
 ['pointerup','pointercancel'].forEach(ev=>document.addEventListener(ev,()=>{glisse=null}));
 /* Arrêter le son si on quitte l'onglet */
