@@ -20,8 +20,8 @@ function aboVerifier(){['ecranAbo','bandeauAbo'].forEach(i=>document.getElementB
   document.body.appendChild(o)}
 const _cdAbo=chargerDoula;chargerDoula=async function(){await _cdAbo.apply(this,arguments);try{aboVerifier()}catch(e){}};
 const _pAbo=pParametres;pParametres=function(){const h=_pAbo();if(S.role!=='doula')return h;const s=aboStatut();
-  const t=s.type==='proprio'?'Propriétaire : accès complet.':s.type==='offert'?'Accès offert par Sabrina.':s.type==='abonnee'?'Abonnement actif'+(s.fin?' · renouvelé jusqu\'au '+new Date(s.fin).toLocaleDateString('fr-CA',{day:'numeric',month:'long',year:'numeric'}):'')+'.':s.type==='essai'?'Essai gratuit : encore '+s.jours+' jours (jusqu\'au '+new Date(s.fin).toLocaleDateString('fr-CA',{day:'numeric',month:'long',year:'numeric'})+').':'Essai terminé.';
-  const carte='<div class="card"><span class="eyebrow acc">Mon abonnement</span><p class="small">'+t+'</p>'+(s.type==='essai'||s.type==='expire'?aboBoutons():'')+'</div>';
+  const t=s.type==='proprio'?'Propriétaire : accès complet.'+(ME_DOULA.abonnement_statut==='actif'?' ✅ Paiement Stripe reçu (test réussi).':''):s.type==='offert'?'Accès offert par Sabrina.':s.type==='abonnee'?'Abonnement actif'+(s.fin?' · renouvelé jusqu\'au '+new Date(s.fin).toLocaleDateString('fr-CA',{day:'numeric',month:'long',year:'numeric'}):'')+'.':s.type==='essai'?'Essai gratuit : encore '+s.jours+' jours (jusqu\'au '+new Date(s.fin).toLocaleDateString('fr-CA',{day:'numeric',month:'long',year:'numeric'})+').':'Essai terminé.';
+  const carte='<div class="card"><span class="eyebrow acc">Mon abonnement</span><p class="small">'+t+'</p>'+(s.type==='essai'||s.type==='expire'||s.type==='proprio'?aboBoutons():'')+'</div>';
   const i=h.lastIndexOf('<div class="card flat">');return i<0?h+carte:h.slice(0,i)+carte+h.slice(i)};
 document.addEventListener('click',async e=>{const b=e.target.closest('[data-act]');if(!b)return;
   if(b.dataset.act==='aboVoir'){S.vue='params';try{render()}catch(x){}}
