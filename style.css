@@ -351,3 +351,7 @@ figure.illu figcaption{font-size:.72rem;color:var(--muted);line-height:1.35}
 .bb2-fruit span{font-size:1.3rem}
 .bb2-h{font-size:1.35rem;margin-top:4px}
 .bb2-haut>*{min-width:0}
+
+/* Pas de zoom au pincement */
+html,body{touch-action:pan-x pan-y;-webkit-text-size-adjust:100%}
+input,select,textarea{font-size:max(16px,1em)}

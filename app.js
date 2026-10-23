@@ -51,10 +51,11 @@ async function saveClient(id){const c=S.clients.find(x=>x.id===id);if(!c)return;
   const dos={};for(const k in c)if(!ALIAS.includes(k))dos[k]=c[k];
   const [a,b]=await Promise.all([sb.from('fam_familles').update(cols).eq('id',id),sb.from('fam_dossiers').upsert({famille_id:id,data:dos,updated_at:new Date().toISOString()})]);
   if(a.error||b.error)toast('Pas enregistré : '+((a.error||b.error).message||'erreur'))}
-async function saveDoula(){if(!ME_DOULA)return;const D=S.doula;const parts=D.prenomD!=null&&D.prenomD!==''?[D.prenomD].concat(D.nomD?[D.nomD]:[]):String(D.nom||'').trim().split(/\s+/);
+async function saveDoula(){if(!ME_DOULA)return false;const D=S.doula;const parts=D.prenomD!=null&&D.prenomD!==''?[D.prenomD].concat(D.nomD?[D.nomD]:[]):String(D.nom||'').trim().split(/\s+/);
   const mod=Object.assign({},ME_DOULA.modeles||{},{outils:{sac:D.sac||{},retour:D.retour||{},indispo:D.indispo||''},assurance:D.assurance||''});
-  const {error}=await sb.from('fam_doulas').update({prenom:parts[0]||null,nom:parts.slice(1).join(' ')||null,telephone:D.tel||null,region:D.region||null,adresse:D.adresse||null,remplacante_nom:D.rempNom||null,remplacante_tel:D.rempTel||null,tvh:D.tvh||null,entreprise:D.entreprise||null,photo:D.photo||null,modeles:mod}).eq('id',ME_DOULA.id);
-  if(!error)ME_DOULA.modeles=mod}
+  const {data,error}=await sb.from('fam_doulas').update({prenom:parts[0]||null,nom:parts.slice(1).join(' ')||null,telephone:D.tel||null,region:D.region||null,adresse:D.adresse||null,remplacante_nom:D.rempNom||null,remplacante_tel:D.rempTel||null,tvh:D.tvh||null,entreprise:D.entreprise||null,photo:D.photo||null,modeles:mod}).eq('id',ME_DOULA.id).select('id');
+  if(error||!data||!data.length){toast('Pas enregistré : '+((error&&error.message)||'la base a refusé la modification. Écrivez-nous.'));return false}
+  ME_DOULA.modeles=mod;return true}
 
 /* ================== CHARGEMENT ================== */
 async function chargerParent(){const id=MOI.familles[0];
@@ -71,7 +72,7 @@ async function chargerParent(){const id=MOI.familles[0];
 async function chargerEchanges(){if(!FAM)return;const id=FAM.id;
   const [m,r,d,mo]=await Promise.all([sb.from('fam_messages').select('*').eq('famille_id',id).order('created_at'),sb.from('fam_rdv').select('*').eq('famille_id',id).order('debut'),sb.from('fam_documents').select('*').eq('famille_id',id).order('created_at',{ascending:false}),sb.from('fam_mots').select('*').eq('famille_id',id).eq('jour',iso(new Date())).maybeSingle()]);
   MSGS=m.data||[];RDV=r.data||[];DOCS=d.data||[];MOT=mo.data||null}
-async function chargerDoula(){ME_DOULA=MOI.doula;appliquerForfaits();const D=ME_DOULA,o=(D.modeles||{}).outils||{};
+async function chargerDoula(){ME_DOULA=MOI.doula;try{const {data:frais}=await sb.from('fam_doulas').select('*').eq('id',MOI.doula.id).maybeSingle();if(frais)ME_DOULA=Object.assign({},MOI.doula,frais)}catch(e){}appliquerForfaits();const D=ME_DOULA,o=(D.modeles||{}).outils||{};
   S.doula={entreprise:D.entreprise||'',photo:D.photo||'',prenomD:D.prenom||'',nomD:D.nom||'',nom:[D.prenom,D.nom].filter(Boolean).join(' '),tel:D.telephone||'',courriel:D.courriel,region:D.region||'',adresse:D.adresse||'',rempNom:D.remplacante_nom||'',rempTel:D.remplacante_tel||'',tvh:D.tvh||'',assurance:(D.modeles||{}).assurance||'',sac:o.sac||{},retour:o.retour||{},indispo:o.indispo||''};
   const {data:fs}=await sb.from('fam_familles').select('*').eq('doula_id',D.id).order('created_at',{ascending:false});
   const ids=(fs||[]).map(f=>f.id);let dos=[],rdv=[],nl=[],docs=[];
@@ -186,7 +187,8 @@ function initSig(cv){if(cv._ok)return;cv._ok=1;const x=cv.getContext('2d');x.lin
   const st=e=>{dn=true;const [a,b]=pos(e);x.beginPath();x.moveTo(a,b);e.preventDefault()},mv=e=>{if(!dn)return;const [a,b]=pos(e);x.lineTo(a,b);x.stroke();cv._vide=false;e.preventDefault()},en=()=>{dn=false};
   cv.addEventListener('pointerdown',st);cv.addEventListener('pointermove',mv);window.addEventListener('pointerup',en);cv.style.touchAction='none'}
 function lireSig(){const cv=$('#sigC'),nom=($('#sigNom')||{}).value||'';if(!nom.trim()){toast('Écrivez votre nom');return null}if(!cv||cv._vide){toast('Signez dans le cadre');return null}return {nom:nom.trim(),image:cv.toDataURL('image/png'),appareil:navigator.userAgent.slice(0,120)}}
-function ouvrirDoc(id){const d=(S.role==='parent'?DOCS:(CDOCS[S.openClient]||[])).find(x=>x.id===id);if(!d)return;
+async function ouvrirDoc(id){let d=(S.role==='parent'?DOCS:(CDOCS[S.openClient]||[])).find(x=>x.id===id);if(!d)return;
+  try{const {data:plein}=await sb.from('fam_documents').select('*').eq('id',id).maybeSingle();if(plein)d=plein}catch(e){}
   let b=docVue(d,S.role==='doula');
   if(S.role==='parent'&&d.statut==='a_remplir')b+=(d.sig_parent_requise?sigPad('Votre nom (signature)'):'')+'<label class="check"><input type="checkbox" id="sigOk"><span>J\'ai lu ce document et je l\'accepte.</span></label><button class="btn" data-act="docSignerP" data-id="'+d.id+'">'+icon('fa-signature')+(d.sig_parent_requise?'Signer et envoyer':'Envoyer')+'</button>';
   if(S.role==='doula'&&d.statut==='a_signer_doula')b+=sigPad('Votre nom (signature de la doula)')+'<button class="btn" data-act="docSignerD" data-id="'+d.id+'">'+icon('fa-signature')+'Signer</button>';
@@ -199,7 +201,7 @@ function statutCard(c){const st={invitee:['Invitée · inscription à finaliser'
   return '<div class="card"><div class="row between"><span class="eyebrow acc">Compte de la famille</span><span class="pill '+st[1]+'">'+st[0]+'</span></div><p class="small">'+icon('fa-envelope','var(--accent)')+' '+esc(c.courriel)+(c.parent_user?' · <b>inscription finalisée</b>':c.invite_envoyee?' · invitation envoyée le '+fmtS(new Date(c.invite_envoyee)):' · invitation pas encore envoyée')+'</p>'+
    (c.parent_user?'':'<button class="btn sm" data-act="inviter" data-id="'+c.id+'">'+icon('fa-paper-plane')+(c.invite_envoyee?'Renvoyer l\'invitation':'Envoyer l\'invitation')+'</button>')+
    '<div class="row">'+(c.statut==='active'||c.statut==='invitee'?'<button class="btn sm ghost" data-act="statut" data-id="'+c.id+'" data-v="archivee">Archiver (fin de l\'accompagnement)</button><button class="btn sm ghost" data-act="statut" data-id="'+c.id+'" data-v="non_retenue">N\'a pas retenu mes services</button>':'<button class="btn sm ghost" data-act="statut" data-id="'+c.id+'" data-v="active">Réactiver</button>')+'</div>'+
-   '<p class="xs muted">Conservé au moins jusqu\'au '+fmtD(parseD(c.conserver_jusqu))+'. Les dossiers restent dans l\'appli au moins un an, même si la famille ne va pas de l\'avant.</p></div>'}
+   '<div class="row"><button class="btn sm danger" data-act="cliSuppr" data-id="'+c.id+'">Supprimer cette famille (test)</button></div><p class="xs muted">Conservé au moins jusqu\'au '+fmtD(parseD(c.conserver_jusqu))+'. Les dossiers restent dans l\'appli au moins un an, même si la famille ne va pas de l\'avant.</p></div>'}
 function cMessages(c){const L=CMSGS[c.id]||[];if(NONLUS[c.id]){sb.rpc('fam_marquer_lus',{p_famille:c.id});NONLUS[c.id]=0}
   return filMessages(L,true)+'<div class="card"><label class="f">Modèle de message<select id="modSel" data-act="modSel"><option value="">Choisir un modèle (facultatif)…</option>'+MESSAGES.map((m,k)=>'<option value="'+k+'">'+esc(m[0])+'</option>').join('')+'<option value="fin">Lettre de fin d\'accompagnement</option></select></label><label class="f">Message à '+esc(c.prenom||'la famille')+'<textarea id="msgTxt" style="min-height:110px"></textarea></label><button class="btn" data-act="envoyerMsgD" data-id="'+c.id+'">'+icon('fa-paper-plane')+'Envoyer dans l\'appli</button><p class="xs muted">'+(c.parent_user?'La famille reçoit une notification sur son téléphone (ou un courriel si elle n\'a pas activé les notifications).':'La famille n\'a pas encore finalisé son inscription : elle verra le message à sa première connexion.')+'</p></div>'}
 function cRdvs(c){const L=CRDV.filter(r=>r.famille_id===c.id).sort((a,b)=>new Date(b.debut)-new Date(a.debut));
@@ -276,7 +278,7 @@ function pParametres(){const d=S.role==='doula',D=S.doula,p=S.parent;const photo
   h+='<div class="card flat"><div class="row"><button class="btn sm ghost" data-act="params">'+icon('fa-arrow-left')+'Retour</button><button class="btn sm danger" data-act="deconnexion">'+icon('fa-right-from-bracket')+'Me déconnecter</button></div><p class="xs muted">'+(S.role==='parent'?'Vous restez connectée sur ce téléphone; déconnexion automatique après 30 jours sans utiliser l\'appli.':'Déconnexion automatique après 7 jours sans utiliser l\'appli.')+'</p></div>';
   return h}
 async function sauverProfil(){const g=id=>($('#'+id)||{}).value||'';
-  if(S.role==='doula'){const D=S.doula;D.prenomD=g('pfPrenom').trim();D.nomD=g('pfNom').trim();if(!D.prenomD){toast('Le prénom est requis');return}D.nom=[D.prenomD,D.nomD].filter(Boolean).join(' ');D.entreprise=g('pfEntreprise').trim();D.tel=g('pfTel');D.region=g('pfRegion');D.adresse=g('pfAdresse');D.rempNom=g('pfRempNom');D.rempTel=g('pfRempTel');D.tvh=g('pfTvh');D.assurance=g('pfAssur');await saveDoula();toast('Profil enregistré');render();return}
+  if(S.role==='doula'){const D=S.doula;D.prenomD=g('pfPrenom').trim();D.nomD=g('pfNom').trim();if(!D.prenomD){toast('Le prénom est requis');return}D.nom=[D.prenomD,D.nomD].filter(Boolean).join(' ');D.entreprise=g('pfEntreprise').trim();D.tel=g('pfTel');D.region=g('pfRegion');D.adresse=g('pfAdresse');D.rempNom=g('pfRempNom');D.rempTel=g('pfRempTel');D.tvh=g('pfTvh');D.assurance=g('pfAssur');const ok=await saveDoula();if(ok)toast('Profil enregistré');render();return}
   const p=S.parent;p.prenom=g('pfPrenom').trim();p.partenaire=g('pfPart');const {error}=await sb.from('fam_familles').update({prenom:p.prenom||null,nom:g('pfNom')||null,telephone:g('pfTel')||null,partenaire:p.partenaire||null,parent_data:p}).eq('id',FAM.id);if(error){toast(error.message);return}FAM.prenom=p.prenom;FAM.nom=g('pfNom');FAM.telephone=g('pfTel');FAM.partenaire=p.partenaire;toast('Profil enregistré');render()}
 /* ================== ÉVÉNEMENTS ================== */
 async function logPush(o){if(S.role!=='parent'){o.id=uid();S.logs.push(o);return}
@@ -436,6 +438,11 @@ document.addEventListener('click',async e=>{const b=e.target.closest('[data-act]
   case 'recuEnvoyer':{const t=$('#recuT').textContent;await sb.from('fam_messages').insert({famille_id:id,de_doula:true,type:'document',texte:t});close();await chargerClientDetail(id);toast('Reçu déposé dans l\'appli');return}
   case 'copyTransm':{const c=C(),T=c.transm||{};copy('TRANSMISSION À LA REMPLAÇANTE · CONFIDENTIEL\n'+TRANSMISSION.map(x=>x[1]+' : '+(T[x[0]]||'')).join('\n')+'\nAutorisation photos : '+(T.photos||'—')+'\nLes parents te connaissent : '+(T.connait||''));return}
   case 'lettre':S.msgClient=id;S.dtab='outils';S.dsub='lettre';S.openClient=null;scrollTo(0,0);break;
+  case 'cliSuppr':{if(b.dataset.c!=='1'){b.dataset.c='1';b.textContent='Confirmer : tout sera effacé';return}
+    b.disabled=true;for(const t of ['fam_messages','fam_rdv','fam_documents','fam_journal','fam_mots','fam_dossiers'])await sb.from(t).delete().eq('famille_id',id);
+    const {data:sup,error:es}=await sb.from('fam_familles').delete().eq('id',id).select('id');
+    if(es||!sup||!sup.length){toast('Pas supprimée : '+((es&&es.message)||'la base a refusé'));b.disabled=false;return}
+    S.clients=S.clients.filter(x=>x.id!==id);S.openClient=null;toast('Famille supprimée');break}
   case 'sacReset':S.doula.sac={};break;
   default:return}
   }catch(err){console.error(err);toast('Une erreur est survenue. Réessayez.')}
@@ -446,7 +453,7 @@ document.addEventListener('change',async e=>{const t=e.target,a=t.dataset.act;if
   if(a==='txt'){setP(t.dataset.p,t.value);if(!t.closest('.sheet')){save();if(t.dataset.rr||t.type==='date'||t.tagName==='SELECT')render()}return}
   if(a==='msgSel'){S.msgClient=t.value;render();return}
   if(a==='modSel'){const c=S.clients.find(x=>x.id===S.openClient);const v=t.value;let txt='';if(v==='fin'){txt='Chère '+cFirst(c)+',\n\nNotre accompagnement se termine aujourd\'hui, et je tenais à vous dire merci. Merci de m\'avoir ouvert la porte de votre histoire et de votre maison.\n\nJ\'ai été témoin de votre courage, de votre douceur et de tout l\'amour qui entoure '+(c.bebe||'votre bébé')+'. Ces souvenirs resteront précieux pour moi.\n\nRappelez-vous que vous n\'avez pas à tout savoir : demander de l\'aide est un geste de force.\n\nMa porte reste ouverte. Si vous avez besoin de parler, d\'une marraine d\'allaitement ou d\'une référence, écrivez-moi.\n\n'+S.doula.nom}else if(v!=='')txt=fillMsg(MESSAGES[+v][1],c);$('#msgTxt').value=txt;return}
-  if(a==='photoProfil'){const f=t.files[0];if(!f)return;try{const src=await shrinkTo(f,320);if(S.role==='doula'){S.doula.photo=src;await saveDoula()}else{S.parent.photo=src;await saveParent()}toast('Photo enregistrée');render()}catch(x){toast('Cette image n\'a pas pu être lue')}return}
+  if(a==='photoProfil'){const f=t.files[0];if(!f)return;try{const src=await shrinkTo(f,320);let ok=true;if(S.role==='doula'){S.doula.photo=src;ok=await saveDoula()}else{S.parent.photo=src;await saveParent()}if(ok)toast('Photo enregistrée');render()}catch(x){toast('Cette image n\'a pas pu être lue')}return}
   if(a==='phAdd'){const files=[...t.files];if(!files.length)return;toast('Ajout de '+files.length+' photo(s)…');for(const f of files){try{await putPhoto({id:uid(),t:Date.now(),src:await shrink(f),cap:''})}catch(x){toast('Une image n\'a pas pu être lue')}}fillPhotos();return}
 });
 document.addEventListener('input',e=>{const t=e.target,a=t.dataset.act;
@@ -472,3 +479,8 @@ function imprimerFiche(c,r){
     (r.alerte==='Oui'?ligne('Signal d\'alerte, orientation',r.orientation||'Oui'):'')+ligne('À faire',r.afaire)+(r.prochaine?ligne('Prochaine rencontre',fmtD(parseD(r.prochaine))):'')+
     '<p style="margin-top:18px;font-size:9pt;color:#666">Imprimé le '+fmtD(new Date())+' · Sérénaissance</p></div>';
   const w=document.createElement('div');w.id='impression';w.innerHTML=el;document.body.appendChild(w);document.body.classList.add('imp');window.print();setTimeout(()=>{w.remove();document.body.classList.remove('imp')},500)}
+
+
+/* Pas de zoom au pincement ni au double toucher : l'appli reste à la bonne taille. */
+['gesturestart','gesturechange','gestureend'].forEach(ev=>document.addEventListener(ev,e=>e.preventDefault()));
+document.addEventListener('touchmove',e=>{if(e.touches&&e.touches.length>1&&e.cancelable)e.preventDefault()},{passive:false});

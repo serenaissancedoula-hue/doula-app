@@ -22,7 +22,8 @@ function remplirModele(t,c,o){const D=S.doula;o=o||{};const bebe=c.bebe||'votre 
   const v={doula_entreprise:D.entreprise||D.nom,doula_nom:D.nom,doula_prenom:D.prenomD||String(D.nom||'').split(' ')[0],doula_adresse:D.adresse||'[adresse]',doula_tel:D.tel||'',doula_courriel:D.courriel,doula_region:D.region||'[ma région]',
     prenom:c.prenom||cFirst(c),parent_nom:c.nom,partenaire:c.partenaire||'',partenaire_et:c.partenaire?' et '+c.partenaire:'',parent_courriel:c.courriel,parent_tel:c.tel||'',bebe,
     dpa:c.dpa?fmtD(parseD(c.dpa)):'[date prévue]',dpa_mois:c.dpa?fmtD(parseD(c.dpa),{month:'long',year:'numeric'}):'',lieu:c.lieu||'[lieu]',professionnel:c.prof||'[professionnel]',date:fmtD(new Date()),assurance:D.assurance||'aucune pour le moment'};
-  let r=String(t||'').replace(/\{\{(\w+)\}\}/g,(m,k)=>['forfaits','forfait','prix'].includes(k)?m:(v[k]!=null?v[k]:m));
+  const sp=c.prixSpecial!==undefined&&c.prixSpecial!==null&&c.prixSpecial!=='';if(sp)v.prix=money(+c.prixSpecial);
+  let r=String(t||'').replace(/\{\{(\w+)\}\}/g,(m,k)=>(['forfaits','forfait','prix'].includes(k)&&!(k==='prix'&&sp))?m:(v[k]!=null?v[k]:m));
   return o.prixVivants?r:prixVivants(r,c.forfait)}
 const MODELES_DEFAUT=()=>{const m={lettre_forfaits:LETTRE_FORFAITS_DEFAUT,lettre_fin:LETTRE_FIN_DEFAUT};LETTRES_MERCI.forEach((l,i)=>m['merci'+(i+1)]=l.texte);Object.keys(DOC_TYPES).forEach(k=>m[k]=DOC_TYPES[k].texte);return m};
 function modeleTexte(k){const m=(ME_DOULA&&ME_DOULA.modeles||{}).docs||{};return m[k]!=null?m[k]:MODELES_DEFAUT()[k]}
