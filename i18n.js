@@ -13,7 +13,7 @@
       });
     });
   }
-  var FILES=['tr/en-1.js','tr/en-2.js','tr/en-3.js','tr/en-4.js','tr/en-5.js','tr/en-6.js'];
+  var FILES=['tr/en-1.js','tr/en-2.js','tr/en-3.js','tr/en-4.js','tr/en-5.js','tr/en-6.js','tr/en-7.js'];
   var EX={},SUB=[],RX=null,cache=Object.create(null),vus=new WeakMap();
   var SKIP={SCRIPT:1,STYLE:1,TEXTAREA:1,CODE:1,NOSCRIPT:1};
   function prep(){
@@ -30,6 +30,7 @@
     if(!core)return s;
     if(EX[core]!==undefined)out=EX[core];
     else if(RX)out=core.replace(RX,function(x){return EX[x]});
+    if(out===core)out=core.replace(/^Bonjour( [^\s,.!?:;]+( [^\s,.!?:;]+)?)?$/,'Hello$1');
     out=out.replace(/(\d{1,2}) h (\d{2})/g,'$1:$2').replace(/ à (?=\d)/g,' at ');
     out=m[1]+out+m[3];
     if(Object.keys(cache).length>6000)cache=Object.create(null);
