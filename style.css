@@ -236,3 +236,6 @@ figure.illu figcaption{font-size:.72rem;color:var(--muted);line-height:1.35}
 .role[hidden]+.gear{margin-left:auto}
 .avimg{object-fit:cover;padding:0}
 .avxl{width:84px;height:84px;border-radius:50%;background:var(--soft);color:var(--accent);display:flex;align-items:center;justify-content:center;font-family:var(--f-display);font-weight:800;font-size:2rem;flex:none;object-fit:cover}
+.espace-t{margin-left:auto;margin-right:10px;font-size:.66rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);white-space:nowrap}
+.espace-t+.gear{margin-left:0}
+@media (max-width:380px){.espace-t{display:none}.espace-t+.gear{margin-left:auto}}

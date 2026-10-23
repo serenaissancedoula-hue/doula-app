@@ -1,7 +1,7 @@
 /* Sérénaissance — appli des doulas et des familles (service worker).
    Toujours la version la plus récente quand il y a Internet; Supabase ne passe jamais par le cache.
    Reçoit les notifications (messages, rendez-vous, documents, rappels, mot du jour). */
-var VERSION = 'sere-app-v1';
+var VERSION = 'sere-app-v2';
 var BASE = self.registration.scope;
 self.addEventListener('install', function (e) {
   e.waitUntil(caches.open(VERSION).then(function (c) { return c.addAll(['./', 'style.css', 'logo.png', 'icones/icone-192.png']).catch(function () {}); }).then(function () { return self.skipWaiting(); }));

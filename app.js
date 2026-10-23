@@ -4,11 +4,17 @@
 const SB_URL='https://zeptirfcwstufcpgvkzx.supabase.co';
 const SB_CLE='sb_publishable_OBeZ61m6gGF5tGPUokeS_A_nCZvpdpl';
 const VAPID='BA1eSxrp55R_nk6-rHpCI0Pi6OjPh-0MIOmlG2XZOLEptXG0xFUS4eB9aKAl3qQelLJqfouEq3FXWkYf02YhKMc';
-const sb=window.supabase.createClient(SB_URL,SB_CLE,{auth:{storageKey:'sere-app-auth',storage:window.localStorage,persistSession:true,autoRefreshToken:true,detectSessionInUrl:false}});
+/* Deux applis séparées : l'Espace Doula (racine) et l'Espace Parents (/parents/). Chacune garde sa propre session. */
+const ESPACE=window.ESPACE==='parent'?'parent':'doula';
+const CLE_AUTH='sere-'+ESPACE+'-auth';
+try{if(ESPACE==='doula'&&!localStorage.getItem(CLE_AUTH)&&localStorage.getItem('sere-app-auth'))localStorage.setItem(CLE_AUTH,localStorage.getItem('sere-app-auth'))}catch(e){}
+const URL_DOULA=new URL('./',document.baseURI).href,URL_PARENTS=URL_DOULA+'parents/';
+const sb=window.supabase.createClient(SB_URL,SB_CLE,{auth:{storageKey:CLE_AUTH,storage:window.localStorage,persistSession:true,autoRefreshToken:true,detectSessionInUrl:false}});
 /* Connexion qui reste ouverte sur le téléphone : familles déconnectées après 30 jours sans utiliser l'appli, doulas après 7 jours. */
 const INACTIF={parent:30,doula:7};
-function marquerActivite(){try{localStorage.setItem('sere-app-derniere',String(Date.now()))}catch(e){}}
-function tropInactif(){try{const t=+localStorage.getItem('sere-app-derniere');if(!t)return false;const r=localStorage.getItem('sere-fam-role')==='doula'?'doula':'parent';return Date.now()-t>INACTIF[r]*86400000}catch(e){return false}}
+const CLE_ACT='sere-'+ESPACE+'-derniere';
+function marquerActivite(){try{localStorage.setItem(CLE_ACT,String(Date.now()))}catch(e){}}
+function tropInactif(){try{const t=+localStorage.getItem(CLE_ACT);if(!t)return false;return Date.now()-t>INACTIF[ESPACE]*86400000}catch(e){return false}}
 ['click','keydown','touchstart'].forEach(ev=>document.addEventListener(ev,()=>{clearTimeout(window.__act);window.__act=setTimeout(marquerActivite,1000)},{passive:true}));
 
 let S={role:null,tab:'accueil',sub:'',dtab:'accueil',dsub:'',parent:blankParent(),doula:{},logs:[],clients:[],timer:null,kick:null,contrActive:null,showContr:false};
@@ -69,15 +75,17 @@ async function chargerClientDetail(id){const [m,d,mo,j]=await Promise.all([sb.fr
   CMSGS[id]=m.data||[];CDOCS[id]=d.data||[];CMOTS[id]=mo.data||[];const c=S.clients.find(x=>x.id===id);if(c)c._journal=(j.data||[]).map(r=>Object.assign({},r.data,{id:r.id,t:new Date(r.t).getTime(),type:r.type}))}
 
 /* ================== CONNEXION ================== */
-function ecranConnexion(msg){$('#tabs').innerHTML='';$('#roleSw').hidden=true;$('#gear').hidden=true;const v=S.vueCx||'connexion';
-  let h='<div class="card" style="max-width:480px;margin:0 auto;width:100%"><div class="hero"><div class="stack" style="gap:6px"><span class="script">Bienvenue</span><h1>Sérénaissance</h1><p class="sub" style="font-family:var(--f-display);font-style:italic;color:var(--accent)">L\'appli des doulas et des familles</p></div><div class="blob"><img src="parents.jpg" alt="Parents avec leur bébé"></div></div>'+(msg?'<div class="banner acc">'+icon('fa-circle-info')+'<div class="small">'+msg+'</div></div>':'');
-  h+='<div class="seg"><button class="chip '+(v==='connexion'?'on':'')+'" data-act="vueCx" data-v="connexion">Me connecter</button><button class="chip '+(v==='doula'?'on':'')+'" data-act="vueCx" data-v="doula">Je suis doula</button></div>';
-  if(v==='connexion')h+='<form id="fLogin" class="stack"><label class="f">Courriel<input type="email" id="lCourriel" autocomplete="email" required></label><label class="f">Mot de passe<input type="password" id="lMdp" autocomplete="current-password"></label><button class="btn" type="submit">Me connecter</button></form><hr><p class="small">Pas encore de mot de passe, ou oublié ? Entrez votre courriel ci-dessus et recevez un lien de connexion.</p><button class="btn ghost" data-act="lienConnexion">'+icon('fa-envelope')+'Recevoir un lien de connexion</button><p class="xs muted"><b>Mamans :</b> c\'est votre doula qui vous inscrit. Vous recevez alors un courriel pour finaliser votre inscription.</p>';
-  else h+='<div class="stack"><p class="small">Créez votre Espace Doula : dossiers de vos familles, rendez-vous avec rappels, contrats signés dans l\'appli, messages, outils de la trousse Sérénaissance. Chaque maman que vous inscrivez reçoit son propre espace.</p><div class="grid2 resp"><label class="f">Prénom<input type="text" id="sPrenom" autocomplete="given-name"></label><label class="f">Nom<input type="text" id="sNom" autocomplete="family-name"></label></div><label class="f">Courriel<input type="email" id="sCourriel" autocomplete="email"></label><button class="btn" data-act="inscriptionDoula">'+icon('fa-paper-plane')+'Recevoir mon lien d\'inscription</button><p class="xs muted">Vous recevez un courriel pour confirmer votre adresse et choisir votre mot de passe.</p></div>';
+function ecranConnexion(msg){$('#tabs').innerHTML='';$('#gear').hidden=true;const v=S.vueCx||'connexion',P=ESPACE==='parent';
+  let h='<div class="card" style="max-width:480px;margin:0 auto;width:100%"><div class="hero"><div class="stack" style="gap:6px"><span class="script">Bienvenue</span><h1>'+(P?'Espace Parents':'Espace Doula')+'</h1><p class="sub" style="font-family:var(--f-display);font-style:italic;color:var(--accent)">'+(P?'Votre grossesse, votre bébé et votre doula, au même endroit':'Vos familles, vos rendez-vous et vos documents')+'</p></div><div class="blob"><img src="'+(P?'parents.jpg':'doula.jpg')+'" alt=""></div></div>'+(msg?'<div class="banner acc">'+icon('fa-circle-info')+'<div class="small">'+msg+'</div></div>':'');
+  if(v==='connexion'){h+='<form id="fLogin" class="stack"><label class="f">Courriel<input type="email" id="lCourriel" autocomplete="username" required></label><label class="f">Mot de passe<input type="password" id="lMdp" autocomplete="current-password"></label><button class="btn" type="submit">'+icon('fa-right-to-bracket')+'Me connecter</button></form><hr><p class="small"><b>Première fois, ou mot de passe oublié ?</b> Entrez votre courriel ci-dessus, puis touchez ce bouton. Vous recevez un lien pour entrer et choisir votre mot de passe.</p><button class="btn ghost" data-act="lienConnexion">'+icon('fa-envelope')+'Recevoir un lien par courriel</button>';
+    h+=P?'<p class="xs muted"><b>Pas encore de compte ?</b> C\'est votre doula qui vous inscrit. Vous recevez alors un courriel pour finaliser votre inscription.</p><p class="xs muted">Vous êtes doula ? <a href="'+URL_DOULA+'">Ouvrir l\'Espace Doula</a></p>':'<hr><p class="small"><b>Nouvelle doula ?</b></p><button class="btn sm ghost" data-act="vueCx" data-v="doula">'+icon('fa-user-plus')+'Créer mon Espace Doula</button><p class="xs muted">Vous êtes un parent ? <a href="'+URL_PARENTS+'">Ouvrir l\'Espace Parents</a></p>'}
+  else h+='<div class="stack"><p class="small">Créez votre Espace Doula : dossiers de vos familles, rendez-vous avec rappels, contrats signés dans l\'appli, messages, outils de la trousse Sérénaissance. Chaque maman que vous inscrivez reçoit son propre espace, dans l\'appli Parents.</p><div class="grid2 resp"><label class="f">Prénom<input type="text" id="sPrenom" autocomplete="given-name"></label><label class="f">Nom<input type="text" id="sNom" autocomplete="family-name"></label></div><label class="f">Courriel<input type="email" id="sCourriel" autocomplete="email"></label><button class="btn" data-act="inscriptionDoula">'+icon('fa-paper-plane')+'Recevoir mon lien d\'inscription</button><p class="xs muted">Vous recevez un courriel pour confirmer votre adresse. Vous choisissez ensuite votre mot de passe : c\'est la seule fois que vous passez par un lien.</p><button class="btn sm ghost" data-act="vueCx" data-v="connexion">'+icon('fa-arrow-left')+'J\'ai déjà un compte</button></div>';
   $('#app').innerHTML=h+'</div>'+pied();
   const f=$('#fLogin');if(f)f.addEventListener('submit',async e=>{e.preventDefault();const em=$('#lCourriel').value.trim(),pw=$('#lMdp').value;if(!pw){toast('Entrez votre mot de passe, ou demandez un lien');return}
-    const {error}=await sb.auth.signInWithPassword({email:em,password:pw});if(error){toast('Courriel ou mot de passe incorrect');return}demarrer()})}
+    const {error}=await sb.auth.signInWithPassword({email:em,password:pw});if(error){toast('Courriel ou mot de passe incorrect. Pas encore de mot de passe ? Demandez un lien.');return}sb.auth.updateUser({data:{mdp:true}});S.mdpOk=true;demarrer()})}
 function pied(){return '<p class="foot"><span class="script">Sérénaissance</span>L\'appli des doulas et des familles · créée par l\'Académie Sérénaissance<br>Information générale : ne remplace pas l\'avis de votre équipe de soins.</p>'}
+function ecranAutreEspace(estDoula){$('#tabs').innerHTML='';$('#gear').hidden=true;const P=ESPACE==='parent';
+  $('#app').innerHTML='<div class="card" style="max-width:480px;margin:0 auto;width:100%"><span class="script">Bonjour</span><h2>'+(P?(estDoula?'Votre compte est un compte de doula':'Aucun espace parent pour ce courriel'):'Votre espace est dans l\'appli Parents')+'</h2><p class="small">Connectée avec <b>'+esc(MOI.courriel)+'</b>.</p>'+(P?(estDoula?'<p class="small">Votre espace de travail est dans l\'appli Doula.</p><a class="btn" href="'+URL_DOULA+'">'+icon('fa-briefcase-medical')+'Ouvrir l\'Espace Doula</a>':'<p class="small">C\'est votre doula qui vous inscrit avec votre courriel. Demandez-lui de vérifier l\'adresse inscrite à votre dossier, puis reconnectez-vous.</p>'):'<p class="small">Ce courriel est inscrit comme parent. Ouvrez l\'Espace Parents et connectez-vous avec le même courriel.</p><a class="btn" href="'+URL_PARENTS+'">'+icon('fa-baby')+'Ouvrir l\'Espace Parents</a>')+'<hr><button class="btn sm ghost" data-act="deconnexion">Me déconnecter</button></div>'+pied()}
 function ecranNouvelleDoula(){const m=(S.meta||{});$('#tabs').innerHTML='';$('#gear').hidden=true;$('#app').innerHTML='<div class="card" style="max-width:480px;margin:0 auto;width:100%"><span class="script">Bienvenue</span><h1>Créer mon Espace Doula</h1><p class="small">Connectée avec <b>'+esc(MOI.courriel)+'</b>.</p><div class="grid2 resp"><label class="f">Prénom<input type="text" id="nPrenom" value="'+esc(m.prenom||'')+'"></label><label class="f">Nom<input type="text" id="nNom" value="'+esc(m.nom||'')+'"></label><label class="f">Téléphone (vu par vos familles)<input type="tel" id="nTel"></label><label class="f">Ma région<input type="text" id="nRegion" placeholder="Ex. Campbellton (N.-B.)"></label></div><button class="btn" data-act="devenirDoula">'+icon('fa-check')+'Créer mon espace</button><hr><p class="xs muted"><b>Vous êtes une maman ?</b> Votre doula doit vous inscrire avec ce courriel. Une fois inscrite par elle, reconnectez-vous.</p><button class="btn sm ghost" data-act="deconnexion">Me déconnecter</button></div>'+pied()}
 async function demarrer(){
   const q=new URLSearchParams(location.search);
@@ -89,12 +97,12 @@ async function demarrer(){
   const {data,error}=await sb.rpc('fam_moi');if(error){ecranConnexion('Une erreur est survenue : '+esc(error.message));return}MOI=data;
   marquerActivite();
   const peutDoula=!!MOI.doula,peutParent=(MOI.familles||[]).length>0;
-  if(!peutDoula&&!peutParent){ecranNouvelleDoula();return}
-  let role=null;try{role=localStorage.getItem('sere-fam-role')}catch(e){}
-  S.role=(role==='doula'&&peutDoula)||(!peutParent)?'doula':'parent';
-  $('#roleSw').hidden=!(peutDoula&&peutParent);
+  const sansMdp=!S.mdpOk&&!(S.meta&&S.meta.mdp);
+  if(ESPACE==='parent'&&!peutParent){ecranAutreEspace(peutDoula);return}
+  if(ESPACE==='doula'&&!peutDoula){if(peutParent){ecranAutreEspace(false);return}ecranNouvelleDoula();return}
+  S.role=ESPACE;
   loadLocal();await charger();routeHash();render();
-  if(S.nouveauCompte)motDePasseSheet(true);
+  if(sansMdp)motDePasseSheet(true);
   if(navigator.serviceWorker)navigator.serviceWorker.addEventListener('message',e=>{if(e.data&&e.data.type==='push')rafraichir()});
 }
 async function charger(){if(S.role==='parent')await chargerParent();else await chargerDoula()}
@@ -108,7 +116,6 @@ function motDePasseSheet(bienvenue){sheet(bienvenue?'Bienvenue ! Choisissez votr
 const DTABS=[['accueil','fa-house','Tableau'],['clientes','fa-users','Familles'],['agenda','fa-calendar-days','Agenda'],['outils','fa-toolbox','Outils'],['ressources','fa-book-medical','Ressources']];
 const PTABS2=[['accueil','fa-house','Accueil'],['suivi','fa-calendar-days','Suivi'],['journal','fa-book-open','Journal'],['madoula','fa-comments','Ma doula'],['preparer','fa-clipboard-list','Préparer'],['infos','fa-book-medical','Infos']];
 function render(){if(!S.role)return;$('#gear').hidden=false;
-  $('#roleParent').classList.toggle('on',S.role==='parent');$('#roleDoula').classList.toggle('on',S.role==='doula');
   const tabs=S.role==='parent'?PTABS2:DTABS,cur=S.role==='parent'?S.tab:S.dtab;
   const nl=S.role==='parent'?MSGS.filter(m=>m.de_doula&&!m.lu).length+DOCS.filter(d=>d.statut==='a_remplir').length:Object.values(NONLUS).reduce((a,b)=>a+b,0);
   $('#tabs').innerHTML='<div class="tabs-in" style="--n:'+tabs.length+'">'+tabs.map(t=>{const badge=((S.role==='parent'&&t[0]==='madoula')||(S.role==='doula'&&t[0]==='clientes'))&&nl?'<span class="badge">'+nl+'</span>':'';return '<button data-act="tab" data-v="'+t[0]+'" class="'+(cur===t[0]&&!S.vue?'on':'')+'" aria-label="'+t[2]+'">'+icon(t[1])+'<span>'+t[2]+'</span>'+badge+'</button>'}).join('')+'</div>';
@@ -174,7 +181,7 @@ function ouvrirDoc(id){const d=(S.role==='parent'?DOCS:(CDOCS[S.openClient]||[])
   let b=docVue(d,S.role==='doula');
   if(S.role==='parent'&&d.statut==='a_remplir')b+=(d.sig_parent_requise?sigPad('Votre nom (signature)'):'')+'<label class="check"><input type="checkbox" id="sigOk"><span>J\'ai lu ce document et je l\'accepte.</span></label><button class="btn" data-act="docSignerP" data-id="'+d.id+'">'+icon('fa-signature')+(d.sig_parent_requise?'Signer et envoyer':'Envoyer')+'</button>';
   if(S.role==='doula'&&d.statut==='a_signer_doula')b+=sigPad('Votre nom (signature de la doula)')+'<button class="btn" data-act="docSignerD" data-id="'+d.id+'">'+icon('fa-signature')+'Signer</button>';
-  if(d.statut==='signe'||d.statut==='a_signer_doula')b+='<button class="btn ghost" data-act="imprimer">'+icon('fa-print')+'Imprimer ou enregistrer en PDF</button>';
+  b+='<button class="btn ghost" data-act="pdf" data-id="'+d.id+'">'+icon('fa-file-pdf')+'Enregistrer, imprimer ou envoyer en PDF</button>';preparerPDF(d);
   if(S.role==='doula'&&d.statut==='a_remplir')b+='<button class="btn sm danger" data-act="docAnnuler" data-id="'+d.id+'" style="align-self:flex-start">Retirer ce document</button>';
   sheet(esc(d.titre),b);document.querySelectorAll('canvas.sig').forEach(initSig)}
 
@@ -278,13 +285,13 @@ document.addEventListener('click',async e=>{const b=e.target.closest('[data-act]
   if(a==='closeBg'&&e.target!==b)return;
   const C=()=>S.clients.find(c=>c.id===(id||S.openClient));
   try{switch(a){
-  case 'lienConnexion':{const em=($('#lCourriel')||{}).value;if(!em){toast('Entrez votre courriel');return}const {data,error}=await sb.functions.invoke('fam-acces',{body:{type:'lien',courriel:em.trim()}});toast(data&&data.ok?'Si ce courriel a un compte, un lien vient de partir. Regardez vos courriels.':((data&&data.erreur)||'Réessayez dans un moment'));return}
+  case 'lienConnexion':{const em=($('#lCourriel')||{}).value;if(!em){toast('Entrez votre courriel');return}const {data,error}=await sb.functions.invoke('fam-acces',{body:{type:'lien',courriel:em.trim(),app:ESPACE==='parent'?'parents':'doula'}});toast(data&&data.ok?'Si ce courriel a un compte, un lien vient de partir. Regardez vos courriels.':((data&&data.erreur)||'Réessayez dans un moment'));return}
   case 'vueCx':S.vueCx=v;ecranConnexion();return;
   case 'inscriptionDoula':{const em=$('#sCourriel').value.trim(),pr=$('#sPrenom').value.trim();if(!pr){toast('Entrez votre prénom');return}if(!/^\S+@\S+\.\S+$/.test(em)){toast('Entrez un courriel valide');return}b.disabled=true;const {data}=await sb.functions.invoke('fam-acces',{body:{type:'doula',courriel:em,prenom:pr,nom:$('#sNom').value.trim()}});if(data&&data.ok){$('#app').innerHTML='<div class="card" style="max-width:480px;margin:0 auto"><span class="script">Merci</span><h2>Regardez vos courriels</h2><p class="small">Un lien vient de partir à <b>'+esc(em)+'</b>. Touchez-le pour confirmer votre adresse et créer votre Espace Doula. Pensez à regarder dans les courriels indésirables.</p></div>'+pied()}else{b.disabled=false;toast((data&&data.erreur)||'L\'envoi n\'a pas fonctionné, réessayez')}return}
-  case 'devenirDoula':{const pr=$('#nPrenom').value.trim();if(!pr){toast('Entrez votre prénom');return}b.disabled=true;const {data,error}=await sb.rpc('fam_devenir_doula',{p_prenom:pr,p_nom:$('#nNom').value,p_tel:$('#nTel').value,p_region:$('#nRegion').value});if(error){toast(error.message);b.disabled=false;return}MOI=data;S.role='doula';try{localStorage.setItem('sere-fam-role','doula')}catch(x){}await charger();render();if(S.nouveauCompte)motDePasseSheet(true);return}
+  case 'devenirDoula':{const pr=$('#nPrenom').value.trim();if(!pr){toast('Entrez votre prénom');return}b.disabled=true;const {data,error}=await sb.rpc('fam_devenir_doula',{p_prenom:pr,p_nom:$('#nNom').value,p_tel:$('#nTel').value,p_region:$('#nRegion').value});if(error){toast(error.message);b.disabled=false;return}MOI=data;S.role='doula';await charger();render();if(!S.mdpOk&&!(S.meta&&S.meta.mdp))motDePasseSheet(true);return}
   case 'deconnexion':await sb.auth.signOut();location.href=location.pathname;return;
   case 'mdp':motDePasseSheet(false);return;
-  case 'saveMdp':{const p1=$('#mdp1').value,p2=$('#mdp2').value;if(p1.length<8){toast('8 caractères ou plus');return}if(p1!==p2){toast('Les deux mots de passe diffèrent');return}const {error}=await sb.auth.updateUser({password:p1});if(error){toast(error.message);return}close();toast('Mot de passe enregistré');return}
+  case 'saveMdp':{const p1=$('#mdp1').value,p2=$('#mdp2').value;if(p1.length<8){toast('8 caractères ou plus');return}if(p1!==p2){toast('Les deux mots de passe diffèrent');return}const {error}=await sb.auth.updateUser({password:p1,data:{mdp:true}});if(error){toast(error.message);return}S.mdpOk=true;close();toast('Mot de passe enregistré : la prochaine fois, entrez avec votre courriel et ce mot de passe');return}
   case 'role':S.vue=null;if(v===S.role)return;S.role=v;try{localStorage.setItem('sere-fam-role',v)}catch(x){}S.openClient=null;$('#app').innerHTML='<p class="small muted" style="text-align:center;padding:40px">Chargement…</p>';await charger();scrollTo(0,0);render();return;
   case 'tab':S.vue=null;if(S.role==='parent'){S.tab=v;S.sub=''}else{S.dtab=v;S.dsub='';S.openClient=null}scrollTo(0,0);break;
   case 'go':{const [t,s]=v.split('|');S.tab=t;S.sub=s||'';scrollTo(0,0);break}
@@ -295,7 +302,7 @@ document.addEventListener('click',async e=>{const b=e.target.closest('[data-act]
   case 'saveProfil':await sauverProfil();return;
   case 'photoRetirer':if(S.role==='doula'){S.doula.photo='';await saveDoula()}else{S.parent.photo='';await saveParent()}toast('Photo retirée');break;
   case 'changerCourriel':{const em=$('#pCourriel').value.trim().toLowerCase();if(!/^\S+@\S+\.\S+$/.test(em)){toast('Courriel invalide');return}if(em===MOI.courriel){toast('C\'est déjà votre courriel');return}const {error}=await sb.auth.updateUser({email:em},{emailRedirectTo:location.origin+location.pathname});if(error){toast(error.message);return}toast('Confirmez avec le lien envoyé à '+em+' (et peut-être à l\'ancienne adresse)');return}
-  case 'changerMdp':{const p1=$('#mdpA').value,p2=$('#mdpB').value;if(p1.length<8){toast('8 caractères ou plus');return}if(p1!==p2){toast('Les deux mots de passe diffèrent');return}const {error}=await sb.auth.updateUser({password:p1});if(error){toast(error.message);return}$('#mdpA').value='';$('#mdpB').value='';toast('Mot de passe changé');return}
+  case 'changerMdp':{const p1=$('#mdpA').value,p2=$('#mdpB').value;if(p1.length<8){toast('8 caractères ou plus');return}if(p1!==p2){toast('Les deux mots de passe diffèrent');return}const {error}=await sb.auth.updateUser({password:p1,data:{mdp:true}});if(error){toast(error.message);return}$('#mdpA').value='';$('#mdpB').value='';toast('Mot de passe changé');return}
   case 'seg':S.seg=v;break;
   case 'close':case 'closeBg':close();return;
   case 'pick':{setP(b.dataset.p,getP(b.dataset.p)===v?'':v);if(b.closest('.sheet')){b.parentNode.querySelectorAll('.chip').forEach(x=>x.classList.toggle('on',x===b&&getP(b.dataset.p)===v));return}break}
@@ -349,6 +356,7 @@ document.addEventListener('click',async e=>{const b=e.target.closest('[data-act]
   case 'docSignerP':{const d=DOCS.find(x=>x.id===id);const rep={};let manque=null;document.querySelectorAll('.sheet .dch').forEach(el=>{rep[el.dataset.k]=el.type==='checkbox'?el.checked:el.value});(d.champs||[]).forEach(c=>{if(c.req&&!rep[c.k])manque=c.t});if(manque){toast('À remplir : '+manque);return}
     if(!$('#sigOk').checked){toast('Cochez « J\'ai lu ce document »');return}let sig=null;if(d.sig_parent_requise){sig=lireSig();if(!sig)return}b.disabled=true;
     const {error}=await sb.rpc('fam_doc_parent',{p_id:id,p_reponses:rep,p_signature:sig});if(error){toast(error.message);b.disabled=false;return}close();await chargerEchanges();toast('Document envoyé à votre doula');break}
+  case 'pdf':{const d=(S.role==='parent'?DOCS:(CDOCS[S.openClient]||[])).find(x=>x.id===id);if(d)partagerPDF(d);return}
   case 'imprimer':{const el=$('#docImp');if(!el)return;const w=document.createElement('div');w.id='impression';w.innerHTML=el.outerHTML;document.body.appendChild(w);document.body.classList.add('imp');window.print();setTimeout(()=>{w.remove();document.body.classList.remove('imp')},500);return}
   case 'qAjout':{const t=$('#qTxt').value.trim();if(!t)return;(S.parent.questions=S.parent.questions||[]).push({texte:t,pour:v,fait:false});break}
   case 'qSuppr':S.parent.questions.splice(+b.dataset.i,1);break;
