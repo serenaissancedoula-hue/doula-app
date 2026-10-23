@@ -59,7 +59,7 @@ ecranConnexion=function(msg){
 async function chargerDemandes(){try{const {data}=await sb.from('fam_demandes').select('*').order('created_at',{ascending:false}).limit(60);DEMANDES=data||[]}catch(e){}}
 const nouvelles=()=>DEMANDES.filter(d=>d.statut==='nouvelle').length;
 const _cd=chargerDoula;
-chargerDoula=async function(){await _cd.apply(this,arguments);await chargerDemandes()};
+chargerDoula=async function(){await _cd.apply(this,arguments);try{if(localStorage.getItem('an-vu'))ME_DOULA.annuaire_vu=true}catch(x){}await chargerDemandes()};
 
 function profilHtml(){const D=ME_DOULA||{};
   const apercu=carte({id:D.id,prenom:D.prenom,nom_initiale:(D.nom||'').slice(0,1),entreprise:D.entreprise,photo:D.photo,region:D.region,zones:D.zones,bio:D.bio,langues:D.langues,certification:D.certification},false);
@@ -76,7 +76,8 @@ function profilHtml(){const D=ME_DOULA||{};
 
 function demandesPage(){
   const dejaClient=c=>(S.clients||[]).some(x=>String(x.courriel||'').toLowerCase()===String(c||'').toLowerCase());
-  const h=back('dsub','','Outils')+sh('Demandes de familles','Des familles de l\'annuaire souhaitent vous rencontrer');
+  const on=!!(ME_DOULA&&ME_DOULA.annuaire);
+  const h=back('dsub','','Outils')+sh('Demandes de familles','Des familles de l\'annuaire souhaitent vous rencontrer')+'<div class="card '+(on?'':'tint')+'"><div class="row between" style="gap:10px"><span><b>'+icon(on?'fa-eye':'fa-eye-slash')+' '+(on?'Vous êtes visible dans l\'annuaire':'Vous n\'êtes pas dans l\'annuaire')+'</b><br><span class="xs muted">'+(on?'Les familles peuvent vous trouver et vous écrire.':'Personne ne peut vous trouver. Vous choisissez.')+'</span></span><button class="btn sm '+(on?'ghost':'')+'" data-act="anBascule">'+(on?'Me retirer':'Activer')+'</button></div><button class="btn sm ghost" style="margin-top:8px" data-act="dgo" data-v="outils|annuaire">Modifier mon profil public</button></div>';
   if(!DEMANDES.length)return h+'<div class="card tint"><p class="small" style="margin:0">Aucune demande pour l\'instant. Activez votre profil dans « Mon profil dans l\'annuaire » pour être trouvée par les familles.</p></div>';
   return h+DEMANDES.map(d=>{const s=STAT[d.statut]||STAT.nouvelle,cree=dejaClient(d.courriel);
     return '<div class="card"><div class="row between" style="gap:8px"><b>'+esc(d.nom)+'</b><span class="pill '+(d.statut==='nouvelle'?'acc':s[1])+'">'+(d.statut==='nouvelle'?'Nouvelle':s[0])+'</span></div>'
@@ -93,6 +94,7 @@ if(typeof DOUT!=='undefined'){DOUT.unshift(['demandes','fa-inbox','Demandes de f
 
 const _da=dAccueil;
 dAccueil=function(){let h=_da.apply(this,arguments);const n=nouvelles();
+  if(ME_DOULA&&!ME_DOULA.annuaire&&!ME_DOULA.annuaire_vu)h='<div class="card tint"><b>'+icon('fa-location-dot')+' Être trouvée par des familles ?</b><p class="small" style="margin:6px 0 10px">Facultatif : activez votre profil dans l\'annuaire « Trouver ma doula ». Vous pouvez le retirer à tout moment.</p><div class="row" style="gap:8px;flex-wrap:wrap"><button class="btn sm" data-act="dgo" data-v="outils|annuaire">Configurer mon profil</button><button class="btn sm ghost" data-act="anPlusTard">Non merci</button></div></div>'+h;
   if(n)h='<button class="card tint" data-act="dgo" data-v="outils|demandes" style="width:100%;text-align:left;cursor:pointer;border:0;color:inherit;font:inherit"><div class="row between"><span><b>'+icon('fa-inbox')+' '+n+' nouvelle'+(n>1?'s':'')+' demande'+(n>1?'s':'')+' de famille</b><br><span class="small">Touchez pour les lire et répondre</span></span>'+icon('fa-chevron-right')+'</div></button>'+h;
   return h};
 
@@ -117,6 +119,9 @@ document.addEventListener('click',async e=>{const b=e.target.closest('[data-act]
     const {data}=await sb.functions.invoke('fam-acces',{body:{type:'famille',courriel:em,prenom:pr,nom:(document.getElementById('fNom').value||'').trim()}});
     if(data&&data.ok){$('#app').innerHTML='<div class="card" style="max-width:480px;margin:0 auto"><span class="script">Merci</span><h2>Regardez vos courriels</h2><p class="small">Un lien vient de partir à <b>'+esc(em)+'</b>. Touchez-le pour confirmer votre courriel et choisir votre mot de passe. Pensez à vérifier vos courriels indésirables.</p></div>'+pied()}
     else{b.disabled=false;toast((data&&data.erreur)||'Réessayez dans un moment')}return}
+  case 'anPlusTard':{ME_DOULA.annuaire_vu=true;try{localStorage.setItem('an-vu','1')}catch(x){}render();return}
+  case 'anBascule':{const on=!ME_DOULA.annuaire;if(on&&(!ME_DOULA.bio||!(ME_DOULA.region||ME_DOULA.zones))){toast('Ajoutez d\'abord votre région et une présentation');S.dsub='annuaire';render();return}
+    const {error}=await sb.from('fam_doulas').update({annuaire:on}).eq('id',ME_DOULA.id);if(error){toast(error.message);return}ME_DOULA.annuaire=on;toast(on?'Vous êtes dans l\'annuaire':'Vous êtes retirée de l\'annuaire');render();return}
   case 'anMdp':motDePasseSheet(false);return;
   case 'anEcrire':ecrireSheet(id);return;
   case 'anEnvoyer':{const nom=document.getElementById('deNom').value.trim();if(!nom){toast('Entrez votre nom');return}if(!document.getElementById('deOk').checked){toast('Cochez la case pour que la doula puisse vous répondre');return}
