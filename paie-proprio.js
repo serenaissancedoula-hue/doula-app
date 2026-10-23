@@ -1,6 +1,6 @@
 /* Sérénaissance — options de paiement des familles de la propriétaire seulement : liens Stripe par forfait + virement Interac au téléphone.
    Les autres doulas gèrent leurs paiements elles-mêmes (aucun lien affiché pour elles). */
-const PAIE_PROPRIO={courriels:['materniteenconfiance@gmail.com','serenaissance.doula@gmail.com'],
+const PAIE_PROPRIO={courriels:['sc@academiesere.ca','materniteenconfiance@gmail.com','serenaissance.doula@gmail.com'],
   liens:{'Accompagnement des Parents':{1:'https://buy.stripe.com/9B63cocXK9ReacA6foffy0a',2:'https://buy.stripe.com/8x23co7Dq7J684sfPYffy0b',4:'https://buy.stripe.com/bJe6oA3na3sQesQ0V4ffy0k'},
     'Soutien au Couple':{1:'https://buy.stripe.com/7sY00c4re3sQ70o8nwffy0d',2:'https://buy.stripe.com/dRmdR2cXK1kI3Oc1Z8ffy0e'},
     'Arrivée de Bébé':{1:'https://buy.stripe.com/3cI00cbTG9Re98wcDMffy0f',2:'https://buy.stripe.com/14A3co9Ly8Na70o9rAffy0g'}}};
