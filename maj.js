@@ -3,7 +3,7 @@
    Si une nouvelle version existe, elle se met à jour toute seule (une fois par session),
    sinon un bandeau propose « Mettre à jour ». Le bouton de Paramètres force la mise à jour.
    À chaque publication : changer APP_VERSION ici ET dans version.json. */
-const APP_VERSION='2026.10.23-11';
+const APP_VERSION='2026.10.23-12';
 async function versionEnLigne(){try{const r=await fetch('version.json?t='+Date.now(),{cache:'no-store'});if(!r.ok)return null;return await r.json()}catch(e){return null}}
 async function majForcer(){try{toast('Mise à jour en cours…')}catch(e){}
   try{const reg=navigator.serviceWorker&&await navigator.serviceWorker.getRegistration();if(reg){await reg.update();if(reg.waiting)reg.waiting.postMessage('skipWaiting')}}catch(e){}
