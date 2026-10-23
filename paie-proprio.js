@@ -9,6 +9,8 @@ blocForfaits=function(){let h=_bfPP();try{
   const D=typeof DOULA!=='undefined'?DOULA:null;if(!D||!PAIE_PROPRIO.courriels.includes(String(D.courriel||'').toLowerCase()))return h;
   const L=PAIE_PROPRIO.liens[FAM.forfait];const tel=D.telephone||'';
   let p='<div class="card"><span class="eyebrow acc">Payer mon versement</span>';
+  const signe=(DOCS||[]).some(d=>d.type==='contrat'&&d.statut==='signe');
+  if(!signe)return h+'<div class="card"><span class="eyebrow acc">Payer mon versement</span><p class="small">Vos options de paiement apparaissent ici dès que votre contrat est signé par vous et par votre doula.</p></div>';
   if(!L)p+='<p class="small">Choisissez d\'abord votre forfait ci-dessus pour voir les options de paiement.</p>';
   else{const F=FORFAITS[FAM.forfait];const opt=[[1,'En un seul paiement',F?money(F.prix):''],[2,'En 2 versements',F?money(F.prix/2)+' chacun':''],[4,'En 4 versements',F?money(F.prix/4)+' chacun':'']].filter(o=>L[o[0]]);
     p+='<p class="small">Paiement sécurisé par carte (Stripe). Votre premier paiement se fait à la signature du contrat.</p>'+opt.map(o=>'<a class="btn" style="display:block;width:100%;text-align:center;margin:6px 0;text-decoration:none;box-sizing:border-box" target="_blank" rel="noopener" href="'+L[o[0]]+'">'+icon('fa-credit-card')+o[1]+(o[2]?' · '+o[2]:'')+'</a>').join('')}
