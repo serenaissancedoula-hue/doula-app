@@ -24,7 +24,7 @@ const inscriptionsFermees=()=>false; /* l'inscription reste ouverte : sans place
 const noteTarif=()=>PLACES&&PLACES.ouvert===false?'<div class="banner acc">'+icon('fa-leaf')+'<div class="small"><b>Les places d\'essai gratuit sont prises.</b> Créez votre compte, puis choisissez votre abonnement : <b>8 $ par mois</b> ou <b>90 $ par an</b>.</div></div>':'<div class="banner acc">'+icon('fa-gift')+'<div class="small"><b>6 mois gratuits</b> pour les premières doulas, puis 8 $ par mois ou 90 $ par an.</div></div>';
 const MSG_COMPLET=()=>'<b>Les inscriptions sont complètes.</b> Les '+((PLACES&&PLACES.max)||10)+' places de la période de test sont prises. Écrivez à l\'Académie Sérénaissance pour être avisée à l\'ouverture des prochaines places.';
 let S={role:null,tab:'accueil',sub:'',dtab:'accueil',dsub:'',parent:blankParent(),doula:{},logs:[],clients:[],timer:null,kick:null,contrActive:null,showContr:false};
-const OWNER_EMAIL='materniteenconfiance@gmail.com';
+const OWNER_EMAIL='sc@academiesere.ca';
 let MOI=null, FAM=null, DOULA=null, ME_DOULA=null;
 let MSGS=[], RDV=[], DOCS=[], MOT=null, NONLUS={}, CRDV=[], CDOCS={}, CMSGS={}, CMOTS={};
 function blankParent(){return {prenom:'',partenaire:'',ddr:'',cycle:28,echoDate:'',echoSA:'',echoJ:'',dpaEquipe:'',lieu:'',prof:'',allergies:'',
