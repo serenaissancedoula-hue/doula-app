@@ -1,7 +1,7 @@
 /* Sérénaissance — questionnaire de satisfaction des doulas testeuses.
    Les réponses arrivent dans la messagerie de la propriétaire (table fam_support) avec sa notification habituelle.
    « Fait » est gardé dans les modèles de la doula (fam_doulas.modeles.avis). */
-const AVIS={
+const AVQ={
   notes:[['global','Dans l\'ensemble, je suis satisfaite de l\'appli'],['facile','L\'appli est facile à utiliser'],['temps','Elle me fait gagner du temps'],['familles','Mes familles l\'aiment']],
   utiles:['Dossiers des familles','Rendez-vous et rappels','Contrats et documents signés','Messages avec les familles','Fiches de rencontre','Outils de la trousse','Suivi de bébé et du 4e trimestre'],
   reco:['Oui, sans hésiter','Peut-être','Non'],
@@ -15,11 +15,11 @@ DSUB.avis=function(){
     return sh('Merci !','Votre questionnaire a été envoyé'+(a.date?' le '+fmtD(parseD(a.date)):'')+'.')+'<div class="card"><p class="small">Vos réponses aident à améliorer l\'appli. Une autre idée ou un problème ? Écrivez-nous.</p><button class="btn" data-act="dsub" data-v="support">'+icon('fa-headset')+'Écrire à Sérénaissance</button> <button class="btn sm ghost" data-act="avisRefaire">Répondre de nouveau</button></div>'}
   let h=sh('Votre avis sur l\'appli','5 minutes. Vos réponses vont directement à Sabrina.');
   h+='<div class="card"><p class="small"><b>Note de 1 à 5</b> : 1 = pas du tout, 5 = tout à fait.</p></div>';
-  AVIS.notes.forEach(n=>{h+='<div class="card"><b class="small">'+n[1]+'</b><div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">'+[1,2,3,4,5].map(i=>'<label class="chip"><input type="radio" name="av_'+n[0]+'" value="'+i+'" style="accent-color:var(--accent)"> '+i+'</label>').join('')+'</div></div>'});
-  h+='<div class="card"><b class="small">Ce que j\'utilise le plus</b><div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">'+AVIS.utiles.map(u=>'<label class="chip"><input type="checkbox" name="av_utiles" value="'+esc(u)+'" style="accent-color:var(--accent)"> '+esc(u)+'</label>').join('')+'</div></div>';
+  AVQ.notes.forEach(n=>{h+='<div class="card"><b class="small">'+n[1]+'</b><div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">'+[1,2,3,4,5].map(i=>'<label class="chip"><input type="radio" name="av_'+n[0]+'" value="'+i+'" style="accent-color:var(--accent)"> '+i+'</label>').join('')+'</div></div>'});
+  h+='<div class="card"><b class="small">Ce que j\'utilise le plus</b><div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">'+AVQ.utiles.map(u=>'<label class="chip"><input type="checkbox" name="av_utiles" value="'+esc(u)+'" style="accent-color:var(--accent)"> '+esc(u)+'</label>').join('')+'</div></div>';
   h+='<div class="card"><label class="f">Ce que j\'aime le plus<textarea id="avPlus" style="min-height:80px"></textarea></label><label class="f">Ce qui manque ou me dérange<textarea id="avMoins" style="min-height:80px"></textarea></label></div>';
-  h+='<div class="card"><b class="small">Je recommanderais l\'appli à une collègue doula</b><div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">'+avisRadios('av_reco',AVIS.reco)+'</div></div>';
-  h+='<div class="card"><b class="small">Si l\'appli devient payante, combien me semblerait juste ?</b><div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">'+avisRadios('av_prix',AVIS.prix)+'</div></div>';
+  h+='<div class="card"><b class="small">Je recommanderais l\'appli à une collègue doula</b><div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">'+avisRadios('av_reco',AVQ.reco)+'</div></div>';
+  h+='<div class="card"><b class="small">Si l\'appli devient payante, combien me semblerait juste ?</b><div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">'+avisRadios('av_prix',AVQ.prix)+'</div></div>';
   h+='<div class="card"><label class="chip"><input type="checkbox" id="avTemoin" style="accent-color:var(--accent)"> Sabrina peut citer mon commentaire comme témoignage</label></div>';
   h+='<button class="btn" data-act="avisEnvoyer">'+icon('fa-paper-plane')+'Envoyer mes réponses</button>';
   return h};
@@ -39,7 +39,7 @@ document.addEventListener('click',async e=>{const b=e.target.closest('[data-act]
   if(!val('av_global')||!val('av_facile')){toast('Répondez au moins aux deux premières questions');return}
   const utiles=[...document.querySelectorAll('input[name="av_utiles"]:checked')].map(x=>x.value);
   const txt=['📋 Questionnaire de satisfaction','',
-    ...AVIS.notes.map(n=>n[1]+' : '+(val('av_'+n[0])||'–')+' / 5'),'',
+    ...AVQ.notes.map(n=>n[1]+' : '+(val('av_'+n[0])||'–')+' / 5'),'',
     'Ce que j\'utilise le plus : '+(utiles.join(', ')||'–'),
     'Ce que j\'aime le plus : '+($('#avPlus').value.trim()||'–'),
     'Ce qui manque ou me dérange : '+($('#avMoins').value.trim()||'–'),
