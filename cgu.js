@@ -55,7 +55,7 @@ async function gate(){if(verifie||typeof MOI==='undefined'||!MOI)return;verifie=
     const l=local();
     const enregistrer=async nom=>{try{await sb.auth.updateUser({data:{cgu:{v:V,nom,date:new Date().toISOString()}}})}catch(e){}};
     if(l){await enregistrer(l.nom);return}
-    if(!S.nouveauCompte)return; /* seulement à la création du compte (lien d'invitation) ; les comptes existants ne sont pas dérangés */
+    if(!S.nouveauCompte&&S.role!=='parent')return; /* familles : toujours à la première connexion, même si le lien du courriel n'est pas reconnu comme une invitation */ /* seulement à la création du compte (lien d'invitation) ; les comptes existants ne sont pas dérangés */
     const nomDefaut=(MOI.prenom?MOI.prenom+' '+(MOI.nom||''):'');
     ecran({bloquant:true,nom:nomDefaut.trim(),ok:enregistrer})}catch(e){verifie=false}}
 const _r=render;render=function(){_r.apply(this,arguments);gate()};
