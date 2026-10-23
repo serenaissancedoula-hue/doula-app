@@ -64,7 +64,7 @@ Calendrier choisi | {{champ:paiement}}
 ## Modalités
 No de TVH (ou « non inscrite ») | 
 - Prix en dollars canadiens. TVH de 15 % ajoutée seulement si la Doula est inscrite (voir ci-dessous).
-- Paiement par Stripe, virement Interac à {{doula_courriel}} ou autre mode convenu.
+- Paiement par virement Interac à {{doula_courriel}} ou autre mode convenu avec la Doula.
 - Solde complet dû au plus tard à 36 semaines.
 - Aucuns frais de crédit ni intérêts.
 - Retard de plus de 14 jours : rappel écrit; la garde peut être suspendue jusqu'au paiement.
