@@ -31,10 +31,10 @@ const _dOutAT=dOutils;dOutils=function(){if(MOI&&MOI.admin&&!DOUT.find(x=>x[0]==
 
 /* ---------- Places des testeuses (propriétaire) ---------- */
 function carteInscriptions(){const el=$('#placesCard');if(!el)return;const P=PLACES;
-  if(!P){el.innerHTML='<span class="eyebrow acc">Inscriptions des doulas</span><p class="small muted">Limite non installée. Exécutez le SQL « places-modifiables » dans Supabase pour pouvoir la changer ici.</p>';return}
+  if(!P){el.innerHTML='<span class="eyebrow acc">Places d\'essai gratuit des doulas</span><p class="small muted">Limite non installée. Exécutez le SQL « places-modifiables » dans Supabase pour pouvoir la changer ici.</p>';return}
   const pr=P.prises||0,mx=P.max||10;
-  el.innerHTML='<span class="eyebrow acc">Inscriptions des doulas</span><div class="row between"><b>'+pr+' sur '+mx+' places prises</b><span class="pill '+(P.ouvert?'ok':'')+'">'+(P.ouvert?'Ouvertes':'Fermées')+'</span></div><div style="height:10px;border-radius:10px;background:var(--soft2);margin:8px 0"><div style="height:10px;border-radius:10px;background:var(--accent);width:'+Math.min(100,Math.round(100*pr/mx))+'%"></div></div>'+
-    '<label class="f">Nombre de places au total<input type="number" id="placesMax" min="'+pr+'" value="'+mx+'"></label><div class="row" style="gap:8px;flex-wrap:wrap"><button class="btn sm" data-act="placesSave">Enregistrer</button><button class="btn sm ghost" data-act="placesFermer">Fermer maintenant</button></div><p class="xs muted">Votre propre espace compte parmi les places. À la limite, le bouton « Créer mon Espace Doula » disparaît.</p>'}
+  el.innerHTML='<span class="eyebrow acc">Places d\'essai gratuit des doulas</span><div class="row between"><b>'+pr+' sur '+mx+' places prises</b><span class="pill '+(P.ouvert?'ok':'')+'">'+(P.ouvert?'Places libres':'Complètes')+'</span></div><div style="height:10px;border-radius:10px;background:var(--soft2);margin:8px 0"><div style="height:10px;border-radius:10px;background:var(--accent);width:'+Math.min(100,Math.round(100*pr/mx))+'%"></div></div>'+
+    '<label class="f">Nombre de places gratuites au total<input type="number" id="placesMax" min="'+pr+'" value="'+mx+'"></label><div class="row" style="gap:8px;flex-wrap:wrap"><button class="btn sm" data-act="placesSave">Enregistrer</button><button class="btn sm ghost" data-act="placesFermer">Terminer les places gratuites</button></div><p class="xs muted">Votre propre espace compte parmi les places. Quand elles sont prises, les nouvelles doulas peuvent s\'inscrire mais doivent choisir un abonnement.</p>'}
 const _pp2=DSUB.proprio;DSUB.proprio=function(){const h=_pp2();if(!MOI||!MOI.admin)return h;setTimeout(async()=>{await chargerPlaces();carteInscriptions();boiteSupport()},0);return h.replace('<div class="card" id="statsProprio">','<div class="card" id="boiteSup"><p class="small muted">Chargement…</p></div><div class="card" id="placesCard"><p class="small muted">Chargement…</p></div><div class="card" id="statsProprio">')};
 async function boiteSupport(){const el=$('#boiteSup');if(!el)return;
   const [r1,r2]=await Promise.all([sb.from('fam_support').select('*').eq('de_admin',false).order('created_at',{ascending:false}).limit(15),sb.rpc('fam_admin_stats')]);
@@ -59,5 +59,5 @@ document.addEventListener('click',async e=>{const b=e.target.closest('[data-act]
     if(!(n>=pr)){toast('Le total ne peut pas être sous le nombre de places prises ('+pr+')');return}
     b.disabled=true;const {error}=await sb.rpc('fam_admin_places',{p_max:n});
     if(error){toast(/function|exist|schema/i.test(error.message)?'Exécutez d\'abord le SQL « places-modifiables » dans Supabase':'Pas enregistré : '+error.message);b.disabled=false;return}
-    await chargerPlaces();carteInscriptions();toast(n===pr?'Inscriptions fermées':'Limite : '+n+' places')}
+    await chargerPlaces();carteInscriptions();toast(n===pr?'Places gratuites terminées':'Limite : '+n+' places')}
   }catch(err){console.error(err);toast('Une erreur est survenue')}});
