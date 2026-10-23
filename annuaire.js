@@ -34,8 +34,8 @@ function carte(d,bouton){
 
 /* ---------- côté famille ---------- */
 async function chargerAnnuaire(){
-  const [r,m]=await Promise.all([sb.rpc('fam_annuaire2',{p_q:null}),sb.from('fam_demandes').select('*').order('created_at',{ascending:false}).limit(30)]);
-  A.liste=r.data||[];A.dem=m.data||[];A.charge=true}
+  const [r,m]=await Promise.all([sb.rpc('fam_annuaire2',{p_q:null}),sb.from('fam_demandes').select('*').order('created_at',{ascending:false}).limit(30).then(x=>x,()=>({data:[]}))]);
+  A.liste=r.data||[];A.dem=(m&&m.data)||[];A.charge=true}
 function filtrer(){const q=norm(A.q);if(!q)return A.liste;const c=coord(A.q);
   if(c){const L=[];A.liste.forEach(d=>{let k=null;if(d.lat!=null&&d.rayon_km){const x=dist(c,{lat:d.lat,lng:d.lng});if(x<=d.rayon_km)k=Math.round(x)}
     const inZ=norm(d.zones).split(',').some(z=>z.trim()===norm(c.nom));if(k!==null||inZ){L.push(Object.assign({},d,{_km:k===null?0:k}))}});return L.sort((a,b)=>a._km-b._km)}
@@ -45,16 +45,16 @@ function listeHtml(){const L=filtrer();
   return '<p class="xs muted">'+L.length+' doula'+(L.length>1?'s':'')+(A.q?' pour « '+esc(A.q)+' »':'')+'</p>'+L.map(d=>carte(d,true)).join('')}
 function demandesHtml(){if(!A.dem.length)return '';
   return '<div class="card"><span class="eyebrow acc">Mes demandes</span><div class="list">'+A.dem.map(x=>{const s=STAT[x.statut]||STAT.nouvelle;return '<div class="li"><div class="ic">'+icon(x.statut==='acceptee'?'fa-circle-check':'fa-paper-plane')+'</div><div class="tx"><b>'+esc(x.doula_nom||'Une doula')+'</b><span>'+new Date(x.created_at).toLocaleDateString('fr-CA',{day:'numeric',month:'short'})+(x.statut==='acceptee'?' · surveillez vos courriels : une invitation arrive':'')+'</span></div><span class="pill '+s[1]+'">'+s[0]+'</span></div>'}).join('')+'</div></div>'}
-async function ecranChercheuse(){
+async function ecranChercheuse(pub){
   $('#tabs').innerHTML='';$('#gear').hidden=true;
   $('#app').innerHTML='<div style="max-width:640px;margin:0 auto;width:100%" class="stack"><p class="small muted" style="text-align:center;padding:40px">Chargement…</p></div>';
   try{await chargerAnnuaire()}catch(e){A.liste=[];A.dem=[]}
-  const sansMdp=!S.mdpOk&&!(S.meta&&S.meta.mdp);
-  const m=S.meta||{};
-  $('#app').innerHTML='<div style="max-width:640px;margin:0 auto;width:100%" class="stack"><div class="card"><div class="stack" style="gap:6px"><span class="script">Bonjour'+(m.prenom?' '+esc(m.prenom):'')+'</span><h1>Trouver ma doula</h1><p class="small">Cherchez une doula près de chez vous, lisez sa présentation et écrivez-lui directement. Elle vous répond, puis vous invite dans votre espace Famille.</p></div>'
+  const sansMdp=!pub&&!S.mdpOk&&!(S.meta&&S.meta.mdp);
+  const m=pub?{}:(S.meta||{});
+  $('#app').innerHTML='<div style="max-width:640px;margin:0 auto;width:100%" class="stack"><div class="card"><div class="stack" style="gap:6px"><span class="script">'+(pub?'Sérénaissance':'Bonjour')+(m.prenom?' '+esc(m.prenom):'')+'</span><h1>Trouver ma doula</h1><p class="small">Cherchez une doula près de chez vous, lisez sa présentation et écrivez-lui directement. Elle vous répond, puis vous invite dans votre espace Famille.</p></div>'
     +'<form id="anForm" class="row" style="gap:8px;margin-top:12px"><label class="f" style="flex:1;margin:0">Ville ou région<input type="text" enterkeyhint="search" list="anVilles" id="anQ" placeholder="Ex. Campbellton, Moncton, Gaspésie…" value="'+esc(A.q)+'"></label><button class="btn" type="submit" style="align-self:flex-end">'+icon('fa-magnifying-glass')+'Chercher</button></form></div>'
     +'<datalist id="anVilles">'+TOUTES.map(v=>'<option value="'+esc(v)+'">').join('')+'</datalist><div id="anListe" class="stack">'+listeHtml()+'</div><div id="anDem">'+demandesHtml()+'</div>'
-    +'<p class="xs muted" style="text-align:center">Connectée avec <b>'+esc(MOI.courriel)+'</b> · <button class="btn sm ghost" data-act="anMdp">Mon mot de passe</button> <button class="btn sm ghost" data-act="deconnexion">Me déconnecter</button></p></div>'+pied();
+    +(pub?'<div class="card tint"><b>Vous voulez écrire à une doula ?</b><p class="small" style="margin:6px 0 10px">Créez un compte gratuit : c\'est rapide, et la doula reçoit votre message directement.</p><div class="row" style="gap:8px;flex-wrap:wrap"><button class="btn sm" data-act="vueCx" data-v="famille">Créer mon compte</button><button class="btn sm ghost" data-act="vueCx" data-v="connexion">J\'ai déjà un compte</button></div></div>':'<p class="xs muted" style="text-align:center">Connectée avec <b>'+esc(MOI.courriel)+'</b> · <button class="btn sm ghost" data-act="anMdp">Mon mot de passe</button> <button class="btn sm ghost" data-act="deconnexion">Me déconnecter</button></p>')+'</div>'+pied();
   const f=document.getElementById('anForm');
   if(f)f.addEventListener('submit',e=>{e.preventDefault();A.q=document.getElementById('anQ').value;document.getElementById('anListe').innerHTML=listeHtml()});
   const q=document.getElementById('anQ');if(q)q.addEventListener('input',()=>{A.q=q.value;document.getElementById('anListe').innerHTML=listeHtml()});
@@ -66,13 +66,15 @@ ecranAutreEspace=function(estDoula){if(ESPACE==='parent'&&!estDoula){ecranCherch
 /* inscription d'une famille depuis l'écran de connexion */
 const _cx=ecranConnexion;
 ecranConnexion=function(msg){
+  if(ESPACE==='parent'&&S.vueCx!=='famille'&&S.vueCx!=='annuaire'&&!S.anVu&&location.hash==='#annuaire'){S.anVu=1;S.vueCx='annuaire'}
+  if(ESPACE==='parent'&&S.vueCx==='annuaire'){ecranChercheuse(true);return}
   if(ESPACE==='parent'&&S.vueCx==='famille'){
     $('#tabs').innerHTML='';$('#gear').hidden=true;
     $('#app').innerHTML='<div class="card" style="max-width:480px;margin:0 auto;width:100%"><span class="script">Bienvenue</span><h1>Créer mon compte famille</h1><p class="small">Pour chercher une doula près de chez vous et lui écrire. C\'est gratuit.</p><div class="stack"><div class="grid2 resp"><label class="f">Prénom<input type="text" id="fPrenom" autocomplete="given-name"></label><label class="f">Nom<input type="text" id="fNom" autocomplete="family-name"></label></div><label class="f">Courriel<input type="email" id="fCourriel" autocomplete="email"></label><button class="btn" data-act="anInscrire">'+icon('fa-paper-plane')+'Recevoir mon lien d\'inscription</button><button class="btn sm ghost" data-act="vueCx" data-v="connexion">'+icon('fa-arrow-left')+'J\'ai déjà un compte</button></div><p class="xs muted" style="margin-top:12px">Votre doula vous a déjà inscrite ? Utilisez plutôt le courriel d\'invitation qu\'elle vous a envoyé.</p></div>'+pied();return}
   _cx.apply(this,arguments);
   if(ESPACE!=='parent')return;
   const p=[...document.querySelectorAll('#app p.xs')].find(x=>/Pas encore de compte/.test(x.textContent));
-  if(p){p.insertAdjacentHTML('afterend','<div class="card tint" style="margin:10px 0 0"><b>Vous cherchez une doula ?</b><p class="small" style="margin:6px 0 10px">Créez un compte gratuit, trouvez une doula près de chez vous et écrivez-lui directement.</p><button class="btn" data-act="vueCx" data-v="famille">'+icon('fa-magnifying-glass')+'Trouver ma doula</button></div>')}};
+  if(p){p.insertAdjacentHTML('afterend','<div class="card tint" style="margin:10px 0 0"><b>Vous cherchez une doula ?</b><p class="small" style="margin:6px 0 10px">Créez un compte gratuit, trouvez une doula près de chez vous et écrivez-lui directement.</p><button class="btn" data-act="vueCx" data-v="annuaire">'+icon('fa-magnifying-glass')+'Voir les doulas près de chez moi</button></div>')}};
 
 /* ---------- côté doula ---------- */
 async function chargerDemandes(){try{const {data}=await sb.from('fam_demandes').select('*').order('created_at',{ascending:false}).limit(60);DEMANDES=data||[]}catch(e){}}
@@ -144,7 +146,8 @@ document.addEventListener('click',async e=>{const b=e.target.closest('[data-act]
   case 'anVille':{selInit();const v=b.dataset.v;SEL=SEL.includes(v)?SEL.filter(x=>x!==v):SEL.concat(v);const el=document.getElementById('pfVilles');if(el)el.innerHTML=villesHtml();return}
   case 'anAjoutVille':{selInit();const i=document.getElementById('pfAutre'),v=(i.value||'').trim().slice(0,60);if(!v)return;if(!SEL.includes(v))SEL.push(v);document.getElementById('pfVilles').innerHTML=villesHtml();return}
   case 'anMdp':motDePasseSheet(false);return;
-  case 'anEcrire':ecrireSheet(id);return;
+  case 'anEcrire':{const {data:{session}}=await sb.auth.getSession();if(!session){sheet('Créez votre compte','<p class="small">Pour écrire à cette doula, créez un compte gratuit. Ça prend une minute, puis vous reviendrez ici.</p><button class="btn" data-act="anCompte">Créer mon compte</button>');return}ecrireSheet(id);return}
+  case 'anCompte':close();S.vueCx='famille';ecranConnexion();return;
   case 'anEnvoyer':{const nom=document.getElementById('deNom').value.trim();if(!nom){toast('Entrez votre nom');return}if(!document.getElementById('deOk').checked){toast('Cochez la case pour que la doula puisse vous répondre');return}
     b.disabled=true;const {data,error}=await sb.rpc('fam_demander_doula',{p_doula:id,p_nom:nom,p_tel:document.getElementById('deTel').value.trim(),p_ville:document.getElementById('deVille').value.trim(),p_dpa:document.getElementById('deDpa').value||null,p_message:document.getElementById('deMsg').value.trim()});
     if(error||!data||!data.ok){b.disabled=false;toast((data&&data.erreur)||(error&&error.message)||'Pas envoyé, réessayez');return}
