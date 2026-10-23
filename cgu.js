@@ -1,5 +1,5 @@
 /* Sérénaissance — conditions d'utilisation et confidentialité à accepter (et signer par son nom) avant d'utiliser l'appli.
-   Doulas : acceptation demandée avant de s'inscrire ; toutes (doulas et familles) : une fois à la première connexion.
+   Doulas : acceptation demandée avant de s'inscrire ; familles et doulas invitées : à la création du compte seulement.
    L'acceptation est gardée dans le compte (métadonnées) avec la version, la date et le nom tapé. */
 (function(){
 const V='2026-10',EN=window.LANG==='en',LS='sere-cgu-ok';
@@ -48,13 +48,14 @@ function ecran(opts){document.getElementById('cguOv')?.remove();const t=L(),o=do
 document.addEventListener('click',e=>{const b=e.target.closest('[data-act]');if(!b)return;const a=b.dataset.act;
   if((a==='inscriptionDoula'||a==='devenirDoula')&&!local()&&!b._cguOk){e.stopImmediatePropagation();e.preventDefault();
     ecran({bloquant:false,ok:()=>{b._cguOk=true;b.click()}})}},true);
-/* 2) À la première connexion (doulas et familles, y compris les comptes existants) */
+/* 2) À la création du compte par invitation (mamans invitées par leur doula, doulas invitées) */
 let verifie=false;
 async function gate(){if(verifie||typeof MOI==='undefined'||!MOI)return;verifie=true;
   try{const {data}=await sb.auth.getUser();const u=data&&data.user;if(!u)return;const c=(u.user_metadata||{}).cgu;if(c&&c.v===V)return;
     const l=local();
     const enregistrer=async nom=>{try{await sb.auth.updateUser({data:{cgu:{v:V,nom,date:new Date().toISOString()}}})}catch(e){}};
     if(l){await enregistrer(l.nom);return}
+    if(!S.nouveauCompte)return; /* seulement à la création du compte (lien d'invitation) ; les comptes existants ne sont pas dérangés */
     const nomDefaut=(MOI.prenom?MOI.prenom+' '+(MOI.nom||''):'');
     ecran({bloquant:true,nom:nomDefaut.trim(),ok:enregistrer})}catch(e){verifie=false}}
 const _r=render;render=function(){_r.apply(this,arguments);gate()};
