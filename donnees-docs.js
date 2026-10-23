@@ -51,9 +51,7 @@ Les déplacements sont inclus dans un rayon de 50 km de {{doula_region}}. Au-del
 Le présent contrat, avec ses annexes, constitue l'entente complète entre les parties. Toute modification doit être faite par écrit. Il est régi par les lois du Nouveau-Brunswick et les lois fédérales du Canada; il n'enlève aucun droit accordé par la loi de la province de résidence des Parents, notamment la Loi sur la protection du consommateur du Québec. Les parties tentent d'abord de régler tout différend à l'amiable.
 
 ## Annexe A · Forfaits et paiement
-Accompagnement des Parents · 1 450 $ : 3 rencontres prénatales, accouchement, post-partum immédiat, 2 rencontres postnatales. Valeur : accouchement 725 $, chaque rencontre 145 $. Versements : 1 × 1 450 $, 2 × 725 $ ou 4 × 362,50 $.
-Soutien au Couple · 1 150 $ : 1 rencontre prénatale, accouchement, post-partum immédiat, 1 rencontre postnatale. Valeur : accouchement 575 $, chaque rencontre 287,50 $. Versements : 1 × 1 150 $ ou 2 × 575 $.
-Arrivée de Bébé · 850 $ : rencontre de connaissance, accouchement, post-partum immédiat. Valeur : accouchement 425 $, rencontre 425 $. Versements : 1 × 850 $ ou 2 × 425 $.
+{{forfaits}}
 Inclus dans tous les forfaits : plan de naissance, liste d'hôpital, cahier de naissance, soutien illimité dans l'appli, par courriel, texto, Messenger ou téléphone, garde 24/7 dès 38 semaines.
 Prix en dollars canadiens. TVH ajoutée seulement si la Doula est inscrite. Paiement par Stripe, virement Interac ou autre mode convenu. Solde complet dû au plus tard à 36 semaines. Aucuns frais de crédit ni intérêts. Retard de plus de 14 jours : rappel écrit; la garde peut être suspendue jusqu'au paiement. Un reçu est remis pour chaque paiement.
 
