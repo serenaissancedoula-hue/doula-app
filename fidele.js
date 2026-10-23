@@ -54,3 +54,6 @@ const _dvF=docVue;docVue=function(d,doula){if(FID_RE.test(d.contenu||'')){const 
 const _rtF=rendreTexte;rendreTexte=function(t){if(FID_RE.test(t||''))return fidHtml({contenu:t,type:S.modK||'contrat',reponses:{},champs:[],statut:'signe'},true);return _rtF(t)};
 const _mtF=modeleTexte;modeleTexte=function(k){const v=_mtF(k);if(k==='contrat'&&!FID_RE.test(v||''))return MODELES_DEFAUT()[k];return v};
 const _dmF=DSUB.modeles;DSUB.modeles=function(){if(S.modApercu===undefined)S.modApercu=1;return _dmF()};
+/* aperçu d'un modèle tel que la famille le verra (même mise en page que le document envoyé) */
+window.apercuDoc=function(k,txt,ex){const T=DOC_TYPES[k]||{};const type=/^merci/.test(k)?'merci':k.startsWith('lettre_')?(k==='lettre_fin'?'fin':'forfaits'):k;
+  try{return docVue({type,titre:T.titre||((MOD_LISTE.find(x=>x[0]===k)||[k,k])[1]),contenu:remplirModele(txt,ex),champs:T.champs||[],statut:'signe',reponses:{}},true)}catch(e){return '<div class="doc">'+rendreTexte(remplirModele(txt,ex))+'</div>'}};
