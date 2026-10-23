@@ -450,4 +450,5 @@ document.addEventListener('visibilitychange',()=>{if(document.visibilityState===
 setInterval(()=>{const el=$('#tick');if(el)el.textContent=mmss((Date.now()-(+el.dataset.start))/1000)},1000);
 setInterval(()=>{if(document.visibilityState==='visible'&&((S.role==='parent'&&S.tab==='madoula')||(S.role==='doula'&&S.ctab==='messages'&&S.openClient)))rafraichir()},30000);
 if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
-openDB();demarrer();
+openDB();/* Démarrer seulement quand tous les scripts (envois, disponibilités) sont chargés. */
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',demarrer);else setTimeout(demarrer,0);
