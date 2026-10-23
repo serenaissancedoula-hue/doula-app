@@ -123,6 +123,28 @@ Aucune nudité ni image intime ne sera publiée. La Doula vous montre chaque ima
 
 const ACCUEIL_DEFAUT = `Ce formulaire m'aide à adapter mon soutien. Répondez seulement à ce que vous êtes à l'aise de partager; chaque question est facultative sauf les coordonnées.`;
 
+const RESILIATION_DEFAUT = `@page Résiliation et remboursement | Article 9 du contrat | CONTRATS ET CONSENTEMENTS | Résiliation
+@cols
+## Formulaire de résiliation (remis aux parents)
+À | {{doula_nom}}, {{doula_entreprise}}, {{doula_courriel}}
+Nous (noms) | {{champ:noms}}
+Résilions le contrat signé le | {{champ:datecontrat}}
+Forfait | {{forfait}}
+Date de l'avis | {{champ:dateavis}}
+{{signatures}}
+_Un simple courriel suffit aussi : ce formulaire n'est pas obligatoire._
+@col
+## Calcul du remboursement (rempli par la doula)
+Total payé ($) |
+Valeur des services rendus, annexe A ($) |
+Valeur des services non rendus ($) |
+Pénalité : plus petit de 50 $ ou 10 % des non rendus ($) |
+Remboursement dû : payé − rendus − pénalité ($) |
+Remboursé le · par |
+Date limite (10 jours après l'avis) |
+>~ Exemple || Forfait Accompagnement des Parents (1 450 $) payé en entier, annulation après 2 rencontres prénatales. Services rendus : 290 $. Non rendus : 1 160 $. Pénalité : 50 $ (moins que 116 $). Remboursement : 1 110 $.
+@endcols`;
+
 /* Types de documents : champs fixes, texte modifiable par la doula */
 const DOC_TYPES = {
   contrat: { titre: 'Contrat de services de doula', texte: CONTRAT_DEFAUT, sigP: true, sigD: true,
@@ -138,6 +160,8 @@ const DOC_TYPES = {
     champs: [{ g: 'Mes autorisations' }, { k: 'a1', t: 'Recueillir et conserver les renseignements de mon formulaire d\'accueil', type: 'case' }, { k: 'a2', t: 'Communiquer avec moi par l\'appli, texto, Messenger et courriel', type: 'case' }, { k: 'a3', t: 'Échanger avec mon équipe soignante, à ma demande seulement', type: 'case' }, { k: 'a3n', t: 'Nom du professionnel', type: 'text' }, { k: 'a4', t: 'Transmettre mon dossier à la doula remplaçante si elle me remplace', type: 'case' }, { k: 'a5', t: 'Discuter de mon accompagnement, de façon anonyme, en supervision', type: 'case' }] },
   photos: { titre: 'Autorisation photos, vidéos et témoignages', texte: PHOTOS_DEFAUT, sigP: true, sigD: false,
     champs: [{ g: 'J\'autorise ma doula à…' }, { k: 'p1', t: 'Prendre des photos pendant le travail ou la naissance, pour nous seulement', type: 'case' }, { k: 'p2', t: 'Publier une photo où personne n\'est reconnaissable (mains, pieds du bébé)', type: 'case' }, { k: 'p3', t: 'Publier une photo où notre famille est reconnaissable', type: 'case' }, { k: 'p4', t: 'Publier notre témoignage avec nos prénoms', type: 'case' }, { k: 'p5', t: 'Publier notre témoignage de façon anonyme (initiales)', type: 'case' }, { k: 'p6', t: 'Utiliser notre histoire, anonymisée, dans de la formation de doulas', type: 'case' }, { k: 'parent2', t: 'Nom du 2e parent (s\'il y a lieu)', type: 'text' }] },
+  resiliation: { titre: 'Résiliation et remboursement', texte: RESILIATION_DEFAUT, sigP: true, sigD: false,
+    champs: [{ k: 'noms', t: 'Nous (noms)', type: 'text' }, { k: 'datecontrat', t: 'Contrat signé le', type: 'date' }, { k: 'dateavis', t: 'Date de l\'avis', type: 'date' }] },
   autre: { titre: 'Document', texte: '', sigP: true, sigD: true, champs: [] }
 };
 

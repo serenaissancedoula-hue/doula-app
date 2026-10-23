@@ -409,3 +409,5 @@ details.acc{border-color:transparent;border-radius:16px}
 .fid-note{font-size:.7rem;color:#8a7a70;font-style:italic}
 .fid-pied{border-top:1px solid #e6d2c6;margin-top:14px;padding-top:6px;font-size:.6rem;color:#8a7a70;display:flex;justify-content:space-between;gap:8px}
 @media (max-width:480px){.fid-cols{grid-template-columns:1fr}.fid-pg{padding:0 14px 12px}.fid-pg .pap-bar{margin:0 -14px 10px}}
+.fid-row .dch{border-radius:0!important;box-shadow:none!important;padding:0 2px!important;height:auto!important;min-height:1.5em;border-width:0 0 1px!important}
+.fid-row select.dch{appearance:auto}
