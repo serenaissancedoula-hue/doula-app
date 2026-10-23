@@ -1,7 +1,7 @@
 /* Sérénaissance — Ma boîte à outils rangée par thèmes, avec recherche. Rien n'est retiré : tous les outils restent là. */
 if(window.ESPACE==='doula'){
 const GROUPES=[
- ['Chaque jour',['contr','calc','sac','couleurs']],
+ ['Chaque jour',['demandes','annuaire','contr','calc','sac','couleurs']],
  ['Documents et messages',['modeles','messages','lettre','temoignages']],
  ['Rencontres',['rencontres','approche','retour']],
  ['Guides pour accompagner',['positions','confort','partenaire']],
