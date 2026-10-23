@@ -19,4 +19,7 @@ dOutils=function(){if(S.dsub&&DSUB[S.dsub])return _dOutE();
   return h};
 document.addEventListener('input',e=>{if(e.target.id!=='outSearch')return;const q=e.target.value.trim().toLowerCase();
   document.querySelectorAll('.grpOutils').forEach(g=>{let n=0;g.querySelectorAll('.tile').forEach(t=>{const ok=!q||t.dataset.nom.includes(q);t.hidden=!ok;if(ok)n++});g.hidden=!n;if(q)g.open=true})});
+/* Un seul thème ouvert à la fois (sauf pendant une recherche) */
+document.addEventListener('toggle',e=>{const d=e.target;if(!d.classList||!d.classList.contains('grpOutils')||!d.open)return;const q=document.getElementById('outSearch');if(q&&q.value.trim())return;
+  document.querySelectorAll('.grpOutils[open]').forEach(x=>{if(x!==d)x.open=false})},true);
 }
