@@ -239,3 +239,32 @@ figure.illu figcaption{font-size:.72rem;color:var(--muted);line-height:1.35}
 .espace-t{margin-left:auto;margin-right:10px;font-size:.66rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);white-space:nowrap}
 .espace-t+.gear{margin-left:0}
 @media (max-width:380px){.espace-t{display:none}.espace-t+.gear{margin-left:auto}}
+/* Documents « papier », comme la trousse */
+.papier{background:#fff;border:1px solid var(--line);border-radius:6px;padding:0 20px 14px;font-family:'Poppins',var(--f-body);font-size:.82rem;line-height:1.6;color:#3d312b;gap:6px;overflow:hidden;box-shadow:0 6px 18px rgba(60,40,30,.06)}
+.pap-bar{height:6px;margin:0 -20px 10px;background:linear-gradient(90deg,#e9b8a6,#b5715c 50%,#8fa58a)}
+.pap-tete{display:flex;align-items:center;gap:8px;border-bottom:1px solid #e6d2c6;padding-bottom:8px}
+.pap-tete img{height:30px;width:auto;flex:none}
+.pap-marque{font-family:'Lora',Georgia,serif;font-style:italic;color:#b5644d;font-size:1.12rem;line-height:1.2}
+.pap-cat{margin-left:auto;font-size:.52rem;letter-spacing:.18em;color:#8a7a70;text-align:right;line-height:1.3}
+.pap-titre h2{font-family:'Lora',Georgia,serif;font-weight:500;font-size:1.45rem;color:#2c221e;margin:10px 0 2px}
+.papier .pap-sec{font-family:'Poppins',var(--f-body);font-size:.66rem;letter-spacing:.18em;text-transform:uppercase;color:#b5644d;font-weight:600;border-bottom:1px solid #e6d2c6;padding-bottom:4px;margin:12px 0 2px}
+.papier p{margin:0}
+.pap-ligne{display:flex;gap:10px;align-items:flex-end;font-size:.78rem;color:#8a7a70;margin:2px 0}
+.pap-ligne>span{flex:none;max-width:48%}
+.pap-ligne.bloc{flex-direction:column;align-items:stretch;gap:2px}
+.pap-ligne.bloc>span{max-width:none}
+.pap-ligne b,.papier .pap-ligne .dch{flex:1;min-width:0;font:400 .84rem/1.5 'Poppins',var(--f-body);color:#2c221e;border:0;border-bottom:1px solid #d9a08a;border-radius:0;background:transparent;padding:3px 0;min-height:24px;box-shadow:none;width:100%}
+.papier .pap-ligne textarea.dch{min-height:52px;resize:vertical;background:repeating-linear-gradient(#fff,#fff 25px,#ecd9cf 26px)}
+.papier .pap-ligne .dch:focus{outline:none;border-bottom-color:#b5644d;background-color:#fdf7f3}
+.pap-case{display:flex;align-items:flex-start;gap:8px;font-size:.82rem;color:#3d312b;padding:2px 0}
+.pap-case .bx{display:inline-flex;flex:none;width:13px;height:13px;margin-top:3px;border:1px solid #b5644d;font-size:.6rem;align-items:center;justify-content:center;color:#b5644d}
+.papier .pap-case input{accent-color:#b5644d;margin-top:4px}
+.pap-sigs{display:grid;grid-template-columns:1.1fr 1.5fr .8fr;gap:0 12px;margin-top:4px}
+.pap-sigs div{border-bottom:1px solid #d9a08a;min-height:48px;display:flex;align-items:flex-end;font-size:.8rem;color:#2c221e;padding-bottom:2px}
+.pap-sigs img{max-height:46px;max-width:100%}
+.pap-sigs small{font-size:.6rem;color:#8a7a70;margin-bottom:8px}
+.pap-pied{border-top:1px solid #e6d2c6;margin-top:14px;padding-top:6px;font-size:.6rem;color:#8a7a70}
+.cl.pochette{border-color:var(--accent)}
+.sheet>*{flex-shrink:0}
+.pap-cat{max-width:38%}
+@media (max-width:420px){.papier{padding:0 14px 12px}.pap-bar{margin:0 -14px 10px}.pap-marque{font-size:1rem}.pap-titre h2{font-size:1.25rem}.pap-cat{font-size:.48rem;letter-spacing:.12em}}

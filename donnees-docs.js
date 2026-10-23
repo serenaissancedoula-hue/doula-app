@@ -137,3 +137,130 @@ const MOTS_POSTPARTUM = [
   'Tu fais un travail extraordinaire, {p}, même dans les moments où tu doutes.',
   'Comment va ton moral, vraiment ? Tu peux me répondre ici, sans filtre.'
 ];
+
+/* ===== Lettres personnelles (envoi groupé) =====
+   Variables de plus : {{prenom}} (prénom de la maman), {{doula_prenom}}, {{bebe}} (prénom du bébé ou « votre bébé »), {{dpa_mois}} */
+const LETTRES_MERCI = [
+  { nom: 'Chaleureuse', texte: `Chère {{prenom}}{{partenaire_et}},
+
+Merci de m'avoir choisie pour vous accompagner dans l'arrivée de votre bébé. C'est un vrai privilège que vous m'ouvriez la porte de cette période si précieuse de votre vie.
+
+Notre rencontre m'a beaucoup touchée. J'ai hâte d'apprendre à mieux vous connaître et de préparer avec vous une naissance qui vous ressemble.
+
+Vous trouverez dans votre appli votre contrat et quelques formulaires à remplir. Prenez le temps de les lire : je réponds avec plaisir à toutes vos questions, directement dans l'appli.
+
+D'ici notre prochaine rencontre, prenez bien soin de vous.
+
+Avec douceur,
+{{doula_prenom}}
+{{doula_entreprise}}` },
+  { nom: 'Douce', texte: `Bonjour {{prenom}}{{partenaire_et}},
+
+Une naissance se prépare un pas à la fois, et vous venez d'en faire un très beau : choisir d'être entourés. Merci de me faire confiance pour marcher à vos côtés jusqu'à l'arrivée de {{bebe}}, et pendant les premières semaines qui suivront.
+
+Je serai là pour vous écouter, vous informer et vous soutenir, dans le respect de vos choix. Il n'y a pas de bonne ou de mauvaise façon de vivre cette aventure : il y a la vôtre.
+
+Votre pochette de bienvenue vous attend dans l'appli. Lisez-la à votre rythme, et écrivez-moi dès qu'une question se présente.
+
+Tendrement,
+{{doula_prenom}}` },
+  { nom: 'Simple et claire', texte: `Bonjour {{prenom}}{{partenaire_et}},
+
+Merci de m'avoir choisie comme doula ! Je suis très heureuse de vous accompagner.
+
+Voici les prochaines étapes :
+1. Lire et signer votre contrat dans l'appli (Ma doula › Documents).
+2. Remplir le formulaire d'accueil confidentiel et le consentement.
+3. Demander le moment de notre première rencontre prénatale (Ma doula › Rendez-vous).
+
+Vous pouvez m'écrire dans l'appli en tout temps.
+
+Au plaisir,
+{{doula_prenom}} · {{doula_tel}}` },
+  { nom: 'Pour les deux parents', texte: `Bonjour {{prenom}}{{partenaire_et}},
+
+Merci de m'accueillir dans votre équipe. Mon rôle est de vous soutenir tous les deux : la maman, bien sûr, mais aussi la personne qui l'accompagne, qui a souvent besoin de repères, de petits gestes concrets et d'un moment pour souffler.
+
+Ensemble, nous allons préparer l'arrivée de {{bebe}} : vos souhaits, vos questions, vos peurs aussi, sans jugement. Le jour venu, je serai à vos côtés pour vous aider à vivre ce moment avec confiance.
+
+Votre contrat et vos documents sont dans l'appli. On se reparle très bientôt.
+
+Avec toute ma reconnaissance,
+{{doula_prenom}}` },
+  { nom: 'Courte', texte: `{{prenom}}, merci de m'avoir choisie !
+
+C'est un honneur de faire partie de votre histoire. Votre pochette de bienvenue est dans l'appli : contrat, formulaire d'accueil et quelques documents à lire et signer.
+
+On se reparle très bientôt.
+{{doula_prenom}}` }
+];
+/* Morceaux pour « Générer une nouvelle version » de la lettre de remerciement */
+const MERCI_OUV = [
+  'Merci de m\'avoir choisie pour vous accompagner jusqu\'à l\'arrivée de {{bebe}}.',
+  'Je tenais à vous dire merci, simplement et sincèrement, de m\'avoir fait confiance.',
+  'Quelle joie d\'apprendre que vous avez choisi de vivre cette aventure avec moi !',
+  'Merci pour notre belle rencontre et pour la confiance que vous m\'accordez.',
+  'Être choisie pour accompagner une famille est toujours un grand privilège : merci.'
+];
+const MERCI_MIL = [
+  'Je serai là pour vous écouter, vous informer et vous soutenir, dans le respect de vos choix.',
+  'Ensemble, nous allons préparer une naissance qui vous ressemble, à votre rythme.',
+  'Mon rôle est de vous offrir du soutien, de l\'information et du réconfort, avant, pendant et après la naissance.',
+  'Vos questions, vos souhaits et même vos peurs ont toute leur place dans nos rencontres.',
+  'Je vous accompagnerai pas à pas, pour que vous vous sentiez prêts et entourés le jour venu.'
+];
+const MERCI_FIN = [
+  'Votre pochette de bienvenue vous attend dans l\'appli. Prenez le temps de la lire, et écrivez-moi au besoin.',
+  'Vous trouverez votre contrat et vos documents dans l\'appli, sous « Ma doula ». Je reste disponible pour toute question.',
+  'Tout est dans votre appli : contrat, formulaires et prochaines étapes. Au plaisir de vous revoir très bientôt.',
+  'D\'ici notre prochaine rencontre, prenez bien soin de vous. Je suis à un message près.',
+  'J\'ai hâte de commencer notre préparation ensemble.'
+];
+const MERCI_SIGN = ['Avec douceur,', 'Tendrement,', 'Au plaisir,', 'Avec toute ma reconnaissance,', 'Chaleureusement,'];
+
+const LETTRE_FORFAITS_DEFAUT = `Bonjour {{prenom}}{{partenaire_et}},
+
+Merci pour notre belle rencontre. Comme promis, voici mes forfaits et mes prix. Prenez le temps d'en discuter ensemble : il n'y a aucune pression, et je reste disponible pour répondre à toutes vos questions.
+
+Quand vous serez prêts, touchez « Choisir ce forfait » sous celui qui vous convient. Je vous enverrai ensuite votre pochette de bienvenue avec votre contrat.
+
+## Mes forfaits
+{{forfaits}}
+
+Au plaisir,
+{{doula_prenom}}`;
+
+const LETTRE_FIN_DEFAUT = `Chère {{prenom}}{{partenaire_et}},
+
+Notre accompagnement se termine, et je tenais à vous dire merci. Merci de m'avoir ouvert la porte de votre histoire et de votre maison.
+
+J'ai été témoin de votre courage, de votre douceur et de tout l'amour qui entoure {{bebe}}. Ces souvenirs resteront précieux pour moi.
+
+Rappelez-vous que vous n'avez pas à tout savoir : demander de l'aide est un geste de force.
+
+Ma porte reste ouverte. Si vous avez besoin de parler, d'une marraine d'allaitement ou d'une référence, écrivez-moi.
+
+Si vous avez quelques minutes, votre avis m'aide beaucoup : un court questionnaire vous attend dans l'appli.
+
+{{doula_prenom}}`;
+
+const SATISFACTION_DEFAUT = `Merci de prendre quelques minutes pour me dire comment vous avez vécu notre accompagnement. Vos réponses vont directement à moi et m'aident à m'améliorer. Le témoignage est facultatif : il n'est publié qu'avec votre autorisation.`;
+const NOTE5 = ['5 · Tout à fait', '4 · Plutôt oui', '3 · Moyennement', '2 · Plutôt non', '1 · Pas du tout'];
+DOC_TYPES.satisfaction = { titre: 'Votre avis et votre témoignage', texte: SATISFACTION_DEFAUT, sigP: false, sigD: false,
+  champs: [
+    { g: 'Votre expérience' },
+    { k: 'n1', t: 'Je me suis sentie écoutée et respectée', type: 'choix', o: NOTE5 },
+    { k: 'n2', t: 'L\'information reçue m\'a aidée à faire mes propres choix', type: 'choix', o: NOTE5 },
+    { k: 'n3', t: 'Le soutien pendant l\'accouchement', type: 'choix', o: NOTE5 },
+    { k: 'n4', t: 'Le soutien après la naissance', type: 'choix', o: NOTE5 },
+    { k: 'n5', t: 'Je recommanderais ma doula à une amie', type: 'choix', o: NOTE5 },
+    { k: 'aide', t: 'Ce qui vous a le plus aidée', type: 'area' },
+    { k: 'ameliorer', t: 'Ce que je pourrais améliorer', type: 'area' },
+    { g: 'Votre témoignage (facultatif)' },
+    { k: 'temoignage', t: 'Quelques mots sur votre accompagnement', type: 'area' },
+    { k: 'pubPrenom', t: 'J\'autorise ma doula à publier ce témoignage avec mon prénom', type: 'case' },
+    { k: 'pubAnonyme', t: 'J\'autorise ma doula à le publier de façon anonyme (initiales)', type: 'case' },
+    { k: 'signature', t: 'Prénom ou initiales à afficher', type: 'text' }
+  ] };
+/* Lettres (sans signature) : modèles modifiables dans « Mes modèles » */
+const LETTRES_TYPES = { merci: 'Merci de m\'avoir choisie', forfaits: 'Mes forfaits et mes prix', fin: 'Merci et à bientôt' };
