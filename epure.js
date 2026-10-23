@@ -22,4 +22,8 @@ document.addEventListener('input',e=>{if(e.target.id!=='outSearch')return;const 
 /* Un seul thème ouvert à la fois (sauf pendant une recherche) */
 document.addEventListener('toggle',e=>{const d=e.target;if(!d.classList||!d.classList.contains('grpOutils')||!d.open)return;const q=document.getElementById('outSearch');if(q&&q.value.trim())return;
   document.querySelectorAll('.grpOutils[open]').forEach(x=>{if(x!==d)x.open=false})},true);
+/* Ressources : comme les Outils, un seul menu ouvert à la fois */
+document.addEventListener('toggle',e=>{const d=e.target;if(!d.matches||!d.matches('details.acc')||d.classList.contains('grpOutils')||!d.open)return;
+  if(!(typeof S!=='undefined'&&S.dtab==='ressources'&&!S.vue))return;const p=d.parentElement;if(!p)return;
+  [...p.children].forEach(x=>{if(x!==d&&x.matches&&x.matches('details.acc')&&x.open)x.open=false})},true);
 }

@@ -35,7 +35,7 @@ async function construirePDF(liste){const {PDFDocument,StandardFonts,rgb}=window
   const champ=(lbl,val)=>{const s=9,lw=Math.min(F.widthOfTextAtSize(pdfTxt(lbl),s)+10,L*.5);const vl=coupe(pdfTxt(val||''),F,s,L-lw-4);
     vl.forEach((l,k)=>{place(20);y-=18;if(k===0)pg.drawText(pdfTxt(lbl),{x:M,y:y+2,size:s,font:F,color:gris});pg.drawText(l,{x:M+lw,y:y+3,size:s,font:F,color:encre});pg.drawLine({start:{x:M+lw,y:y},end:{x:W-M,y:y},thickness:.6,color:ligne})})};
   for(let di=0;di<liste.length;di++){const d=liste[di];nouvellePage(di);
-    String(d.contenu||'').split(/\n/).forEach(l=>{if(l.startsWith('## '))section(l.slice(3));else if(l.trim())para(l);else y-=5});
+    (window.fidPlat&&/^@page /m.test(d.contenu||'')?fidPlat(d):String(d.contenu||'')).split(/\n/).forEach(l=>{if(l.startsWith('## '))section(l.slice(3));else if(l.trim())para(l);else y-=5});
     const R=d.reponses||{},C=d.champs||[];
     if(C.length){y-=4;C.forEach(c=>{if(c.g){section(c.g);return}const v=R[c.k];
       if(c.type==='case'){place(16);y-=15;pg.drawRectangle({x:M,y:y+1,width:8,height:8,borderColor:terra,borderWidth:.8});if(v)pg.drawText('x',{x:M+1.6,y:y+2.2,size:8,font:FB,color:terra});coupe(pdfTxt(c.t),F,9,L-16).forEach((l,k)=>{if(k){place(13);y-=13}pg.drawText(l,{x:M+14,y:y+2,size:9,font:F,color:brun})})}

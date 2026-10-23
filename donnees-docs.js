@@ -3,63 +3,106 @@
    Variables remplacées à l'envoi : {{doula_entreprise}} {{doula_nom}} {{doula_adresse}} {{doula_tel}} {{doula_courriel}} {{doula_region}}
    {{parent_nom}} {{partenaire}} {{parent_courriel}} {{parent_tel}} {{dpa}} {{lieu}} {{professionnel}} {{forfait}} {{prix}} {{date}} */
 
-const CONTRAT_DEFAUT = `## Les parties
-ENTRE : {{doula_nom}}, faisant affaire sous le nom {{doula_entreprise}}, {{doula_adresse}}, {{doula_tel}}, {{doula_courriel}} (ci-après « la Doula »);
-ET : {{parent_nom}}{{partenaire_et}} (ensemble « les Parents »), {{parent_courriel}}, {{parent_tel}}.
-Date prévue d'accouchement : {{dpa}} · Lieu prévu : {{lieu}} · Professionnel de santé responsable : {{professionnel}}.
-
+const CONTRAT_DEFAUT = `@page Contrat de services de doula | Page 1 de 3 | CONTRATS ET CONSENTEMENTS | Initiales : Parents ______ Doula ______
+## Les parties
+**ENTRE :** {{doula_nom}}, faisant affaire sous le nom {{doula_entreprise}}, {{doula_adresse}}, {{doula_region}} (Nouveau-Brunswick), {{doula_tel}}, {{doula_courriel}} (ci-après « la Doula »);
+ET (nom de la personne enceinte) | {{parent_nom}}
+Adresse · téléphone · courriel | {{champ:adresse}}  {{parent_courriel}} · {{parent_tel}}
+Partenaire, s'il y a lieu (ensemble « les Parents ») | {{partenaire}}
+Date prévue d'accouchement · lieu prévu | {{dpa}} · {{lieu}}
+Professionnel de santé responsable | {{professionnel}}
 ## Article 1 · Objet
 La Doula offre aux Parents un soutien émotionnel, physique et informationnel non médical pendant la grossesse, l'accouchement et le post-partum, selon le forfait choisi à l'annexe A.
-
 ## Article 2 · Forfait choisi
-{{forfait}} · {{prix}}. Le détail des services, des prix et des modalités de paiement figure à l'annexe A, qui fait partie du présent contrat.
-
+{{cases_forfaits}}
+Le détail des services, des prix et des modalités de paiement figure à l'annexe A, qui fait partie du présent contrat.
 ## Article 3 · Nature et limites du rôle
-La Doula n'est pas une professionnelle de la santé et n'effectue aucun acte médical, clinique ou infirmier. Elle ne pose aucun diagnostic, ne prend aucune décision médicale et ne parle pas au nom des Parents auprès de l'équipe soignante. Les Parents demeurent seuls responsables de leurs décisions et de leur suivi médical. L'annexe B précise ces limites.
-
+La Doula n'est pas une professionnelle de la santé et n'effectue aucun acte médical, clinique ou infirmier. Elle ne pose aucun diagnostic, ne prend aucune décision médicale et ne parle pas au nom des Parents auprès de l'équipe soignante. Les Parents demeurent seuls responsables de leurs décisions et de leur suivi médical. L'annexe B précise ces limites et doit être signée.
 ## Article 4 · Période de garde
 À partir de 38 semaines de grossesse et jusqu'à l'accouchement, la Doula est de garde 24 heures sur 24, 7 jours sur 7. Les Parents l'appellent (et non par texto seulement) dès le début du travail, à la rupture des membranes, ou lorsqu'ils partent vers le lieu de naissance. Si l'accouchement survient avant 37 semaines, la Doula fera tous les efforts raisonnables pour être présente, sans garantie.
-
+@page Contrat de services de doula | Page 2 de 3 | CONTRATS ET CONSENTEMENTS | Initiales : Parents ______ Doula ______
 ## Article 5 · Présence à l'accouchement
-La Doula se rend auprès des Parents dans un délai raisonnable après l'appel, selon la distance et les conditions routières. Elle reste jusqu'à environ 2 heures après la naissance pour le post-partum immédiat. Après 18 heures de présence continue, elle peut faire appel à sa doula remplaçante pour se reposer, afin de garder un soutien sécuritaire. Les règles de l'établissement priment; si elles empêchent la présence de la Doula, le soutien se poursuit à distance et la portion accouchement est traitée selon l'article 9.
-
+La Doula se rend auprès des Parents dans un délai raisonnable après l'appel, selon la distance et les conditions routières. Elle reste jusqu'à environ 2 heures après la naissance pour le post-partum immédiat. Après 18 heures de présence continue, elle peut faire appel à sa doula remplaçante pour se reposer, afin de garder un soutien sécuritaire. Les règles de l'établissement (nombre d'accompagnants, mesures sanitaires) priment; si elles empêchent la présence de la Doula, le soutien se poursuit à distance et la portion accouchement est traitée selon l'article 9.
 ## Article 6 · Communications
-Les Parents peuvent joindre la Doula dans l'appli Sérénaissance, par courriel, texto, Messenger ou téléphone. Hors période de garde, la Doula répond habituellement en moins de 24 heures. En cas d'urgence, les Parents composent d'abord le 911 ou joignent leur professionnel de santé.
-
+Les Parents peuvent joindre la Doula par courriel, texto, Messenger ou téléphone. Hors période de garde, la Doula répond habituellement en moins de 24 heures. En cas d'urgence, les Parents composent d'abord le 911 ou joignent leur professionnel de santé.
 ## Article 7 · Doula remplaçante
 Si la Doula ne peut être présente (maladie, deux naissances simultanées, force majeure), elle propose une doula remplaçante de confiance, liée par une entente de confidentialité. Les Parents sont libres de l'accepter ou non. S'ils refusent, ou si aucune remplaçante n'est disponible, la portion accouchement leur est remboursée.
-
 ## Article 8 · Accouchement rapide ou non signalé
 Si les Parents n'ont pas appelé la Doula à temps pour qu'elle puisse se rendre, la portion accouchement reste due. La Doula offre alors une rencontre postnatale supplémentaire.
-
 ## Article 9 · Annulation et remboursement
-Les Parents peuvent résilier le contrat en tout temps par avis écrit (un courriel ou un message dans l'appli suffit). Avant la première rencontre : remboursement complet, sans frais. Après la première rencontre : les Parents paient la valeur des services rendus, plus une pénalité égale au plus petit de 50 $ ou de 10 % de la valeur des services non rendus. Le remboursement est fait dans les 10 jours suivant l'avis écrit, par le même moyen de paiement. La Doula peut mettre fin au contrat, avec un avis écrit motivé, si sa sécurité est menacée, en cas de comportement abusif, de non-paiement après rappel écrit, ou si les Parents demandent un acte hors de son rôle; les sommes payées pour des services non rendus sont alors remboursées, sans pénalité.
-
+Les Parents peuvent résilier le contrat en tout temps par avis écrit (un courriel suffit).
+- Avant la première rencontre : remboursement complet, sans frais.
+- Après la première rencontre : les Parents paient la valeur des services rendus, plus une pénalité égale au plus petit de 50 $ ou de 10 % de la valeur des services non rendus.
+- La valeur de chaque service est indiquée à l'annexe A.
+- Le remboursement est fait dans les 10 jours suivant l'avis écrit, par le même moyen de paiement.
+La Doula peut mettre fin au contrat, avec un avis écrit motivé, si sa sécurité est menacée, en cas de comportement abusif, de non-paiement après rappel écrit, ou si les Parents demandent un acte hors de son rôle. Les sommes payées pour des services non rendus sont alors remboursées, sans pénalité.
+@page Contrat de services de doula | Page 3 de 3 | CONTRATS ET CONSENTEMENTS | En deux exemplaires
 ## Article 10 · Perte de grossesse ou situation imprévue
 En cas de deuil périnatal, de césarienne planifiée ou de transfert de soins, la Doula offre de poursuivre son accompagnement sous une forme adaptée. Si les Parents préfèrent mettre fin au contrat, seuls les services rendus sont payables, sans pénalité.
-
 ## Article 11 · Confidentialité
-La Doula garde confidentiels tous les renseignements reçus, conformément au consentement signé. Elle ne peut les communiquer qu'avec le consentement des Parents, sauf si la loi l'exige (notamment l'obligation de signaler une situation où la sécurité d'un enfant est compromise) ou en cas de danger grave et imminent pour la vie d'une personne.
-
+La Doula garde confidentiels tous les renseignements reçus, conformément au formulaire de consentement signé. Elle ne peut les communiquer qu'avec le consentement des Parents, sauf si la loi l'exige (notamment l'obligation de signaler une situation où la sécurité d'un enfant est compromise) ou en cas de danger grave et imminent pour la vie d'une personne.
 ## Article 12 · Responsabilité et assurance
-La Doula n'est pas responsable des décisions médicales, des résultats de l'accouchement ni des actes de l'équipe soignante. Rien dans le présent contrat ne limite la responsabilité de la Doula pour sa propre faute, ni les droits que la loi accorde aux Parents. Assurance responsabilité : {{assurance}}.
-
+La Doula indique ci-dessous son assurance responsabilité professionnelle et civile, le cas échéant. Elle n'est pas responsable des décisions médicales, des résultats de l'accouchement ni des actes de l'équipe soignante. Rien dans le présent contrat ne limite la responsabilité de la Doula pour sa propre faute, ni les droits que la loi accorde aux Parents.
+Assureur et no de police | {{assurance}}
 ## Article 13 · Déplacements
 Les déplacements sont inclus dans un rayon de 50 km de {{doula_region}}. Au-delà, des frais de 0,55 $/km aller-retour s'appliquent, annoncés avant la signature.
-
 ## Article 14 · Dispositions générales
-Le présent contrat, avec ses annexes, constitue l'entente complète entre les parties. Toute modification doit être faite par écrit. Il est régi par les lois du Nouveau-Brunswick et les lois fédérales du Canada; il n'enlève aucun droit accordé par la loi de la province de résidence des Parents, notamment la Loi sur la protection du consommateur du Québec. Les parties tentent d'abord de régler tout différend à l'amiable.
-
-## Annexe A · Forfaits et paiement
-{{forfaits}}
-Inclus dans tous les forfaits : plan de naissance, liste d'hôpital, cahier de naissance, soutien illimité dans l'appli, par courriel, texto, Messenger ou téléphone, garde 24/7 dès 38 semaines.
-Prix en dollars canadiens. TVH ajoutée seulement si la Doula est inscrite. Paiement par Stripe, virement Interac ou autre mode convenu. Solde complet dû au plus tard à 36 semaines. Aucuns frais de crédit ni intérêts. Retard de plus de 14 jours : rappel écrit; la garde peut être suspendue jusqu'au paiement. Un reçu est remis pour chaque paiement.
-
-## Annexe B · Rôle et limites de la doula
-La Doula applique le principe « Observer et référer ».
-LA DOULA PEUT : offrir un soutien émotionnel, du réconfort et de l'écoute; proposer des positions, la respiration, des massages et des mesures de confort; fournir de l'information fondée sur des sources reconnues; aider les Parents à formuler leurs questions à l'équipe soignante; soutenir l'allaitement et les premiers soins au bébé; reconnaître des signaux d'alerte et orienter vers les ressources.
-LA DOULA NE PEUT PAS : faire un examen vaginal, prendre la tension ou écouter le cœur du bébé; poser un diagnostic ou interpréter un résultat médical; recommander ou administrer un médicament, une plante ou un produit naturel; parler ou décider à la place des Parents; remplacer une sage-femme, une infirmière, une IBCLC ou un médecin; retarder une consultation ou un appel au 911.
-NOS ENGAGEMENTS : nous avons un suivi médical ou sage-femme régulier pendant la grossesse; nous informerons la Doula de tout élément de santé pouvant influencer l'accompagnement; en cas d'urgence, nous appelons d'abord le 911 ou notre professionnel de santé; nous restons seuls responsables de nos décisions médicales.`;
+Le présent contrat, avec ses annexes, constitue l'entente complète entre les parties. Toute modification doit être faite par écrit et signée. Il est régi par les lois du Nouveau-Brunswick et les lois fédérales du Canada; il n'enlève aucun droit accordé par la loi de la province de résidence des Parents, notamment la Loi sur la protection du consommateur du Québec. Les parties tentent d'abord de régler tout différend à l'amiable.
+## Signatures
+{{signatures}}
+@page Annexe A · Forfaits et paiement | Fait partie du contrat | CONTRATS ET CONSENTEMENTS | Annexe A
+@cols
+{{cartes_forfaits}}
+@card Inclus dans tous les forfaits || Plan de naissance, liste d'hôpital, cahier de naissance, soutien illimité par courriel, texto, Messenger ou téléphone, garde 24/7 dès 38 semaines. À la carte : relation d'aide (1 h) 60 $; bloc prénatal ou postnatal (3 h) 120 $, annulable sans frais jusqu'à 24 h avant.
+@col
+## Mon calendrier de paiement
+Versement 1 · à la signature ($) |
+Versement 2 · date et montant |
+Versement 3 · date et montant |
+Versement 4 · au plus tard à 36 sem. ($) |
+Calendrier choisi | {{champ:paiement}}
+## Modalités
+No de TVH (ou « non inscrite ») | 
+- Prix en dollars canadiens. TVH de 15 % ajoutée seulement si la Doula est inscrite (voir ci-dessous).
+- Paiement par Stripe, virement Interac à {{doula_courriel}} ou autre mode convenu.
+- Solde complet dû au plus tard à 36 semaines.
+- Aucuns frais de crédit ni intérêts.
+- Retard de plus de 14 jours : rappel écrit; la garde peut être suspendue jusqu'au paiement.
+- Un reçu est remis pour chaque paiement.
+_La présence à l'accouchement vaut 50 % du forfait; l'autre 50 % est réparti entre les rencontres. Ces valeurs servent au calcul en cas d'annulation._
+## Initiales
+Parents ______________   Doula ______________
+@endcols
+@page Annexe B · Rôle et limites de la doula | Fait partie du contrat | CONTRATS ET CONSENTEMENTS | Annexe B
+_Les Parents reconnaissent que la Doula offre un soutien non médical et applique le principe « Observer et référer »._
+@cols
+## La doula peut
+- Offrir un soutien émotionnel, du réconfort et de l'écoute
+- Proposer des positions, la respiration, des massages et des mesures de confort
+- Fournir de l'information fondée sur des sources reconnues
+- Aider les Parents à formuler leurs questions à l'équipe soignante
+- Soutenir l'allaitement et les premiers soins au bébé
+- Reconnaître des signaux d'alerte et orienter vers les ressources
+>~ Précision || Même si la Doula est aussi naturothérapeute et intervenante en relation d'aide, ces services ne sont pas inclus dans l'accompagnement de doula et ne remplacent aucun traitement médical ou psychologique.
+## Nos engagements
+[ ] Nous avons un suivi médical ou sage-femme régulier pendant la grossesse.
+[ ] Nous informerons la Doula de tout élément de santé pouvant influencer l'accompagnement.
+[ ] En cas d'urgence, nous appelons d'abord le 911 ou notre professionnel de santé.
+[ ] Nous restons seuls responsables de nos décisions médicales.
+@col
+## La doula ne peut pas
+- Faire un examen vaginal, prendre la tension ou écouter le cœur du bébé
+- Poser un diagnostic ou interpréter un résultat médical
+- Recommander ou administrer un médicament, une plante ou un produit naturel
+- Parler ou décider à la place des Parents
+- Remplacer une sage-femme, une infirmière, une IBCLC ou un médecin
+- Retarder une consultation ou un appel au 911
+>! Appeler l'hôpital ou le 911 sans attendre || Saignement abondant, maux de tête intenses ou troubles de la vue, fièvre de 38 °C ou plus, bébé qui bouge moins, liquide vert ou brun, douleur intense et constante, idées de se faire du mal ou de faire du mal au bébé.
+## Signatures
+Parent 1 |
+Parent 2 |
+Doula · date |
+@endcols`;
 
 const CONSENTEMENT_DEFAUT = `## Ce que je recueille et pourquoi
 Vos coordonnées et des renseignements sur votre grossesse, votre santé et votre famille, uniquement pour vous accompagner, tenir un dossier et vous facturer. Ils sont conservés dans l'appli Sérénaissance (accès protégé par mot de passe). Certains outils peuvent conserver des données à l'extérieur du Canada, notamment aux États-Unis.
