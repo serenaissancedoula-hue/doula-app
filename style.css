@@ -228,3 +228,11 @@ figure.illu figcaption{font-size:.72rem;color:var(--muted);line-height:1.35}
   #impression .doc{border:0;padding:0;font-size:11pt}
 }
 [hidden]{display:none!important}
+
+.gear{border:1px solid var(--line);background:var(--white);border-radius:50%;width:40px;height:40px;display:flex;align-items:center;justify-content:center;color:var(--muted);cursor:pointer;flex:none;font-size:1.05rem}
+.gear.on,.gear:hover{color:var(--accent);border-color:var(--accent)}
+.role+.gear{margin-left:8px}
+.top-in>.gear:first-of-type{margin-left:auto}
+.role[hidden]+.gear{margin-left:auto}
+.avimg{object-fit:cover;padding:0}
+.avxl{width:84px;height:84px;border-radius:50%;background:var(--soft);color:var(--accent);display:flex;align-items:center;justify-content:center;font-family:var(--f-display);font-weight:800;font-size:2rem;flex:none;object-fit:cover}

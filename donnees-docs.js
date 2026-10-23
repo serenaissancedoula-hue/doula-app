@@ -1,10 +1,10 @@
 /* Académie Sérénaissance — appli Famille : modèles de documents à signer et mots du jour.
    Les modèles sont ceux de Sabrina, à titre d'exemple : chaque doula peut modifier le texte dans « Mes modèles ».
-   Variables remplacées à l'envoi : {{doula_nom}} {{doula_adresse}} {{doula_tel}} {{doula_courriel}} {{doula_region}}
+   Variables remplacées à l'envoi : {{doula_entreprise}} {{doula_nom}} {{doula_adresse}} {{doula_tel}} {{doula_courriel}} {{doula_region}}
    {{parent_nom}} {{partenaire}} {{parent_courriel}} {{parent_tel}} {{dpa}} {{lieu}} {{professionnel}} {{forfait}} {{prix}} {{date}} */
 
 const CONTRAT_DEFAUT = `## Les parties
-ENTRE : {{doula_nom}}, faisant affaire sous le nom Académie Sérénaissance, {{doula_adresse}}, {{doula_tel}}, {{doula_courriel}} (ci-après « la Doula »);
+ENTRE : {{doula_nom}}, faisant affaire sous le nom {{doula_entreprise}}, {{doula_adresse}}, {{doula_tel}}, {{doula_courriel}} (ci-après « la Doula »);
 ET : {{parent_nom}}{{partenaire_et}} (ensemble « les Parents »), {{parent_courriel}}, {{parent_tel}}.
 Date prévue d'accouchement : {{dpa}} · Lieu prévu : {{lieu}} · Professionnel de santé responsable : {{professionnel}}.
 
