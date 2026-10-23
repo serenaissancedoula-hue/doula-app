@@ -5,4 +5,4 @@ function recuTexte(c,p,k){const I=infoDoula(),D=S.doula||{};const solde=cPrice(c
 document.addEventListener('click',e=>{const b=e.target.closest('[data-act="paieSave"]');if(!b)return;
   setTimeout(async()=>{try{const c=(S.clients||[]).find(x=>x.id===S.openClient);if(!c||!(c.paie||[]).length)return;const k=c.paie.length,p=c.paie[k-1];if(p.recuAuto)return;p.recuAuto=true;
     const {error}=await sb.from('fam_messages').insert({famille_id:c.id,de_doula:true,type:'document',texte:recuTexte(c,p,k)});
-    if(!error){toast('Reçu envoyé automatiquement dans l\'appli de la famille');if(typeof chargerClientDetail==='function')chargerClientDetail(c.id)}}catch(x){}},120)},false);
+    if(!error){notifierFamille(c.id,'recu');toast('Reçu envoyé automatiquement dans l\'appli de la famille');if(typeof chargerClientDetail==='function')chargerClientDetail(c.id)}}catch(x){}},120)},false);

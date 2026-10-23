@@ -27,6 +27,10 @@ Deno.serve(async (req) => {
       const patch = { abonnement_statut: "actif", stripe_customer: o.customer, stripe_sub: o.subscription };
       if (o.client_reference_id) await sb.from("fam_doulas").update(patch).eq("id", o.client_reference_id);
       else if (o.customer_details?.email) await sb.from("fam_doulas").update(patch).ilike("courriel", o.customer_details.email);
+    } else if (ev.type === "invoice.paid") {
+      const patch = { abonnement_recu: o.hosted_invoice_url ?? null, abonnement_recu_le: new Date().toISOString() };
+      const { data } = await sb.from("fam_doulas").update(patch).eq("stripe_customer", o.customer).select("id");
+      if (!data?.length && o.customer_email) await sb.from("fam_doulas").update(patch).ilike("courriel", o.customer_email);
     } else if (ev.type === "customer.subscription.updated" || ev.type === "customer.subscription.deleted") {
       const fin = o.current_period_end ? new Date(o.current_period_end * 1000).toISOString() : null;
       await sb.from("fam_doulas").update({ abonnement_statut: ev.type.endsWith("deleted") ? "annule" : statut(o.status), abonnement_fin: fin, stripe_sub: o.id }).eq("stripe_customer", o.customer);
