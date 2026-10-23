@@ -4,7 +4,7 @@
 const DELAI=10*60*1000,CLE='sere-derniere-activite';
 const lire=()=>{try{return +localStorage.getItem(CLE)||0}catch(e){return 0}};
 const noter=()=>{try{localStorage.setItem(CLE,String(Date.now()))}catch(e){}};
-const connectee=()=>{try{return !!(window.MOI)}catch(e){return false}};
+const connectee=()=>{try{return typeof MOI!=='undefined'&&!!MOI}catch(e){return false}};
 const occupee=()=>{try{return !!(S&&(S.contrActive||S.timer||S.kick))}catch(e){return false}};
 /* Fermeture de l'appli : un nouveau lancement (sessionStorage vide) efface la connexion, donc il faut se reconnecter. */
 try{if(!sessionStorage.getItem('sere-lancee')){sessionStorage.setItem('sere-lancee','1');

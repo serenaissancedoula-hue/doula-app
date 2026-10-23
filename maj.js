@@ -3,7 +3,7 @@
    Si une nouvelle version existe, elle se met à jour toute seule (une fois par session),
    sinon un bandeau propose « Mettre à jour ». Le bouton de Paramètres force la mise à jour.
    À chaque publication : changer APP_VERSION ici ET dans version.json, et le ?v= des scripts dans index.html et parents/index.html (sinon le téléphone garde les anciens fichiers). */
-const APP_VERSION='2026.10.23-30';
+const APP_VERSION='2026.10.23-32';
 async function versionEnLigne(){try{const r=await fetch('version.json?t='+Date.now(),{cache:'no-store'});if(!r.ok)return null;return await r.json()}catch(e){return null}}
 async function majForcer(){try{toast('Mise à jour en cours…')}catch(e){}
   try{sessionStorage.setItem('sere-maj-ok','1')}catch(e){}
@@ -25,7 +25,7 @@ function maintenanceAffiche(m){const f=d=>new Date(d).toLocaleString('fr-CA',{we
   if(!m||!m.debut||!m.fin)return;const now=Date.now(),d=new Date(m.debut).getTime(),e=new Date(m.fin).getTime();if(isNaN(d)||isNaN(e)||now>e)return;
   if(now>=d){const o=document.createElement('div');o.id='ecranMaint';o.style.cssText='position:fixed;inset:0;z-index:99999;background:var(--bg,#faf5ef);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:32px;gap:12px';
     o.innerHTML='<div style="font-size:48px">🛠️</div><h2 style="margin:0">Appli en maintenance</h2><p style="max-width:320px">'+(m.message||'Nous améliorons l\'appli. Vos données sont en sécurité.')+'</p><p class="small"><b>Retour prévu : '+f(m.fin)+'</b></p><button class="btn sm ghost" id="maintFermer" hidden>Continuer quand même (propriétaire)</button>';
-    document.body.appendChild(o);try{if(window.MOI&&MOI.admin)document.getElementById('maintFermer').hidden=false}catch(x){}
+    document.body.appendChild(o);try{if(typeof MOI!=='undefined'&&MOI&&MOI.admin)document.getElementById('maintFermer').hidden=false}catch(x){}
     document.getElementById('maintFermer').onclick=()=>o.remove();setTimeout(()=>maintenanceAffiche(m),Math.min(e-now+1000,600000));return}
   const b=document.createElement('div');b.id='bandeauMaint';b.className='bandeau-maj';b.innerHTML='<span>🛠️ Mise à jour prévue le <b>'+f(m.debut)+'</b>. L\'appli sera en maintenance jusqu\'à '+new Date(m.fin).toLocaleTimeString('fr-CA',{hour:'2-digit',minute:'2-digit'})+'.</span><button class="btn sm ghost" id="maintOk">OK</button>';
   document.body.appendChild(b);document.getElementById('maintOk').onclick=()=>b.remove();setTimeout(()=>maintenanceAffiche(m),Math.min(d-now+500,600000))}
