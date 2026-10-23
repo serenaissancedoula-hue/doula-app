@@ -8,9 +8,12 @@ const _dvFi=docVue;docVue=function(d,doula){if(!estFichier(d))return _dvFi(d,dou
   return '<div class="stack">'+vue+'<a class="btn ghost" style="text-align:center;text-decoration:none" href="'+f.url+'" download="'+esc(f.nom)+'">'+icon('fa-download')+'Télécharger '+esc(f.nom)+'</a></div>'};
 const _odFi=ouvrirDoc;ouvrirDoc=async function(id){await _odFi(id);try{const d=(S.role==='parent'?DOCS:(CDOCS[S.openClient]||[])).find(x=>x.id===id);if(d&&d.titre!==undefined){const {data}=await sb.from('fam_documents').select('contenu').eq('id',id).maybeSingle();if(data&&estFichier(data))document.querySelectorAll('.sheet [data-act="pdf"]').forEach(b=>b.remove())}}catch(e){}};
 document.addEventListener('change',async e=>{const i=e.target.closest('#fichUp');if(!i||!i.files[0])return;const f=i.files[0];
-  if(f.size>FICHIER_MAX){toast('Fichier trop gros (3 Mo max)');i.value='';return}
   if(!/^(application\/pdf|image\/)/.test(f.type)){toast('PDF ou image seulement');i.value='';return}
-  const url=await new Promise(r=>{const fr=new FileReader();fr.onload=()=>r(fr.result);fr.readAsDataURL(f)});
+  if(f.type==='application/pdf'&&f.size>FICHIER_MAX){toast('PDF trop gros (3 Mo max)');i.value='';return}
+  let url=await new Promise(r=>{const fr=new FileReader();fr.onload=()=>r(fr.result);fr.readAsDataURL(f)});
+  /* les images sont réduites (1600 px, JPEG) pour garder l'appli rapide */
+  if(f.type.startsWith('image/')&&f.type!=='image/svg+xml'){try{url=await new Promise((ok,ko)=>{const im=new Image();im.onload=()=>{const k=Math.min(1,1600/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height);x.drawImage(im,0,0,c.width,c.height);ok(c.toDataURL('image/jpeg',.82))};im.onerror=ko;im.src=url})}catch(x){}}
+  if(url.length>FICHIER_MAX*1.4){toast('Fichier trop gros');i.value='';return}
   const titre=(($('#fichPart')||{}).checked?'Pour le partenaire · ':'')+f.name.replace(/\.[^.]+$/,'').slice(0,80);
   const {error}=await sb.from('fam_documents').insert({famille_id:i.dataset.fam,type:'autre',titre,contenu:'@fichier '+f.name+'|'+url,champs:[],sig_parent_requise:false,sig_doula_requise:false,statut:'signe'});
   i.value='';if(error){toast(error.message);return}
