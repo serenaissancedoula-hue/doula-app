@@ -306,7 +306,7 @@ document.addEventListener('click',async e=>{const b=e.target.closest('[data-act]
     try{Object.keys(localStorage).filter(k=>k.indexOf(CLE_AUTH)===0||k==='sere-app-derniere').forEach(k=>localStorage.removeItem(k))}catch(e){}
     location.replace(location.pathname);return}
   case 'mdp':motDePasseSheet(false);return;
-  case 'saveMdp':{const p1=$('#mdp1').value,p2=$('#mdp2').value;if(p1.length<8){toast('8 caractères ou plus');return}if(p1!==p2){toast('Les deux mots de passe diffèrent');return}const {error}=await sb.auth.updateUser({password:p1,data:{mdp:true}});if(error){toast(error.message);return}S.mdpOk=true;close();toast('Mot de passe enregistré : la prochaine fois, entrez avec votre courriel et ce mot de passe');return}
+  case 'saveMdp':{const p1=$('#mdp1').value,p2=$('#mdp2').value;if(p1.length<8){toast('8 caractères ou plus');return}if(p1!==p2){toast('Les deux mots de passe diffèrent');return}const {error}=await sb.auth.updateUser({password:p1,data:{mdp:true}});if(error){toast(error.message);return}S.mdpOk=true;close();try{window.cguVerifier&&cguVerifier()}catch(x){}toast('Mot de passe enregistré : la prochaine fois, entrez avec votre courriel et ce mot de passe');return}
   case 'role':S.vue=null;if(v===S.role)return;S.role=v;try{localStorage.setItem('sere-fam-role',v)}catch(x){}S.openClient=null;$('#app').innerHTML='<p class="small muted" style="text-align:center;padding:40px">Chargement…</p>';await charger();scrollTo(0,0);render();return;
   case 'tab':S.vue=null;if(S.role==='parent'){S.tab=v;S.sub=''}else{S.dtab=v;S.dsub='';S.openClient=null}scrollTo(0,0);break;
   case 'go':{const [t,s]=v.split('|');S.tab=t;S.sub=s||'';scrollTo(0,0);break}

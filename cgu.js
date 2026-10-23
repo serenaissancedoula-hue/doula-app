@@ -50,7 +50,8 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-act]');if(
     ecran({bloquant:false,ok:()=>{b._cguOk=true;b.click()}})}},true);
 /* 2) À la création du compte par invitation (mamans invitées par leur doula, doulas invitées) */
 let verifie=false;
-async function gate(){if(verifie||typeof MOI==='undefined'||!MOI)return;verifie=true;
+async function gate(){if(verifie||typeof MOI==='undefined'||!MOI)return;if(document.getElementById('mdp1'))return; /* d'abord le mot de passe, puis les conditions */
+  verifie=true;
   try{const {data}=await sb.auth.getUser();const u=data&&data.user;if(!u)return;const c=(u.user_metadata||{}).cgu;if(c&&c.v===V)return;
     const l=local();
     const enregistrer=async nom=>{try{await sb.auth.updateUser({data:{cgu:{v:V,nom,date:new Date().toISOString()}}})}catch(e){}};
@@ -58,5 +59,6 @@ async function gate(){if(verifie||typeof MOI==='undefined'||!MOI)return;verifie=
     if(!S.nouveauCompte&&S.role!=='parent')return; /* familles : toujours à la première connexion, même si le lien du courriel n'est pas reconnu comme une invitation */ /* seulement à la création du compte (lien d'invitation) ; les comptes existants ne sont pas dérangés */
     const nomDefaut=(MOI.prenom?MOI.prenom+' '+(MOI.nom||''):'');
     ecran({bloquant:true,nom:nomDefaut.trim(),ok:enregistrer})}catch(e){verifie=false}}
+window.cguVerifier=()=>{verifie=false;gate()};
 const _r=render;render=function(){_r.apply(this,arguments);gate()};
 })();
