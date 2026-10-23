@@ -74,9 +74,21 @@ function ouvrirBebePE(){const st=stage();if(st.k!=='preg')return;const w=Math.ma
   document.body.appendChild(d);document.body.style.overflow='hidden';
   if(b){try{coeurArreter();coeurDemarrer(b);S.sonCoeur=true}catch(e){}}}
 function fermerBebePE(){coeurArreter();S.sonCoeur=false;const d=$('#bebePE');if(d)d.remove();document.body.style.overflow=''}
-document.addEventListener('click',e=>{const z=e.target.closest('.bebe-carte .bebe-zone:not(.nn)');if(z&&!e.target.closest('#bebePE')){ouvrirBebePE();return}
+document.addEventListener('click',e=>{const z=e.target.closest('.bebe-carte .bebe-zone:not(.nn), .bb2-img');if(z&&!e.target.closest('#bebePE')){ouvrirBebePE();return}
   const b=e.target.closest('[data-act]');if(!b)return;
   if(b.dataset.act==='bebePEFermer')fermerBebePE();
   else if(b.dataset.act==='bebePESon'){const st=stage();if(S.sonCoeur){coeurArreter();S.sonCoeur=false;b.innerHTML=icon('fa-volume-xmark')}else{coeurDemarrer(bpm(st.g.w));S.sonCoeur=true;b.innerHTML=icon('fa-volume-high')}}
   else if(b.dataset.act==='bebeMiroir'&&$('#bebePE')){const st=stage(),w=Math.max(4,Math.min(42,st.g.w));const z=$('#bebeZonePE');if(z)z.outerHTML=svgBebe(w,'bebeZonePE')}},true);
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&$('#bebePE'))fermerBebePE()});
+
+/* Mise en page inspirée des applis de grossesse, dans le style Sérénaissance :
+   image de bébé à gauche, longueur et poids à droite, puis « Votre bébé » en texte. */
+carteBebe=function(g){const w=Math.max(4,Math.min(42,g.w)),f=fruit(w),I=infoSemaine(w),M=mouvement(w),b=bpm(w),em=FRUIT_EMOJI[f[0]]||'🌱';
+  return '<div class="card bebe-carte bb2"><div class="bb2-tete"><span class="eyebrow acc">Mon bébé</span><b class="bb2-sem">'+w+' semaines'+(g.d?' + '+g.d+' j':'')+'</b><span class="xs muted">'+(g.left>0?g.left+' jours avant la date prévue':'Date prévue atteinte')+'</span></div>'+
+   '<div class="bb2-haut"><div class="bb2-img" aria-label="Touchez pour voir bébé en grand">'+svgBebe(w)+'<span class="bb2-loupe">'+icon('fa-expand')+'</span></div>'+
+   '<div class="bb2-mes"><span class="eyebrow">Taille</span><div class="bb2-l"><span>Longueur<small>cm</small></span><b class="num">'+cm(f[1])+'</b></div><div class="bb2-l"><span>Poids<small>'+(f[2]>=1000?'kg':'grammes')+'</small></span><b class="num">'+(f[2]>=1000?cm((f[2]/1000).toFixed(1)):(f[2]||'< 1'))+'</b></div><div class="bb2-l"><span>Cœur<small>bpm</small></span><b class="num">'+(b||'—')+'</b></div><div class="bb2-fruit"><span aria-hidden="true">'+em+'</span>'+esc(f[0])+'</div></div></div>'+
+   '<div class="prog"><i style="width:'+Math.min(100,Math.max(0,g.gaDays/280*100))+'%"></i></div>'+
+   '<h2 class="bb2-h">Votre bébé</h2><p>'+(I?I[1]:'')+'</p><p class="small"><b>Ses mouvements :</b> '+M[2]+'</p>'+
+   '<h2 class="bb2-h">Vous</h2><p>'+(I?I[2]:'')+'</p>'+(I?'<div class="banner sage">'+icon('fa-lightbulb')+'<div class="small"><b>Petit conseil :</b> '+I[3]+'</div></div>':'')+
+   (w<42?'<details><summary class="small" style="cursor:pointer;color:var(--accent);font-weight:600">À quoi s\'attendre la semaine prochaine</summary><p class="small">'+(infoSemaine(w+1)||[])[1]+'</p></details>':'')+
+   '<p class="xs muted">Touchez l\'image pour voir bébé en grand et entendre son cœur. Mesures moyennes : chaque bébé grandit à son rythme. La semaine avance toute seule avec votre date prévue.</p></div>'};
