@@ -15,3 +15,7 @@ blocForfaits=function(){let h=_bfPP();try{
   if(tel)p+='<div class="soft" style="margin-top:8px"><b>Ou par virement Interac</b><p class="small" style="margin:4px 0">Envoyez votre virement au numéro de téléphone de votre doula :</p><div class="row between"><b style="font-size:1.05rem">'+esc(tel)+'</b><button class="btn sm ghost" data-act="copierTel" data-v="'+esc(tel)+'">'+icon('fa-copy')+'Copier</button></div><p class="xs muted">Inscrivez votre nom dans le message. Votre doula vous remet un reçu.</p></div>';
   return h+p+'</div>'}catch(e){return h}};
 document.addEventListener('click',e=>{const b=e.target.closest('[data-act="copierTel"]');if(!b)return;try{navigator.clipboard.writeText(b.dataset.v).then(()=>toast('Numéro copié'),()=>toast(b.dataset.v))}catch(x){toast(b.dataset.v)}});
+/* courriel officiel de la propriétaire : affiché dans les contrats, reçus et le virement Interac */
+const _idPP=infoDoula;infoDoula=function(){const I=_idPP.apply(this,arguments);try{
+  const c=String(I.courriel||'').toLowerCase();const proprio=PAIE_PROPRIO.courriels.includes(c)||(S.role!=='parent'&&typeof MOI!=='undefined'&&MOI&&MOI.admin);
+  if(proprio)I.courriel='sc@academiesere.ca'}catch(e){}return I};
