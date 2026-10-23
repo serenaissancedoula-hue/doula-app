@@ -12,7 +12,7 @@ const ENVOI_ITEMS=[
   ['fin','Lettre de fin d\'accompagnement','fa-feather','Un merci personnel']];
 const ENVOI_MOMENTS=[
   ['approche','Après la rencontre d\'approche',['forfaits'],'Bonjour {p} ! Merci pour notre belle rencontre. Comme promis, voici mes forfaits et mes prix. Vous pouvez choisir celui qui vous convient directement dans l\'appli.'],
-  ['bienvenue','Pochette de bienvenue',['merci','contrat','accueil','consentement','photos'],'Bonjour {p} ! Votre pochette de bienvenue est arrivée : une petite lettre de ma part, votre contrat et quelques formulaires. Tout se lit, se remplit et se signe dans l\'appli.'],
+  ['bienvenue','Pochette de bienvenue',['merci','forfaits','contrat','accueil','consentement','photos'],'Bonjour {p} ! Votre pochette de bienvenue est arrivée : une petite lettre de ma part, votre contrat et quelques formulaires. Tout se lit, se remplit et se signe dans l\'appli.'],
   ['fin','Fin de l\'accompagnement',['fin','satisfaction'],'Bonjour {p} ! Une lettre de ma part vous attend dans l\'appli, avec un court questionnaire. Votre avis compte beaucoup pour moi.']];
 
 /* ---------- variables et prix toujours à jour ---------- */
