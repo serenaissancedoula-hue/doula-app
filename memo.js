@@ -1,0 +1,27 @@
+/* Sérénaissance — aide-mémoire par section : la doula en envoie après une rencontre ; la famille garde les sections qu'elle veut et construit le sien. */
+const estMemo=d=>String(d&&d.contenu||'').startsWith('@memo ');
+function memoLire(d){try{return JSON.parse(String(d.contenu).slice(6))}catch(e){return {t:d.titre,s:[]}}}
+function memoSections(txt){const S2=[];String(txt||'').split('\n').forEach(l=>{if(l.startsWith('## '))S2.push({t:l.slice(3).trim(),txt:''});else if(l.trim()){if(!S2.length)S2.push({t:'Notes',txt:''});S2[S2.length-1].txt+=(S2[S2.length-1].txt?'\n':'')+l.replace(/^[-•]\s*/,'').trim()}});return S2}
+/* doula : envoyer */
+const _cdM=cDocs;cDocs=function(c){return _cdM(c)+'<div class="card"><span class="eyebrow acc">Aide-mémoire après une rencontre</span><p class="small muted">Résumez ce que vous avez vu ensemble, par sections. La famille garde les sections qu\'elle veut dans son propre aide-mémoire.</p><button class="btn ghost" data-act="memoNouveau" data-id="'+c.id+'">'+icon('fa-bookmark')+'Créer un aide-mémoire</button></div>'};
+const _dvM=docVue;docVue=function(d,doula){if(!estMemo(d))return _dvM(d,doula);const m=memoLire(d),gardees=((S.parent||{}).memo||{}).sections||[];
+  return '<div class="stack">'+m.s.map((x,i)=>{const ok=gardees.some(g=>g.src===d.id+':'+i);return '<div class="card"><span class="eyebrow acc">'+esc(x.t)+'</span><ul class="fid-ul">'+String(x.txt).split('\n').map(l=>'<li>'+esc(l)+'</li>').join('')+'</ul>'+(S.role==='parent'?(ok?'<span class="pill sage">Dans mon aide-mémoire</span>':'<button class="btn sm" data-act="memoGarder" data-id="'+d.id+'" data-i="'+i+'">'+icon('fa-plus')+'Garder dans mon aide-mémoire</button>'):'')+'</div>'}).join('')+(S.role==='parent'?'<button class="btn ghost" data-act="memoToutGarder" data-id="'+d.id+'">'+icon('fa-bookmark')+'Tout garder</button>':'')+'</div>'};
+const _odM=ouvrirDoc;ouvrirDoc=async function(id){await _odM(id);try{const d=(S.role==='parent'?DOCS:(CDOCS[S.openClient]||[])).find(x=>x.id===id);if(d&&/^Aide-mémoire/.test(d.titre||''))document.querySelectorAll('.sheet [data-act="pdf"]').forEach(b=>b.remove())}catch(e){}};
+const _dlM=docLigne;docLigne=function(d,doula){const h=_dlM(d,doula);return estMemo(d)?h.replace('>Signé<','>Aide-mémoire<'):h};
+/* famille : son aide-mémoire */
+PREP_TILES.push(['memo','fa-bookmark','Mon aide-mémoire','Construit par sections, avec votre doula',()=>(((S.parent||{}).memo||{}).sections||[]).length+' section(s)']);
+PSUB.memo=function(){const M=(S.parent.memo=S.parent.memo||{sections:[]});M.sections=M.sections||[];
+  return sh('Mon aide-mémoire','Gardez ici ce qui compte pour vous : les sections de votre doula, et les vôtres.')+
+   (M.sections.length?M.sections.map((s,i)=>'<div class="card">'+ui.text('parent.memo.sections.'+i+'.t','Titre de la section')+ui.area('parent.memo.sections.'+i+'.txt','Contenu (une idée par ligne)','',110)+'<button class="btn sm ghost danger" data-act="memoSupp" data-i="'+i+'">'+icon('fa-trash')+'Retirer</button></div>').join(''):'<div class="card dash small muted">Rien ici pour l\'instant. Ouvrez un aide-mémoire envoyé par votre doula (onglet Ma doula › Documents) et gardez les sections qui vous servent.</div>')+
+   '<button class="btn" data-act="memoSection">'+icon('fa-plus')+'Ma propre section</button>'};
+function memoSauver(){try{save()}catch(e){}render()}
+document.addEventListener('click',async e=>{const b=e.target.closest('[data-act^="memo"]');if(!b)return;const a=b.dataset.act;
+  if(a==='memoNouveau'){e.stopPropagation();sheet('Nouvel aide-mémoire','<label class="f">Titre<input id="mmT" placeholder="Après notre rencontre sur le travail"></label><label class="f">Sections<textarea id="mmS" style="min-height:220px" placeholder="## Respiration&#10;Inspirer 4 temps, expirer 6 temps&#10;Pratiquer 5 minutes par jour&#10;## Pour le partenaire&#10;Masser le bas du dos&#10;Offrir de l\'eau"></textarea></label><p class="xs muted">Une ligne qui commence par « ## » crée une nouvelle section.</p><button class="btn" data-act="memoEnvoyer" data-id="'+b.dataset.id+'">'+icon('fa-paper-plane')+'Envoyer à la famille</button>');return}
+  if(a==='memoEnvoyer'){e.stopPropagation();const t=($('#mmT').value||'').trim()||'Notre rencontre',s=memoSections($('#mmS').value);if(!s.length){toast('Ajoutez au moins une section');return}
+    const {error}=await sb.from('fam_documents').insert({famille_id:b.dataset.id,type:'autre',titre:'Aide-mémoire : '+t,contenu:'@memo '+JSON.stringify({t,s}),champs:[],sig_parent_requise:false,sig_doula_requise:false,statut:'signe'});
+    if(error){toast(error.message);return}close();await chargerClientDetail(b.dataset.id);render();toast('Aide-mémoire envoyé à la famille');return}
+  if(a==='memoGarder'||a==='memoToutGarder'){e.stopPropagation();const d=DOCS.find(x=>x.id===b.dataset.id);if(!d)return;const m=memoLire(d),M=(S.parent.memo=S.parent.memo||{sections:[]});M.sections=M.sections||[];
+    m.s.forEach((x,i)=>{if(a==='memoGarder'&&i!==+b.dataset.i)return;if(!M.sections.some(g=>g.src===d.id+':'+i))M.sections.push({t:x.t,txt:x.txt,src:d.id+':'+i})});
+    try{save()}catch(x){}toast('Ajouté à votre aide-mémoire');ouvrirDoc(d.id);return}
+  if(a==='memoSection'){e.stopPropagation();const M=(S.parent.memo=S.parent.memo||{sections:[]});(M.sections=M.sections||[]).push({t:'',txt:''});memoSauver();return}
+  if(a==='memoSupp'){e.stopPropagation();S.parent.memo.sections.splice(+b.dataset.i,1);memoSauver();return}},true);
