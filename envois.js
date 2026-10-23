@@ -21,7 +21,7 @@ function prixVivants(t,nomForfait){const F=FORFAITS[nomForfait];return String(t|
 function remplirModele(t,c,o){const D=S.doula;o=o||{};const bebe=c.bebe||'votre bébé';
   const v={doula_entreprise:D.entreprise||D.nom,doula_nom:D.nom,doula_prenom:D.prenomD||String(D.nom||'').split(' ')[0],doula_adresse:D.adresse||'[adresse]',doula_tel:D.tel||'',doula_courriel:D.courriel,doula_region:D.region||'[ma région]',
     prenom:c.prenom||cFirst(c),parent_nom:c.nom,partenaire:c.partenaire||'',partenaire_et:c.partenaire?' et '+c.partenaire:'',parent_courriel:c.courriel,parent_tel:c.tel||'',bebe,
-    dpa:c.dpa?fmtD(parseD(c.dpa)):'[date prévue]',dpa_mois:c.dpa?fmtD(parseD(c.dpa),{month:'long',year:'numeric'}):'',lieu:c.lieu||'[lieu]',professionnel:c.prof||'[professionnel]',date:fmtD(new Date()),assurance:D.assurance||'aucune pour le moment'};
+    dpa:c.dpa?fmtD(parseD(c.dpa)):'[date prévue]',dpa_mois:c.dpa?fmtD(parseD(c.dpa),{month:'long',year:'numeric'}):'',lieu:c.lieu||'[lieu]',professionnel:c.prof||'[professionnel]',date36:c.dpa?fmtD(addD(parseD(c.dpa),-28)):'[date prévue − 4 semaines]',date:fmtD(new Date()),assurance:D.assurance||'aucune pour le moment'};
   const sp=c.prixSpecial!==undefined&&c.prixSpecial!==null&&c.prixSpecial!=='';if(sp)v.prix=money(+c.prixSpecial);
   let r=String(t||'').replace(/\{\{(\w+)\}\}/g,(m,k)=>(['forfaits','forfait','prix'].includes(k)&&!(k==='prix'&&sp))?m:(v[k]!=null?v[k]:m));
   return o.prixVivants?r:prixVivants(r,c.forfait)}
@@ -42,7 +42,7 @@ function papier(d,doula){const I=infoDoula(),R=d.reponses||{},lect=doula||d.stat
     if(c.type==='choix')return '<label class="pap-ligne"><span>'+esc(c.t)+'</span><select class="dch" data-k="'+c.k+'"><option value="">Choisir…</option>'+c.o.map(o=>'<option>'+esc(o)+'</option>').join('')+'</select></label>';
     return '<label class="pap-ligne"><span>'+esc(c.t)+(c.req?' *':'')+'</span><input type="'+(c.type==='date'?'date':'text')+'" class="dch" data-k="'+c.k+'"></label>'}).join('');
   const rangs=[];if(d.sig_doula_requise||d.signature_doula)rangs.push([d.signature_doula,'Doula']);if(d.sig_parent_requise||d.signature_parent)rangs.push([d.signature_parent,'Parent']);
-  if(rangs.length)h+='<h3 class="pap-sec">Signatures</h3><div class="pap-sigs">'+rangs.map(([s,q])=>'<div>'+(s?esc(s.nom):'')+'</div><div>'+(s&&s.image?'<img src="'+esc(s.image)+'" alt="Signature">':'')+'</div><div>'+(s?fmtD(new Date(s.le),{day:'numeric',month:'short',year:'numeric'}):'')+'</div><small>Nom en lettres moulées : '+q+'</small><small>Signature</small><small>Date</small>').join('')+'</div>';
+  if(rangs.length)h+='<h3 class="pap-sec">Signatures</h3><div class="pap-sigs">'+rangs.map(([s,q])=>{const ins=window.sigInline&&sigInline(q,d,s);return '<div>'+(ins?ins.nom:s?esc(s.nom):'')+'</div><div class="'+(ins?'sig-cell':'')+'">'+(ins?ins.sig:(s&&s.image?'<img src="'+esc(s.image)+'" alt="Signature">':''))+'</div><div>'+(s?fmtD(new Date(s.le),{day:'numeric',month:'short',year:'numeric'}):'')+'</div><small>Nom en lettres moulées : '+q+'</small><small>Signature</small><small>Date</small>'}).join('')+'</div>';
   return h+'<div class="pap-pied">'+esc([I.ent,I.nom,I.tel,I.courriel].filter(Boolean).join(' · '))+'</div></div>'}
 docVue=function(d,doula){if(d.type==='forfaits'&&!doula)return papier(Object.assign({},d,{contenu:String(d.contenu||'').replace(/## Mes forfaits\n?/,'').replace(/\{\{forfaits\}\}\n?/,'')}),doula)+blocForfaits();return papier(docResolu(d),doula)};
 const _docLigne=docLigne;

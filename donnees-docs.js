@@ -56,16 +56,17 @@ Le présent contrat, avec ses annexes, constitue l'entente complète entre les p
 @card Inclus dans tous les forfaits || Plan de naissance, liste d'hôpital, cahier de naissance, soutien illimité par courriel, texto, Messenger ou téléphone, garde 24/7 dès 38 semaines. À la carte : relation d'aide (1 h) 60 $; bloc prénatal ou postnatal (3 h) 120 $, annulable sans frais jusqu'à 24 h avant.
 @col
 ## Mon calendrier de paiement
-Versement 1 · à la signature ($) |
-Versement 2 · date et montant |
-Versement 3 · date et montant |
-Versement 4 · au plus tard à 36 sem. ($) |
-Calendrier choisi | {{champ:paiement}}
+Nombre de versements | {{champ:paiement}}
+Fréquence des versements | {{champ:frequence}}
+Début du calendrier | Date de signature du contrat
+Date limite du dernier versement | 36 semaines de grossesse : {{date36}}
+>! Premier versement obligatoire || Le premier versement est dû à la signature du contrat. Si la Doula ne l'a pas reçu, la première rencontre n'a pas lieu et la garde ne commence pas.
+- Les versements suivants se calculent à partir de la date de signature, chaque semaine, aux 2 semaines ou chaque mois, selon le choix de la famille.
+- Le montant total doit être payé en totalité avant 36 semaines de grossesse.
 ## Modalités
 No de TVH (ou « non inscrite ») | 
 - Prix en dollars canadiens. TVH de 15 % ajoutée seulement si la Doula est inscrite (voir ci-dessous).
 - Paiement par virement Interac à {{doula_courriel}} ou autre mode convenu avec la Doula.
-- Solde complet dû au plus tard à 36 semaines.
 - Aucuns frais de crédit ni intérêts.
 - Retard de plus de 14 jours : rappel écrit; la garde peut être suspendue jusqu'au paiement.
 - Un reçu est remis pour chaque paiement.
@@ -145,10 +146,13 @@ Date limite (10 jours après l'avis) |
 >~ Exemple || Forfait Accompagnement des Parents (1 450 $) payé en entier, annulation après 2 rencontres prénatales. Services rendus : 290 $. Non rendus : 1 160 $. Pénalité : 50 $ (moins que 116 $). Remboursement : 1 110 $.
 @endcols`;
 
+const VERS_DEF = { 'Accompagnement des Parents': [1, 3, 6], 'Soutien au Couple': [1, 3], 'Arrivée de Bébé': [1, 2] };
+function versPour(n) { return (typeof FORFAITS !== 'undefined' && FORFAITS[n] && FORFAITS[n].vers) || VERS_DEF[n] || [1, 2, 3]; }
+
 /* Types de documents : champs fixes, texte modifiable par la doula */
 const DOC_TYPES = {
   contrat: { titre: 'Contrat de services de doula', texte: CONTRAT_DEFAUT, sigP: true, sigD: true,
-    champs: [{ k: 'adresse', t: 'Adresse des parents', type: 'text' }, { k: 'paiement', t: 'Calendrier de paiement choisi', type: 'choix', o: ['1 versement', '2 versements', '4 versements'] }] },
+    champs: [{ k: 'adresse', t: 'Adresse des parents', type: 'text' }, { k: 'paiement', t: 'Nombre de versements', req: true, type: 'choix', o: ['1 versement', '2 versements', '3 versements', '6 versements'] }, { k: 'frequence', t: 'Fréquence des versements', req: true, type: 'choix', o: ['Chaque semaine', 'Aux 2 semaines', 'Chaque mois'] }] },
   accueil: { titre: 'Formulaire d\'accueil confidentiel', texte: ACCUEIL_DEFAUT, sigP: true, sigD: false,
     champs: [
       { g: 'Coordonnées' }, { k: 'nom', t: 'Nom de la personne enceinte', type: 'text', req: true }, { k: 'pronoms', t: 'Pronoms (facultatif)', type: 'text' }, { k: 'partenaire', t: 'Partenaire / personne de soutien', type: 'text' }, { k: 'adresse', t: 'Adresse', type: 'text' }, { k: 'tel', t: 'Téléphone · courriel', type: 'text', req: true }, { k: 'urgence', t: 'Personne à joindre en cas d\'urgence', type: 'text' }, { k: 'langue', t: 'Langue préférée', type: 'text' },

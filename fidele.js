@@ -5,17 +5,21 @@ const FID_RE=/^@page /m;
 function fidForfaits(d){const nomF=(typeof forfaitDe==='function')?forfaitDe(d):null;
   const cases=Object.entries(FORFAITS).map(([n,f])=>'['+(n===nomF?'x':' ')+'] '+n+' · '+money(f.prix)).join('\n');
   const cartes=Object.entries(FORFAITS).map(([n,f])=>{const r=f.renc===f.acc?'rencontre ':'chaque rencontre ';
-    const vers=['1 × '+money(f.prix),'2 × '+money(f.prix/2)].concat(/^Accompagnement/.test(n)?['4 × '+money(f.prix/4)]:[]).join(' · ');
+    const vers=versPour(n).map(k=>k+' × '+money(Math.round(f.prix/k*100)/100)).join(' · ');
     return '@card '+n+' · '+money(f.prix)+' || '+f.desc+'. || **Valeur :** accouchement '+money(f.acc)+' · '+r+money(f.renc)+' || **Versements :** '+vers}).join('\n');
   return {cases,cartes}}
 function fidTokens(d){const F=fidForfaits(d);return String(d.contenu||'').replace(/\{\{cases_forfaits\}\}/g,F.cases).replace(/\{\{cartes_forfaits\}\}/g,F.cartes)}
 function fidInline(s){return esc(s).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>')}
 function fidChamp(d,k,lect){const R=d.reponses||{},c=(d.champs||[]).find(x=>x.k===k);const v=R[k];
   if(lect||!c)return v?esc(v):'&nbsp;';
-  if(c.type==='choix')return '<select class="dch" data-k="'+k+'"><option value="">Choisir…</option>'+c.o.map(o=>'<option>'+esc(o)+'</option>').join('')+'</select>';
+  const opts=k==='paiement'?versPour(forfaitDe(d)).map(n=>n+(n>1?' versements':' versement')):c.o;
+  if(c.type==='choix'&&(k==='paiement'||k==='frequence'))return '<span class="fid-opts"><input type="hidden" class="dch" data-k="'+k+'" value="">'+opts.map(o=>'<label class="fid-opt"><input type="checkbox" data-opt="'+k+'" data-val="'+esc(o)+'"><span>'+esc(o)+'</span></label>').join('')+'</span>';
+  if(c.type==='choix')return '<select class="dch" data-k="'+k+'"><option value="">Choisir…</option>'+opts.map(o=>'<option>'+esc(o)+'</option>').join('')+'</select>';
   return '<input type="text" class="dch" data-k="'+k+'" placeholder="'+esc(c.t)+'">'}
+window.sigInline=function(q,d,s){if(s)return null;const ok=((q==='Parent'||q==='Parent 1')&&S.role==='parent'&&d.statut==='a_remplir'&&d.sig_parent_requise)||(q==='Doula'&&S.role==='doula'&&d.statut==='a_signer_doula');if(!ok)return null;
+  return {nom:'<input type="text" id="sigNom" class="sig-nom" placeholder="Votre nom complet">',sig:'<canvas class="sig" id="sigC" width="600" height="180"></canvas><button type="button" class="btn sm ghost" data-act="sigEff">Effacer</button>'}};
 function fidSigs(d){const I=infoDoula();const rangs=[['Doula',d.signature_doula,I.nom],['Parent 1',d.signature_parent,''],['Parent 2',null,'']];
-  return '<div class="fid-row"><span>Signé à · le</span><b>&nbsp;</b></div><div class="pap-sigs">'+rangs.map(([q,s,n])=>'<div>'+esc(s?s.nom:n)+'</div><div>'+(s&&s.image?'<img src="'+esc(s.image)+'" alt="Signature">':'')+'</div><div>'+(s&&s.le?fmtD(new Date(s.le),{day:'numeric',month:'short',year:'numeric'}):'')+'</div><small>Nom en lettres moulées : '+q+'</small><small>Signature</small><small>Date</small>').join('')+'</div>'}
+  return '<div class="fid-row"><span>Signé à · le</span><b>&nbsp;</b></div><div class="pap-sigs">'+rangs.map(([q,s,n])=>{const ins=sigInline(q,d,s);return '<div>'+(ins?ins.nom:esc(s?s.nom:n))+'</div><div class="'+(ins?'sig-cell':'')+'">'+(ins?ins.sig:(s&&s.image?'<img src="'+esc(s.image)+'" alt="Signature">':''))+'</div><div>'+(s&&s.le?fmtD(new Date(s.le),{day:'numeric',month:'short',year:'numeric'}):'')+'</div><small>Nom en lettres moulées : '+q+'</small><small>Signature</small><small>Date</small>'}).join('')+'</div>'}
 function fidBloc(l,d,lect,st){
   if(l.startsWith('## '))return '<h3 class="pap-sec">'+esc(l.slice(3))+'</h3>';
   if(l==='{{signatures}}')return fidSigs(d);
@@ -57,3 +61,10 @@ const _dmF=DSUB.modeles;DSUB.modeles=function(){if(S.modApercu===undefined)S.mod
 /* aperçu d'un modèle tel que la famille le verra (même mise en page que le document envoyé) */
 window.apercuDoc=function(k,txt,ex){const T=DOC_TYPES[k]||{};const type=/^merci/.test(k)?'merci':k.startsWith('lettre_')?(k==='lettre_fin'?'fin':'forfaits'):k;
   try{return docVue({type,titre:T.titre||((MOD_LISTE.find(x=>x[0]===k)||[k,k])[1]),contenu:remplirModele(txt,ex),champs:T.champs||[],statut:'signe',reponses:{}},true)}catch(e){return '<div class="doc">'+rendreTexte(remplirModele(txt,ex))+'</div>'}};
+
+/* une seule case cochée par choix ; la valeur va dans le champ caché lu à l'envoi */
+document.addEventListener('change',e=>{const c=e.target.closest('input[data-opt]');if(!c)return;const g=c.dataset.opt;
+  document.querySelectorAll('input[data-opt="'+g+'"]').forEach(x=>{if(x!==c)x.checked=false});
+  const h=document.querySelector('input.dch[data-k="'+g+'"]');if(h)h.value=c.checked?c.dataset.val:''});
+/* la signature se fait sur le document : on retire le cadre séparé en dessous */
+const _odFid=ouvrirDoc;ouvrirDoc=async function(id){await _odFid(id);try{if(document.querySelector('.sheet .fid #sigNom, .sheet .papier #sigNom'))document.querySelectorAll('.sheet #sigNom').forEach(n=>{if(!n.closest('.fid,.papier')){const st=n.closest('.stack');if(st)st.remove()}})}catch(e){}};
