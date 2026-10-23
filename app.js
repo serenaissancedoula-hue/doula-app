@@ -127,11 +127,11 @@ function motDePasseSheet(bienvenue){sheet(bienvenue?'Bienvenue ! Choisissez votr
 const DTABS=[['accueil','fa-house','Tableau'],['clientes','fa-users','Familles'],['agenda','fa-calendar-days','Agenda'],['outils','fa-toolbox','Outils'],['ressources','fa-book-medical','Ressources']];
 const PTABS2=[['accueil','fa-house','Accueil'],['suivi','fa-calendar-days','Suivi'],['journal','fa-book-open','Journal'],['madoula','fa-comments','Ma doula'],['preparer','fa-clipboard-list','Préparer'],['infos','fa-book-medical','Infos']];
 function render(){if(!S.role)return;$('#gear').hidden=false;
-  const tabs=S.role==='parent'?PTABS2:DTABS,cur=S.role==='parent'?S.tab:S.dtab;
+  const tabs=(S.role==='parent'?PTABS2:DTABS).concat([['params','fa-gear','Paramètres']]),cur=S.vue==='params'?'params':(S.role==='parent'?S.tab:S.dtab);
   const nl=S.role==='parent'?MSGS.filter(m=>m.de_doula&&!m.lu).length+DOCS.filter(d=>d.statut==='a_remplir').length:Object.values(NONLUS).reduce((a,b)=>a+b,0);
-  $('#tabs').innerHTML='<div class="tabs-in" style="--n:'+tabs.length+'">'+tabs.map(t=>{const badge=((S.role==='parent'&&t[0]==='madoula')||(S.role==='doula'&&t[0]==='clientes'))&&nl?'<span class="badge">'+nl+'</span>':'';return '<button data-act="tab" data-v="'+t[0]+'" class="'+(cur===t[0]&&!S.vue?'on':'')+'" aria-label="'+t[2]+'">'+icon(t[1])+'<span>'+t[2]+'</span>'+badge+'</button>'}).join('')+'</div>';
+  $('#tabs').innerHTML='<div class="tabs-in" style="--n:'+tabs.length+'">'+tabs.map(t=>{const badge=((S.role==='parent'&&t[0]==='madoula')||(S.role==='doula'&&t[0]==='clientes'))&&nl?'<span class="badge">'+nl+'</span>':'';return '<button data-act="'+(t[0]==='params'?'params':'tab')+'" data-v="'+t[0]+'" class="'+(cur===t[0]&&(t[0]==='params'||!S.vue)?'on':'')+'" aria-label="'+t[2]+'">'+icon(t[1])+'<span>'+t[2]+'</span>'+badge+'</button>'}).join('')+'</div>';
   let h='';
-  $('#gear').classList.toggle('on',!!S.vue);
+  
   try{if(S.vue==='params')h+=pParametres();else if(S.role==='parent')h+=({accueil:pAccueil,suivi:pSuivi,journal:pJournal,madoula:pMaDoula,preparer:pPreparer,souvenirs:pSouvenirs,infos:pInfos}[S.tab]||pAccueil)();
     else h+=({accueil:dAccueil,clientes:dClientes,agenda:dAgenda,outils:dOutils,ressources:dRessources}[S.dtab]||dAccueil)();
   }catch(err){console.error(err);h+='<div class="banner bad">'+icon('fa-triangle-exclamation')+'<div>Cette page n\'a pas pu s\'afficher. <button class="btn sm ghost" data-act="tab" data-v="accueil">Retour à l\'accueil</button></div></div>'}
