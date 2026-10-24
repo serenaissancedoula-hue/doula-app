@@ -318,5 +318,16 @@ window.TR_EN=Object.assign(window.TR_EN||{},{
 "Tétée ·":"Feed ·",
 "tétées ·":"feeds ·",
 "a 9 jours":"is 9 days old",
-"Bébé à 31 semaines dans le liquide amniotique":"Baby at 31 weeks in the amniotic fluid"
+"Bébé à 31 semaines dans le liquide amniotique":"Baby at 31 weeks in the amniotic fluid",
+"Activez-les pour être avertie des messages, des rendez-vous et des documents, même quand l'appli est fermée.":"Turn them on to be alerted about messages, appointments and documents, even when the app is closed.",
+"Notifications":"Notifications",
+"Activer":"Turn on",
+"Pour ma doula":"For my doula",
+"Envoyez cette fiche à votre doula. Vous pouvez la modifier quand vous voulez et la lui renvoyer.":"Send this sheet to your doula. You can edit it whenever you like and send it again.",
+"Dernier envoi :":"Last sent:",
+"Envoyer à ma doula":"Send to my doula",
+"Renvoyer à ma doula":"Send to my doula again",
+"Envoyé à votre doula":"Sent to your doula",
+"Rien à envoyer pour l'instant : remplissez d'abord la fiche":"Nothing to send yet: fill in the sheet first",
+"Sur iPhone et iPad : ouvrez le menu de partage de Safari, choisissez « Sur l'écran d'accueil », puis ouvrez l'appli depuis cette icône avant d'activer.":"On iPhone and iPad: open Safari's share menu, choose “Add to Home Screen”, then open the app from that icon before turning notifications on."
 });

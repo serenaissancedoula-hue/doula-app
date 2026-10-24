@@ -58,13 +58,20 @@ pSuivi=function(){S.wkSel=null;S.ppSel=null;return _pSuiviB()};
 
 /* Le cœur qu'on entend (son synthétisé : un « toum-toum » doux et un souffle, comme au doppler) */
 let AUD=null;
-function coeurDemarrer(b){const C=new (window.AudioContext||window.webkitAudioContext)();const sortie=C.createGain();sortie.gain.value=.9;sortie.connect(C.destination);
+function coeurDemarrer(b){
+  /* iPhone/iPad : jouer même si le commutateur silencieux est activé (iOS 16.4+) */
+  try{if(navigator.audioSession)navigator.audioSession.type='playback'}catch(e){}
+  const C=new (window.AudioContext||window.webkitAudioContext)();try{C.resume()}catch(e){}
+  /* les haut-parleurs de téléphone et de tablette ne reproduisent presque rien sous 150 Hz : le « toum-toum » est donc construit autour de 150–600 Hz (comme un doppler) */
+  const comp=C.createDynamicsCompressor();comp.threshold.value=-18;comp.ratio.value=6;const sortie=C.createGain();sortie.gain.value=1;sortie.connect(comp);comp.connect(C.destination);
   const n=C.createBuffer(1,C.sampleRate*2,C.sampleRate),d=n.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;
-  const src=C.createBufferSource();src.buffer=n;src.loop=true;const lp=C.createBiquadFilter();lp.type='lowpass';lp.frequency.value=320;const souffle=C.createGain();souffle.gain.value=0;src.connect(lp).connect(souffle).connect(sortie);src.start();
-  const per=60/b;let t=C.currentTime+.1;
-  const coup=(at,fort)=>{const o=C.createOscillator(),g=C.createGain();o.type='sine';o.frequency.setValueAtTime(95,at);o.frequency.exponentialRampToValueAtTime(45,at+.12);g.gain.setValueAtTime(0,at);g.gain.linearRampToValueAtTime(fort,at+.012);g.gain.exponentialRampToValueAtTime(.001,at+.16);o.connect(g).connect(sortie);o.start(at);o.stop(at+.2);
-    souffle.gain.setValueAtTime(.02,at);souffle.gain.linearRampToValueAtTime(.22*fort,at+.03);souffle.gain.exponentialRampToValueAtTime(.02,at+per*.45)};
-  const prog=()=>{while(t<C.currentTime+.6){coup(t,.9);coup(t+per*.32,.55);t+=per}};prog();const id=setInterval(prog,200);
+  const per=60/b;let t=C.currentTime+.15;
+  const coup=(at,fort,f0)=>{
+    const o=C.createOscillator(),g=C.createGain();o.type='triangle';o.frequency.setValueAtTime(f0*1.5,at);o.frequency.exponentialRampToValueAtTime(f0,at+.1);
+    g.gain.setValueAtTime(0,at);g.gain.linearRampToValueAtTime(.9*fort,at+.012);g.gain.exponentialRampToValueAtTime(.001,at+.2);o.connect(g).connect(sortie);o.start(at);o.stop(at+.25);
+    const s=C.createBufferSource();s.buffer=n;const bp=C.createBiquadFilter();bp.type='bandpass';bp.frequency.value=380;bp.Q.value=.9;const gn=C.createGain();
+    gn.gain.setValueAtTime(0,at);gn.gain.linearRampToValueAtTime(.55*fort,at+.02);gn.gain.exponentialRampToValueAtTime(.001,at+.22);s.connect(bp).connect(gn).connect(sortie);s.start(at,Math.random());s.stop(at+.3)};
+  const prog=()=>{while(t<C.currentTime+.8){coup(t,1,150);coup(t+per*.3,.65,120);t+=per}};prog();const id=setInterval(()=>{try{if(C.state==='suspended')C.resume()}catch(e){}prog()},200);
   if(navigator.vibrate)try{navigator.vibrate(1)}catch(e){}
   AUD={C,id}}
 function coeurArreter(){if(!AUD)return;clearInterval(AUD.id);try{AUD.C.close()}catch(e){}AUD=null}
