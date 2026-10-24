@@ -26,7 +26,7 @@ function grille(){const E=evts(),y=cur.getFullYear(),m=cur.getMonth(),pr=(new Da
    '<span class="eyebrow acc" style="text-transform:capitalize">'+sel.toLocaleDateString('fr-CA',{weekday:'long',day:'numeric',month:'long'})+'</span>'+(J.length?J.map(e=>'<div class="li"'+(e.fam?' data-act="clientOpen" data-id="'+e.fam+'" style="cursor:pointer"':'')+'><div class="tx"><b>'+esc(e.txt)+'</b>'+(e.h?'<span>'+e.h+'</span>':'')+'</div></div>').join(''):'<p class="small muted">Rien de prévu ce jour-là.</p>')+
    '<div class="row" style="margin-top:8px"><button class="btn sm ghost" data-act="agcAuj">Aujourd\'hui</button></div></div>'}
 function vacBloc(){try{const h=carteDispos(),i=h.indexOf('<div class="card"><span class="eyebrow acc">Mes vacances et absences');return i<0?'':h.slice(i)}catch(e){return ''}}
-const _d=dAgenda;dAgenda=function(){const h=_d(),i=h.indexOf('</div>')+6;/* garde + calendrier juste sous le titre */
+const _d=dAgenda;dAgenda=function(){let h=_d();h=h.replace(/<div class="card"><span class="eyebrow acc">Mes vacances et indisponibilités<\/span>[\s\S]*?<\/label><\/div>/,'');const i=h.indexOf('</div>')+6;/* garde + calendrier juste sous le titre */
   const k=h.indexOf('class="sh"')>=0?h.indexOf('</div>',h.indexOf('class="sh"'))+6:0;
   return h.slice(0,k)+enGardeBloc()+grille()+h.slice(k)+vacBloc()};
 document.addEventListener('click',e=>{const x=e.target.closest('[data-act]');if(!x)return;const a=x.dataset.act;
