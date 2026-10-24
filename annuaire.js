@@ -15,7 +15,15 @@ const VILLES={'Nouveau-Brunswick':[['Campbellton',48.0,-66.67],['Atholville',48.
 const TOUTES_C=Object.values(VILLES).flat();const TOUTES=TOUTES_C.map(x=>x[0]);
 const coord=n=>{const t=TOUTES_C.find(x=>norm(x[0])===norm(n));return t?{lat:t[1],lng:t[2],nom:t[0]}:null};
 const dist=(a,b)=>{const R=6371,r=x=>x*Math.PI/180,dl=r(b.lat-a.lat),dn=r(b.lng-a.lng),h=Math.sin(dl/2)**2+Math.cos(r(a.lat))*Math.cos(r(b.lat))*Math.sin(dn/2)**2;return 2*R*Math.asin(Math.sqrt(h))};
-let SEL=null;const selInit=()=>{if(SEL===null)SEL=String((ME_DOULA&&ME_DOULA.zones)||'').split(',').map(x=>x.trim()).filter(Boolean)};
+const LIEN_ANNUAIRE='https://buy.stripe.com/14AaEQg9Wfby1G40V4ffy0s';
+const CHAMPS=['entreprise','photo','region','zones','bio','langues','certification','ville_base','rayon_km','lat','lng','site_web','dispo_mois'];
+const brouillon=()=>{const D=ME_DOULA||{};return Object.assign({},{entreprise:D.entreprise,photo:D.photo,region:D.region},D.annuaire_pub||{},D.annuaire_brouillon||{})};
+const exemptee=()=>!!((typeof MOI!=='undefined'&&MOI&&MOI.admin)||(ME_DOULA&&ME_DOULA.acces_gratuit));
+const payeJusque=()=>ME_DOULA&&ME_DOULA.annuaire_fin?new Date(ME_DOULA.annuaire_fin):null;
+const payee=()=>exemptee()||(payeJusque()&&payeJusque()>new Date());
+const fr=d=>new Date(d).toLocaleDateString('fr-CA',{day:'numeric',month:'long',year:'numeric'});
+let PEND=[],TOUS=[];
+let SEL=null;const selInit=()=>{if(SEL===null)SEL=String(brouillon().zones||'').split(',').map(x=>x.trim()).filter(Boolean)};
 function villesHtml(){selInit();const extra=SEL.filter(v=>!TOUTES.includes(v));
   const chip=v=>'<button type="button" class="pill '+(SEL.includes(v)?'acc':'line')+'" style="cursor:pointer;border:0;font:inherit" data-act="anVille" data-v="'+esc(v)+'">'+(SEL.includes(v)?icon('fa-check')+' ':'')+esc(v)+'</button>';
   return (SEL.length?'<p class="xs muted" style="margin:0 0 6px">'+SEL.length+' ville'+(SEL.length>1?'s':'')+' choisie'+(SEL.length>1?'s':'')+'</p>':'')
@@ -51,7 +59,7 @@ function ficheSheet(id){const d=(A.liste||[]).find(x=>x.id===id);if(!d)return;co
 
 /* ---------- côté famille ---------- */
 async function chargerAnnuaire(){
-  const [r,m]=await Promise.all([sb.rpc('fam_annuaire3',{p_q:null}),sb.from('fam_demandes').select('*').order('created_at',{ascending:false}).limit(30).then(x=>x,()=>({data:[]}))]);
+  const [r,m]=await Promise.all([sb.rpc('fam_annuaire4',{p_q:null}),sb.from('fam_demandes').select('*').order('created_at',{ascending:false}).limit(30).then(x=>x,()=>({data:[]}))]);
   A.liste=r.data||[];A.dem=(m&&m.data)||[];A.charge=true}
 function filtrer(){const q=norm(A.q);if(!q)return A.liste;const c=coord(A.q);
   if(c){const L=[];A.liste.forEach(d=>{let k=null;if(d.lat!=null&&d.rayon_km){const x=dist(c,{lat:d.lat,lng:d.lng});if(x<=d.rayon_km)k=Math.round(x)}
@@ -97,22 +105,42 @@ ecranConnexion=function(msg){
 async function chargerDemandes(){try{const {data}=await sb.from('fam_demandes').select('*').order('created_at',{ascending:false}).limit(60);DEMANDES=data||[]}catch(e){}}
 const nouvelles=()=>DEMANDES.filter(d=>d.statut==='nouvelle').length;
 const _cd=chargerDoula;
-chargerDoula=async function(){await _cd.apply(this,arguments);try{if(localStorage.getItem('an-vu'))ME_DOULA.annuaire_vu=true}catch(x){}await chargerDemandes()};
+chargerDoula=async function(){await _cd.apply(this,arguments);await chargerApprob();try{if(localStorage.getItem('an-vu'))ME_DOULA.annuaire_vu=true}catch(x){}await chargerDemandes()};
 
-let MSEL=null;const moisInit=()=>{if(MSEL===null)MSEL=moisDe(ME_DOULA||{})};
+let MSEL=null;const moisInit=()=>{if(MSEL===null)MSEL=moisDe(brouillon())};
 function moisHtml(){moisInit();return moisProchains().map(k=>'<button type="button" class="pill '+(MSEL.includes(k)?'acc':'line')+'" style="cursor:pointer;border:0;font:inherit" data-act="anMois" data-v="'+k+'">'+(MSEL.includes(k)?icon('fa-check')+' ':'')+esc(moisLib(k))+'</button>').join('')}
-function profilHtml(){const D=ME_DOULA||{};
+const AUT=[
+ 'J\'autorise Sérénaissance à afficher publiquement mon prénom, l\'initiale de mon nom, ma photo, ma présentation, mes villes, mon site web et mes disponibilités dans l\'annuaire « Trouver ma doula ».',
+ 'J\'autorise Sérénaissance à me transmettre, par courriel et dans l\'appli, le nom, le courriel et les informations que les familles inscrivent dans leur demande de rendez-vous.',
+ 'Je confirme que les informations et formations que j\'indique sont exactes et que j\'exerce mon rôle de doula sans poser d\'actes médicaux, en référant la famille à son équipe de soins au besoin.',
+ 'Je comprends que mon profil est approuvé par Sérénaissance avant d\'être affiché (24 à 48 h), que chaque modification est aussi approuvée, que l\'inscription est de 25 $ par année et que Sérénaissance peut retirer un profil non conforme.'];
+const patch0=(cases,sig)=>cases.length>0&&cases.every(x=>x.checked)&&sig.trim().split(/\s+/).length>=2;
+function autorisationHtml(){const a=(ME_DOULA&&brouillon().autorisation)||null;
+  if(a)return '<div class="card tint" style="margin-top:12px"><b>'+icon('fa-file-signature')+' Autorisation de publication signée</b><p class="xs muted" style="margin:4px 0 0">Signée par '+esc(a.nom)+' le '+fr(a.date)+'.</p></div>';
+  return '<div class="card tint" style="margin-top:12px"><b>'+icon('fa-file-signature')+' Autorisation de publication</b><p class="xs muted" style="margin:4px 0 8px">À signer une seule fois pour apparaître dans l\'annuaire.</p>'+AUT.map((t,i)=>'<label class="check"><input type="checkbox" class="pfAut"><span class="small">'+t+'</span></label>').join('')+'<label class="f" style="margin-top:8px">Signature : tapez votre nom complet<input type="text" id="pfSig" autocomplete="name" placeholder="Prénom Nom"></label></div>'}
+function etatHtml(){const D=ME_DOULA||{},st=D.annuaire_statut||'aucun',paye=payee(),fin=payeJusque();
+  const vis=D.annuaire&&D.accepte_nouvelles!==false&&st==='approuve'&&paye;
+  const pill=vis?'<span class="pill acc">'+icon('fa-eye')+' Visible des familles</span>':'<span class="pill line">'+icon('fa-eye-slash')+' Pas visible</span>';
+  const etapes=[
+   [st==='approuve','Profil approuvé par Sérénaissance',st==='en_attente'?'En attente d\'approbation'+(D.annuaire_pub?' (votre version précédente reste affichée)':''):st==='refuse'?'À modifier : '+esc(D.annuaire_note||'voir le message de Sérénaissance'):D.annuaire_brouillon?'':'Remplissez le profil puis enregistrez : il sera envoyé pour approbation'],
+   [paye,'Inscription annuelle',exemptee()?'Offerte':paye?'Payée jusqu\'au '+fr(fin):'25 $ par année'],
+   [!!D.annuaire,'Option « Apparaître dans l\'annuaire » cochée',D.annuaire?'':'Cochez-la ci-dessous']];
+  const proche=!exemptee()&&paye&&fin&&(fin-new Date())<45*864e5;
+  return '<div class="card '+(vis?'':'tint')+'"><div class="row between" style="gap:8px"><b>Mon inscription</b>'+pill+'</div><div class="list" style="margin-top:8px">'+etapes.map(e=>'<div class="li"><div class="ic">'+icon(e[0]?'fa-circle-check':'fa-circle')+'</div><div class="tx"><b>'+e[1]+'</b>'+(e[2]?'<span>'+e[2]+'</span>':'')+'</div></div>').join('')+'</div>'
+   +(exemptee()||(paye&&!proche)?'':'<a class="btn" style="margin-top:10px;width:100%" target="_blank" rel="noopener noreferrer" href="'+LIEN_ANNUAIRE+'?client_reference_id='+esc(D.id)+'&prefilled_email='+encodeURIComponent(D.courriel||'')+'">'+icon('fa-credit-card')+(paye?'Renouveler pour 25 $':'Payer mon inscription : 25 $ / an')+'</a><p class="xs muted" style="margin:6px 0 0">Paiement sécurisé par Stripe. Votre inscription est activée automatiquement après le paiement (rechargez l\'appli).</p>')+'</div>'}
+function profilHtml(){const D0=ME_DOULA||{},D=Object.assign({},brouillon(),{id:D0.id,prenom:D0.prenom,nom:D0.nom,annuaire:D0.annuaire,accepte_nouvelles:D0.accepte_nouvelles});
   const apercu=carte({site_web:D.site_web,dispo_mois:D.dispo_mois,ville_base:D.ville_base,rayon_km:D.rayon_km,id:D.id,prenom:D.prenom,nom_initiale:(D.nom||'').slice(0,1),entreprise:D.entreprise,photo:D.photo,region:D.region,zones:D.zones,bio:D.bio,langues:D.langues,certification:D.certification},false);
-  return back('dsub','','Outils')+sh('Mon profil dans l\'annuaire','Les familles de votre région vous trouvent et vous écrivent')
-   +'<div class="card"><label class="check"><input type="checkbox" id="pfOn" '+(D.annuaire?'checked':'')+'><span><b>Apparaître dans l\'annuaire « Trouver ma doula »</b><br><span class="xs muted">Optionnel. Seuls votre prénom, l\'initiale de votre nom, votre photo et le texte ci-dessous sont visibles. Votre courriel et votre téléphone ne le sont jamais : c\'est vous qui décidez de répondre.</span></span></label>'
+  return back('dsub','','Outils')+sh('Mon profil dans l\'annuaire','Les familles de votre région vous trouvent et vous écrivent')+etatHtml()
+   +'<div class="card"><label class="check"><input type="checkbox" id="pfOn" '+(D.annuaire?'checked':'')+'><span><b>Apparaître dans l\'annuaire « Trouver ma doula »</b><br><span class="xs muted">Optionnel. Inscription annuelle de 25 $ et approbation de votre profil par Sérénaissance. Seuls votre prénom, l\'initiale de votre nom, votre photo et le texte ci-dessous sont visibles. Votre courriel et votre téléphone ne le sont jamais : c\'est vous qui décidez de répondre.</span></span></label>'
    +'<label class="check" style="margin-top:8px"><input type="checkbox" id="pfAcc" '+(D.accepte_nouvelles===false?'':'checked')+'><span>J\'accepte de nouvelles familles en ce moment</span></label>'
    +'<div class="stack" style="margin-top:12px"><label class="f">Ma région<input type="text" id="pfRegion" value="'+esc(D.region||'')+'" placeholder="Ex. Restigouche (N.-B.)"></label>'
    +'<div class="grid2 resp"><label class="f">Ma ville de départ<select id="pfBase"><option value="">— Choisir —</option>'+TOUTES.map(v=>'<option'+(v===D.ville_base?' selected':'')+'>'+esc(v)+'</option>').join('')+'</select></label><label class="f">Je me déplace jusqu\'à<select id="pfRayon">'+[10,25,40,50,75,100,150,200].map(k=>'<option value="'+k+'"'+(+D.rayon_km===k?' selected':'')+'>'+k+' km</option>').join('')+'</select></label></div><div><span class="small"><b>Autres villes précises que je dessers (facultatif)</b></span><div id="pfVilles" class="stack" style="gap:6px;margin-top:6px">'+villesHtml()+'</div></div>'
    +'<div class="grid2 resp"><label class="f">Langues<input type="text" id="pfLangues" value="'+esc(D.langues||'')+'" placeholder="Français, anglais"></label><label class="f">Formation / certification<input type="text" id="pfCert" value="'+esc(D.certification||'')+'" placeholder="Ex. Académie Sérénaissance"></label></div>'
    +'<label class="f">Mon site web<input type="text" id="pfSite" value="'+esc(D.site_web||'')+'" placeholder="academiesere.ca"></label><div><span class="small"><b>Mes disponibilités pour accoucher</b></span><p class="xs muted" style="margin:2px 0 6px">Touchez les mois de date prévue pour lesquels vous prenez encore des familles.</p><div id="pfMois" class="row" style="gap:6px;flex-wrap:wrap">'+moisHtml()+'</div></div><label class="f">Ma présentation (jusqu\'à 2000 caractères)<textarea id="pfBio" rows="12" maxlength="2000" placeholder="Qui êtes-vous ? Comment accompagnez-vous les familles ?">'+esc(D.bio||'')+'</textarea></label>'
    +'<p class="xs muted">Ajoutez une belle photo de vous dans Paramètres : elle s\'affiche ici.</p>'
+   +autorisationHtml()
    +'<button class="btn" data-act="anSauverProfil">'+icon('fa-check')+'Enregistrer mon profil</button></div></div>'
-   +'<div class="eyebrow acc" style="margin:14px 0 6px">Ce que les familles verront</div>'+apercu+'<p class="xs muted">Votre abonnement doit être actif pour apparaître dans l\'annuaire.</p>'}
+   +'<div class="eyebrow acc" style="margin:14px 0 6px">Ce que les familles verront</div>'+apercu+'<p class="xs muted">Vous pouvez modifier votre profil en tout temps. Chaque modification est approuvée par Sérénaissance avant d\'être affichée.</p>'}
 
 function demandesPage(){
   const dejaClient=c=>(S.clients||[]).some(x=>String(x.courriel||'').toLowerCase()===String(c||'').toLowerCase());
@@ -129,11 +157,20 @@ function demandesPage(){
     +(d.statut==='nouvelle'||d.statut==='vue'?'<button class="btn sm ghost" data-act="anDecliner" data-id="'+esc(d.id)+'">Décliner</button>':'')
     +(cree?'<span class="pill acc">'+icon('fa-check')+' Dans vos familles</span>':'')+'</div></div>'}).join('')}
 
-DSUB.annuaire=profilHtml;DSUB.demandes=demandesPage;
-if(typeof DOUT!=='undefined'){DOUT.unshift(['demandes','fa-inbox','Demandes de familles','Familles qui souhaitent vous rencontrer'],['annuaire','fa-location-dot','Mon profil dans l\'annuaire','Soyez trouvée par les familles près de vous'])}
+async function chargerApprob(){try{if(!(MOI&&MOI.admin))return;const {data}=await sb.from('fam_doulas').select('id,prenom,nom,courriel,photo,entreprise,annuaire,annuaire_brouillon,annuaire_pub,annuaire_statut,annuaire_note,annuaire_fin,acces_gratuit').in('annuaire_statut',['en_attente','approuve','refuse']).order('created_at');TOUS=data||[];PEND=TOUS.filter(d=>d.annuaire_statut==='en_attente')}catch(e){}}
+function approbationsPage(){const lig=d=>{const c=Object.assign({},d.annuaire_brouillon||{},{id:d.id,prenom:d.prenom,nom_initiale:(d.nom||'').slice(0,1)});return c};
+  const att=PEND.map(d=>'<div class="stack" style="gap:6px">'+carte(lig(d),false)+'<div class="card tint"><p class="xs muted" style="margin:0 0 8px">'+esc(d.courriel)+(d.annuaire_brouillon&&d.annuaire_brouillon.autorisation?' · autorisation signée par '+esc(d.annuaire_brouillon.autorisation.nom)+' le '+fr(d.annuaire_brouillon.autorisation.date):' · SANS autorisation signée')+(d.annuaire_pub?' · modification d\'un profil déjà approuvé':' · première demande')+'</p>'+(d.annuaire_brouillon&&d.annuaire_brouillon.bio?'<details class="acc"><summary>Voir toute la présentation<i class="fa-solid fa-chevron-down chev"></i></summary><div class="body"><p class="small" style="white-space:pre-line">'+esc(d.annuaire_brouillon.bio)+'</p><p class="xs muted">'+[d.annuaire_brouillon.zones&&'Villes : '+d.annuaire_brouillon.zones,d.annuaire_brouillon.site_web&&'Site : '+d.annuaire_brouillon.site_web].filter(Boolean).map(esc).join('<br>')+'</p></div></details>':'')+'<input type="text" id="apNote'+esc(d.id)+'" placeholder="Raison (seulement si vous refusez)" style="width:100%;margin:8px 0"><div class="row" style="gap:8px"><button class="btn sm" data-act="anOk" data-id="'+esc(d.id)+'">'+icon('fa-check')+'Approuver</button><button class="btn sm ghost" data-act="anNon" data-id="'+esc(d.id)+'">Refuser</button></div></div></div>').join('');
+  const ok=TOUS.filter(d=>d.annuaire_statut==='approuve');
+  return back('dsub','','Outils')+sh('Approbations de l\'annuaire','Les profils de doulas à valider avant d\'être affichés')
+   +(att||'<div class="card tint"><p class="small" style="margin:0">Aucun profil en attente.</p></div>')
+   +(ok.length?'<div class="card"><span class="eyebrow acc">Profils approuvés</span><div class="list">'+ok.map(d=>'<div class="li"><div class="tx"><b>'+esc((d.prenom||'')+' '+(d.nom||''))+'</b><span>'+(d.acces_gratuit||String(d.courriel).toLowerCase()==='sc@academiesere.ca'?'Inscription offerte':d.annuaire_fin&&new Date(d.annuaire_fin)>new Date()?'Payé jusqu\'au '+fr(d.annuaire_fin):'Inscription non payée : non visible')+(d.annuaire?'':' · désactivé par la doula')+'</span></div></div>').join('')+'</div></div>':'')}
+DSUB.annuaire=profilHtml;DSUB.demandes=demandesPage;DSUB.approbations=approbationsPage;
+if(typeof DOUT!=='undefined'){DOUT.push(['approbations','fa-user-check','Approbations de l\'annuaire','Profils de doulas à valider']);DOUT.unshift(['demandes','fa-inbox','Demandes de familles','Familles qui souhaitent vous rencontrer'],['annuaire','fa-location-dot','Mon profil dans l\'annuaire','Soyez trouvée par les familles près de vous'])}
 
+const _dOA=dOutils;dOutils=function(){if(!S.dsub&&!(MOI&&MOI.admin)){const k=DOUT.findIndex(x=>x[0]==='approbations');if(k>=0)DOUT.splice(k,1)}return _dOA.apply(this,arguments)};
 const _da=dAccueil;
 dAccueil=function(){let h=_da.apply(this,arguments);const n=nouvelles();
+  if(MOI&&MOI.admin&&PEND.length)h='<button class="card tint" data-act="dgo" data-v="outils|approbations" style="width:100%;text-align:left;cursor:pointer;border:0;color:inherit;font:inherit"><div class="row between"><span><b>'+icon('fa-user-check')+' '+PEND.length+' profil'+(PEND.length>1?'s':'')+' d\'annuaire à approuver</b></span>'+icon('fa-chevron-right')+'</div></button>'+h;
   if(ME_DOULA&&!ME_DOULA.annuaire&&!ME_DOULA.annuaire_vu)h='<div class="card tint"><b>'+icon('fa-location-dot')+' Être trouvée par des familles ?</b><p class="small" style="margin:6px 0 10px">Facultatif : activez votre profil dans l\'annuaire « Trouver ma doula ». Vous pouvez le retirer à tout moment.</p><div class="row" style="gap:8px;flex-wrap:wrap"><button class="btn sm" data-act="dgo" data-v="outils|annuaire">Configurer mon profil</button><button class="btn sm ghost" data-act="anPlusTard">Non merci</button></div></div>'+h;
   if(n)h='<button class="card tint" data-act="dgo" data-v="outils|demandes" style="width:100%;text-align:left;cursor:pointer;border:0;color:inherit;font:inherit"><div class="row between"><span><b>'+icon('fa-inbox')+' '+n+' nouvelle'+(n>1?'s':'')+' demande'+(n>1?'s':'')+' de famille</b><br><span class="small">Touchez pour les lire et répondre</span></span>'+icon('fa-chevron-right')+'</div></button>'+h;
   return h};
@@ -160,7 +197,7 @@ document.addEventListener('click',async e=>{const b=e.target.closest('[data-act]
     if(data&&data.ok){$('#app').innerHTML='<div class="card" style="max-width:480px;margin:0 auto"><span class="script">Merci</span><h2>Regardez vos courriels</h2><p class="small">Un lien vient de partir à <b>'+esc(em)+'</b>. Touchez-le pour confirmer votre courriel et choisir votre mot de passe. Pensez à vérifier vos courriels indésirables.</p></div>'+pied()}
     else{b.disabled=false;toast((data&&data.erreur)||'Réessayez dans un moment')}return}
   case 'anPlusTard':{ME_DOULA.annuaire_vu=true;try{localStorage.setItem('an-vu','1')}catch(x){}render();return}
-  case 'anBascule':{const on=!ME_DOULA.annuaire;if(on&&(!ME_DOULA.bio||!(ME_DOULA.region||ME_DOULA.zones))){toast('Ajoutez d\'abord votre région et une présentation');S.dsub='annuaire';render();return}
+  case 'anBascule':{const on=!ME_DOULA.annuaire;if(on&&!ME_DOULA.annuaire_brouillon){toast('Remplissez d\'abord votre profil');S.dsub='annuaire';render();return}
     const {error}=await sb.from('fam_doulas').update({annuaire:on}).eq('id',ME_DOULA.id);if(error){toast(error.message);return}ME_DOULA.annuaire=on;toast(on?'Vous êtes dans l\'annuaire':'Vous êtes retirée de l\'annuaire');render();return}
   case 'anMois':{moisInit();const v=b.dataset.v;MSEL=MSEL.includes(v)?MSEL.filter(x=>x!==v):MSEL.concat(v);document.getElementById('pfMois').innerHTML=moisHtml();return}
   case 'anVille':{selInit();const v=b.dataset.v;SEL=SEL.includes(v)?SEL.filter(x=>x!==v):SEL.concat(v);const el=document.getElementById('pfVilles');if(el)el.innerHTML=villesHtml();return}
@@ -173,9 +210,20 @@ document.addEventListener('click',async e=>{const b=e.target.closest('[data-act]
     b.disabled=true;const {data,error}=await sb.functions.invoke('fam-contact',{body:{doula:id,nom:nom,tel:document.getElementById('deTel').value.trim(),ville:document.getElementById('deVille').value.trim(),dpa:document.getElementById('deDpa').value||null,message:document.getElementById('deMsg').value.trim()}});
     if(error||!data||!data.ok){b.disabled=false;toast((data&&data.erreur)||(error&&error.message)||'Pas envoyé, réessayez');return}
     close();toast('Demande envoyée ! La doula vous répondra bientôt.');await chargerAnnuaire();const el=document.getElementById('anDem');if(el)el.innerHTML=demandesHtml();return}
-  case 'anSauverProfil':{const g=k=>(document.getElementById(k)||{}).value||'';const patch={annuaire:document.getElementById('pfOn').checked,accepte_nouvelles:document.getElementById('pfAcc').checked,region:g('pfRegion').trim()||null,site_web:g('pfSite').trim()||null,dispo_mois:(MSEL&&MSEL.length?MSEL.join(','):null),ville_base:g('pfBase')||null,rayon_km:g('pfBase')?+g('pfRayon'):null,lat:(coord(g('pfBase'))||{}).lat??null,lng:(coord(g('pfBase'))||{}).lng??null,zones:(SEL&&SEL.length?SEL.join(', '):null),langues:g('pfLangues').trim()||null,certification:g('pfCert').trim()||null,bio:g('pfBio').trim()||null};
-    if(patch.annuaire&&(!patch.bio||!(patch.ville_base||patch.region||patch.zones))){toast('Ajoutez votre région (ou vos villes) et une courte présentation pour apparaître');return}
-    const {error}=await sb.from('fam_doulas').update(patch).eq('id',ME_DOULA.id);if(error){toast('Pas enregistré : '+error.message);return}Object.assign(ME_DOULA,patch);SEL=null;MSEL=null;try{S.doula.region=patch.region||''}catch(x){}toast(patch.annuaire?'Votre profil est dans l\'annuaire':'Profil enregistré (non affiché dans l\'annuaire)');render();return}
+  case 'anSauverProfil':{const g=k=>(document.getElementById(k)||{}).value||'';const base=g('pfBase')||null;
+    const c={entreprise:ME_DOULA.entreprise||null,photo:ME_DOULA.photo||null,region:g('pfRegion').trim()||null,zones:(SEL&&SEL.length?SEL.join(', '):null),bio:g('pfBio').trim()||null,langues:g('pfLangues').trim()||null,certification:g('pfCert').trim()||null,ville_base:base,rayon_km:base?+g('pfRayon'):null,lat:(coord(base)||{}).lat??null,lng:(coord(base)||{}).lng??null,site_web:g('pfSite').trim()||null,dispo_mois:(MSEL&&MSEL.length?MSEL.join(','):null)};
+    let aut=brouillon().autorisation||null;
+    if(!aut){const cases=[...document.querySelectorAll('.pfAut')],sig=(document.getElementById('pfSig')||{}).value||'';
+      if(patch0(cases,sig)){aut={nom:sig.trim(),date:new Date().toISOString(),v:1}}else{toast('Cochez les 4 autorisations et signez avec votre nom complet pour continuer');return}}
+    c.autorisation=aut;
+    const patch={annuaire:document.getElementById('pfOn').checked,accepte_nouvelles:document.getElementById('pfAcc').checked,annuaire_brouillon:c};
+    if(!c.bio||!(c.ville_base||c.region||c.zones)){toast('Ajoutez votre ville de départ (ou votre région) et une présentation');return}
+    const {error}=await sb.from('fam_doulas').update(patch).eq('id',ME_DOULA.id);if(error){toast('Pas enregistré : '+error.message);return}
+    const chg=JSON.stringify(c)!==JSON.stringify(ME_DOULA.annuaire_brouillon||null);Object.assign(ME_DOULA,patch);if(chg)ME_DOULA.annuaire_statut='en_attente';
+    if(chg&&MOI&&MOI.admin){await sb.rpc('fam_annuaire_decider',{p_doula:ME_DOULA.id,p_ok:true});ME_DOULA.annuaire_pub=c;ME_DOULA.annuaire_statut='approuve'}
+    SEL=null;MSEL=null;toast(chg&&!(MOI&&MOI.admin)?'Enregistré. Votre profil est envoyé pour approbation (24 à 48 h).':'Profil enregistré');render();return}
+  case 'anOk':case 'anNon':{const note=a==='anNon'?(document.getElementById('apNote'+id)||{}).value||'':'';if(a==='anNon'&&!note.trim()){toast('Écrivez une courte raison pour la doula');return}
+    const {data}=await sb.rpc('fam_annuaire_decider',{p_doula:id,p_ok:a==='anOk',p_note:note});if(!data||!data.ok){toast((data&&data.erreur)||'Erreur');return}await chargerApprob();toast(a==='anOk'?'Profil approuvé':'Profil refusé');render();return}
   case 'anDecliner':{if(b.dataset.c!=='1'){b.dataset.c='1';toast('Touchez encore pour décliner');return}await sb.from('fam_demandes').update({statut:'declinee'}).eq('id',id);await chargerDemandes();render();return}
   case 'anAccepter':{const d=DEMANDES.find(x=>x.id===id);if(!d)return;if(d.statut!=='acceptee'){await sb.from('fam_demandes').update({statut:'acceptee'}).eq('id',id);d.statut='acceptee'}
     const mots=String(d.nom||'').trim().split(/\s+/);S.dtab='clientes';S.openClient=null;render();

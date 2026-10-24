@@ -27,6 +27,17 @@ Deno.serve(async (req) => {
       const patch = { abonnement_statut: "actif", stripe_customer: o.customer, stripe_sub: o.subscription };
       if (o.client_reference_id) await sb.from("fam_doulas").update(patch).eq("id", o.client_reference_id);
       else if (o.customer_details?.email) await sb.from("fam_doulas").update(patch).ilike("courriel", o.customer_details.email);
+    } else if (ev.type === "checkout.session.completed" && o.mode === "payment" && o.metadata?.produit === "annuaire") {
+      // Annuaire « Trouver ma doula » : 25 $ = 12 mois de visibilité (à partir de la fin actuelle si encore valide)
+      let q = sb.from("fam_doulas").select("id,annuaire_fin");
+      q = o.client_reference_id ? q.eq("id", o.client_reference_id) : q.ilike("courriel", o.customer_details?.email ?? "-");
+      const { data } = await q.limit(1);
+      const d = data?.[0];
+      if (d) {
+        const debut = d.annuaire_fin && new Date(d.annuaire_fin) > new Date() ? new Date(d.annuaire_fin) : new Date();
+        debut.setFullYear(debut.getFullYear() + 1);
+        await sb.from("fam_doulas").update({ annuaire_fin: debut.toISOString() }).eq("id", d.id);
+      }
     } else if (ev.type === "invoice.paid") {
       const patch = { abonnement_recu: o.hosted_invoice_url ?? null, abonnement_recu_le: new Date().toISOString() };
       const { data } = await sb.from("fam_doulas").update(patch).eq("stripe_customer", o.customer).select("id");

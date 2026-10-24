@@ -6,7 +6,7 @@ const GROUPES=[
  ['Rencontres',['rencontres','approche','retour']],
  ['Guides pour accompagner',['positions','confort','partenaire']],
  ['Mon compte',['profil','support','probleme','avis','doulas']],
- ['Propriétaire',['proprio','support','avisTab']]];
+ ['Propriétaire',['proprio','support','avisTab','approbations']]];
 const _dOutE=dOutils;
 dOutils=function(){if(S.dsub&&DSUB[S.dsub])return _dOutE();
   _dOutE(); /* laisse les autres modules ajouter leurs tuiles */
