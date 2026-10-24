@@ -78,10 +78,8 @@ function pAccueil(){const st=stage(),p=S.parent;let h='';const nm=p.prenom&&p.pr
      '<div class="stack" style="gap:8px"><span class="eyebrow acc">'+g.tri+'<sup>e</sup> trimestre'+(g.w>=38&&g.w<=42?' · votre doula est de garde':'')+'</span><h2>Bébé a la taille '+art(f[0])+esc(f[0])+'</h2><p class="muted small num">Environ '+cm(f[1])+' cm'+(f[2]?' · '+(f[2]>=1000?cm((f[2]/1000).toFixed(1))+' kg':f[2]+' g'):'')+' (moyenne)</p><p class="small">'+(g.left>0?'<b class="num">'+g.left+'</b> jours avant la date prévue, le '+fmtD(g.dpa):g.left===0?'C\'est la date prévue aujourd\'hui.':'Date prévue dépassée de <b>'+(-g.left)+'</b> jour(s).')+'</p></div></div></div>';
     h+='<div class="quick">'+[['kickStart','fa-shoe-prints','Mouvements'],['contr','fa-stopwatch','Contractions'],['humeur','fa-face-smile','Humeur'],['symptome','fa-notes-medical','Symptômes']].map(q=>'<button class="qbtn" data-act="'+q[0]+'">'+icon(q[1])+q[2]+'</button>').join('')+'</div>';
     h+=kickCard()+contrCard();
-    h+='<div class="card"><span class="eyebrow acc">Cette semaine</span><div class="grid2 resp"><div class="soft"><b>'+icon('fa-baby')+' Bébé</b><p class="small">'+wi[2]+'</p></div><div class="soft"><b>'+icon('fa-person-pregnant')+' Vous</b><p class="small">'+wi[3]+'</p></div></div></div>';
     h+=todoCard(g.w);
     const nx=EXAMS.find(e=>e[1]>=g.w);if(nx)h+='<div class="card"><div class="li" style="padding:0;border:0"><div class="ic">'+icon('fa-stethoscope')+'</div><div class="tx"><span class="eyebrow acc">Prochain repère · '+(nx[0]===nx[1]?nx[0]:nx[0]+'-'+nx[1])+' SA</span><b>'+nx[2]+'</b><span>'+nx[3]+'</span></div></div></div>';
-    if(g.w>=34)h+='<button class="btn sage" data-act="birthForm">'+icon('fa-baby')+'Bébé est né</button>';
   } else {const day=st.day,info=ppInfo(day),bb=p.naissance.prenomBebe;
     h+='<div class="sh"><span class="script">'+(bb?'Bienvenue '+esc(bb):'Bienvenue bébé')+'</span></div>';
     h+=hautAccueil();
@@ -90,7 +88,6 @@ function pAccueil(){const st=stage(),p=S.parent;let h='';const nm=p.prenom&&p.pr
     h+=timerCard();
     h+='<div class="quick">'+[['feed','fa-person-breastfeeding','Tétée'],['biberon','fa-bottle-droplet','Biberon'],['tirage','fa-pump-medical','Tirage'],['couche','fa-droplet','Couche'],['sommeil','fa-moon','Sommeil'],['humeur','fa-face-smile','Mon moral']].map(q=>'<button class="qbtn" data-act="'+q[0]+'">'+icon(q[1])+q[2]+'</button>').join('')+'</div>';
     h+=dayStats(day);
-    h+='<div class="card"><span class="eyebrow acc">'+info[1]+'</span><div class="grid2 resp"><div class="soft"><b>'+icon('fa-baby')+' Bébé</b><p class="small">'+info[2]+'</p></div><div class="soft"><b>'+icon('fa-spa')+' Vous</b><p class="small">'+info[3]+'</p></div></div></div>';
     if(day<=60)h+=moralCard();
   }
   h+=doulaCard();

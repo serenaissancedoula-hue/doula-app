@@ -52,11 +52,9 @@ pAccueil=function(){let h=_pAccB();const st=stage();
     const c=h.indexOf('<div class="card"><span class="eyebrow acc">Cette semaine</span>');if(c>=0){const e=h.indexOf('</div></div></div>',c);if(e>0)h=h.slice(0,c)+h.slice(e+18)}}
   else if(st.k==='pp'){const q=h.indexOf('<div class="quick">');if(q>=0)h=h.slice(0,q)+carteBebePP(st.day)+h.slice(q)}
   return h};
+/* Le suivi garde l'explorateur semaine par semaine / jour par jour ; la carte de bébé du jour est seulement à l'accueil (pas de doublon). */
 const _pSuiviB=pSuivi;
-pSuivi=function(){S.wkSel=null;S.ppSel=null;let h=_pSuiviB();const st=stage();
-  if(st.k==='preg'){const a=h.indexOf('<div class="card"><span class="eyebrow acc">Semaine par semaine</span>'),e=h.indexOf('<div class="card"><span class="eyebrow acc">Examens et repères</span>');if(a>=0&&e>a)h=h.slice(0,a)+carteBebe(st.g).replace(/id="bebeZone"/,'id="bebeZone2"')+h.slice(e)}
-  else if(st.k==='pp'){const a=h.indexOf('<div class="card"><h2>Jour '),e=h.indexOf('<div class="card"><span class="eyebrow acc">Examens et rendez-vous</span>');if(a>=0&&e>a)h=h.slice(0,a)+carteBebePP(st.day)+h.slice(e)}
-  return h};
+pSuivi=function(){S.wkSel=null;S.ppSel=null;return _pSuiviB()};
 
 /* Le cœur qu'on entend (son synthétisé : un « toum-toum » doux et un souffle, comme au doppler) */
 let AUD=null;
