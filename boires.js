@@ -1,0 +1,49 @@
+/* Sérénaissance — Suivi (famille) : kit « Boires de bébé » (chrono sein + biberon, couches, sommeil, conseils) et carte calendrier. */
+(function(){
+if(window.ESPACE!=='parent')return;
+const KB=()=>'srn_bibT_'+(typeof FAM!=='undefined'&&FAM&&FAM.id||'x');
+function lire(){try{return JSON.parse(localStorage.getItem(KB())||'null')}catch(e){return null}}
+function ecrire(v){try{if(v)localStorage.setItem(KB(),JSON.stringify(v));else localStorage.removeItem(KB())}catch(e){}}
+let B=null,Bok=false;const gB=()=>{if(!Bok){B=lire();Bok=true}return B};
+const NOURR='https://www.canada.ca/fr/sante-canada/services/guide-alimentaire-canadien/ressources/nutrition-nourrisson/nutrition-nourrisson-terme-sante-recommandations-naissance-six-mois.html';
+const SOMM='https://www.canada.ca/fr/sante-publique/services/sommeil-securitaire/semaine-sommeil-securitaire.html';
+const ml=day=>day<=1?'5 à 15 ml':day<=2?'15 à 30 ml':day<=4?'30 à 60 ml':day<=7?'60 à 90 ml':day<=30?'90 à 120 ml':day<=60?'120 à 150 ml':'150 à 180 ml';
+const nb=day=>day<=30?'8 à 12 boires / 24 h':day<=60?'7 à 9 boires / 24 h':'6 à 8 boires / 24 h';
+function chronoBib(){if(!gB())return '';const s=(Date.now()-B.start)/1000;
+  return '<div class="card" style="border-color:var(--accent)"><div class="row between"><span class="eyebrow acc"><span class="live"></span>&nbsp; Biberon en cours</span><span class="xs muted">depuis '+fmtT(B.start)+'</span></div><div class="timer" data-bibtick="'+B.start+'">'+mmss(s)+'</div><div class="row"><button class="btn" data-act="bibStop">'+icon('fa-stop')+'Terminer</button><button class="btn ghost sm" data-act="bibCancel">Annuler</button></div><p class="xs muted">Au rythme de bébé : assis, biberon presque horizontal, pauses. Un boire dure souvent 15 à 30 minutes.</p></div>'}
+function acc(t,ic,b){return '<details class="acc"><summary>'+icon(ic)+' '+t+'<i class="fa-solid fa-chevron-down chev"></i></summary><div class="body">'+b+'</div></details>'}
+function stats(day){
+  const L=S.logs.filter(l=>(l.type==='sein'||l.type==='biberon')&&l.t>Date.now()-864e5).sort((a,b)=>a.t-b.t);
+  let iv='';if(L.length>=3){const m=(L[L.length-1].t-L[0].t)/(L.length-1)/36e5;iv='<div class="stat"><b>'+(Math.round(m*10)/10).toString().replace('.',',')+' h</b><span>entre les boires (moy.)</span></div>'}
+  const sein=L.filter(l=>l.type==='sein'),tot=sein.reduce((a,l)=>a+(+l.sec||0),0);
+  const bib=L.filter(l=>l.type==='biberon').reduce((a,l)=>a+(+l.ml||0),0);
+  return '<div class="grid3"><div class="stat"><b>'+sein.length+'</b><span>tétées · '+dur(tot)+'</span></div><div class="stat"><b>'+bib+' ml</b><span>au biberon</span></div>'+(iv||'<div class="stat"><b>'+L.length+'</b><span>boires en 24 h</span></div>')+'</div>'}
+function kit(){const st=stage();if(st.k!=='pp')return '';const day=st.day;
+  const btn=(a,v,ic,t)=>'<button class="qbtn" data-act="'+a+'"'+(v?' data-v="'+v+'"':'')+'>'+icon(ic)+t+'</button>';
+  let h='<div class="card"><span class="eyebrow acc">Boires de bébé</span><h2>Jour '+day+'</h2><p class="small muted">Repère : '+nb(day)+' · environ '+ml(day)+' par biberon.</p><div class="quick">'+
+   (S.timer?'':btn('feedGo','G','fa-person-breastfeeding','Sein gauche')+btn('feedGo','D','fa-person-breastfeeding','Sein droit'))+(gB()?'':btn('bibGo','','fa-bottle-droplet','Biberon (chrono)'))+btn('tirage','','fa-pump-medical','Tirage')+btn('couche','','fa-droplet','Couche')+btn('sommeil','','fa-moon','Sommeil')+btn('poids','','fa-weight-scale','Poids')+'</div>'+stats(day)+'</div>';
+  h+=(S.timer&&typeof timerCard==='function'?timerCard():'')+chronoBib();
+  h+='<div class="card"><span class="eyebrow acc">Conseils et repères</span>'+
+   acc('Allaitement : bien démarrer','fa-person-breastfeeding','<ul class="clean small"><li>Ventre contre ventre, oreille, épaule et hanche alignées; son nez face au mamelon.</li><li>Attendez la grande bouche, comme un bâillement, puis approchez bébé, menton en premier.</li><li>Lèvres retroussées, joues rondes, avalées audibles : bon signe. Une douleur qui dure n\'est pas normale : demandez de l\'aide.</li><li>Alternez le sein de départ. Offrez les deux seins; laissez bébé finir le premier.</li><li>Positions : madone, madone inversée, ballon de football, couchée sur le côté, semi-allongée (peau à peau).</li></ul><button class="btn ghost sm" data-act="go" data-v="infos|B1">Voir la fiche complète</button>')+
+   acc('Biberon : quantités et rythme','fa-bottle-droplet','<p class="small">Repères indicatifs selon l\'âge (à ajuster selon bébé et l\'avis de votre professionnel) :</p><table class="tbl"><thead><tr><th>Âge</th><th>Par biberon</th></tr></thead><tbody><tr><td>Jour 1</td><td>5 à 15 ml</td></tr><tr><td>Jour 2</td><td>15 à 30 ml</td></tr><tr><td>Jours 3 à 4</td><td>30 à 60 ml</td></tr><tr><td>Jours 5 à 7</td><td>60 à 90 ml</td></tr><tr><td>2 à 4 semaines</td><td>90 à 120 ml</td></tr><tr><td>1 à 2 mois</td><td>120 à 150 ml</td></tr></tbody></table><ul class="clean small"><li>Suivez ses signaux : il ouvre la bouche, cherche, porte les mains à sa bouche. Pleurer est un signe tardif.</li><li>Bébé assis, biberon presque horizontal, pauses fréquentes, on alterne les côtés.</li><li>Il se détourne, ralentit, relâche les mains : il a assez bu. Ne le forcez pas à finir.</li><li>Lait préparé : jeté après 2 h à température ambiante, après 1 h une fois bébé a commencé à boire.</li></ul>')+
+   acc('Conserver le lait maternel','fa-snowflake','<ul class="clean small"><li>Température de la pièce : jusqu\'à 4 heures.</li><li>Frigo (au fond, pas à la porte) : jusqu\'à 4 jours.</li><li>Congélateur : jusqu\'à 6 mois. Écrivez la date, utilisez le plus vieux d\'abord.</li><li>Réchauffez au bain-marie tiède, jamais au micro-ondes. Ne recongelez pas un lait décongelé.</li></ul>')+
+   acc('Bébé boit-il assez ?','fa-circle-check','<ul class="clean small"><li>8 boires ou plus par 24 heures les premières semaines.</li><li>Vous l\'entendez avaler; il est calme après le boire.</li><li>Couches : 6 mouillées et 3 selles jaunes ou plus par jour dès le 5e jour.</li><li>Il reprend son poids de naissance vers 10 à 14 jours.</li></ul><div class="banner bad">'+icon('fa-phone')+'<div class="small">Appelez le 811 ou votre professionnel le jour même : moins de 8 boires, moins de couches que prévu, urine foncée après le jour 3, bébé difficile à réveiller, jaunisse qui augmente, fièvre.</div></div>')+
+   acc('Sommeil sécuritaire','fa-moon','<ul class="clean small"><li>Toujours sur le dos, sur une surface ferme, dans son propre lit.</li><li>Rien dans le lit : pas de coussin, de toutou ni de couverture lâche.</li><li>Après un boire à la tétée dans le lit, remettez bébé dans son lit si vous risquez de vous endormir.</li></ul>')+
+   '<p class="xs muted">Information générale basée sur les recommandations de Santé Canada : <a href="'+NOURR+'" target="_blank" rel="noopener noreferrer">nutrition du nourrisson</a> · <a href="'+SOMM+'" target="_blank" rel="noopener noreferrer">sommeil sécuritaire</a>. Ne remplace pas l\'avis de votre équipe de soins.</p></div>';
+  return h}
+function calCard(){let ev={};try{ev=window.calEvt?window.calEvt():{}}catch(e){}
+  const auj=new Date();auj.setHours(0,0,0,0);const rows=[];
+  for(let i=0;i<60&&rows.length<4;i++){const d=new Date(+auj+i*864e5),k=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');(ev[k]||[]).filter(e=>e.t!=='garde').forEach(e=>{if(rows.length<4)rows.push([d,e])})}
+  return '<div class="card"><div class="row between"><span class="eyebrow acc">Mon calendrier</span><button class="btn sm ghost" data-act="calVoir">'+icon('fa-calendar-days')+'Voir le mois</button></div>'+
+   (rows.length?'<div class="list">'+rows.map(r=>'<div class="li"><div class="ic">'+icon(r[1].t==='dpa'?'fa-baby':'fa-calendar-check')+'</div><div class="tx"><b>'+esc(r[1].txt)+'</b><span>'+fmtD(r[0],{weekday:'long',day:'numeric',month:'long'})+(r[1].h?' · '+esc(r[1].h):'')+'</span></div></div>').join('')+'</div>':'<p class="small muted">Rien de prévu pour l\'instant. Ajoutez vos rendez-vous ci-dessous.</p>')+
+   '<div class="row"><button class="btn sm" data-act="rmNew">'+icon('fa-plus')+'Ajouter un rendez-vous</button></div></div>'}
+const _ps=pSuivi;pSuivi=function(){let h=_ps.apply(this,arguments);try{if(S.role==='parent'){const a=h.indexOf('<div class="seg">'),e=a<0?-1:h.indexOf('</div>',a),at=e<0?0:e+6;h=h.slice(0,at)+kit()+calCard()+h.slice(at)}}catch(x){}return h};
+const _lt=logText;logText=function(l){let t=_lt.apply(this,arguments);try{if(l.type==='biberon'&&l.sec)t+=' · '+dur(l.sec)}catch(e){}return t};
+document.addEventListener('click',e=>{const b=e.target.closest('[data-act="bibGo"],[data-act="bibStop"],[data-act="bibCancel"],[data-act="bibFin"],[data-act="calVoir"]');if(!b)return;e.stopPropagation();e.preventDefault();const a=b.dataset.act;
+  if(a==='calVoir'){window.calOpen&&window.calOpen();return}
+  if(a==='bibGo'){B={start:Date.now()};Bok=true;ecrire(B);render();return}
+  if(a==='bibCancel'){B=null;ecrire(null);render();return}
+  if(a==='bibStop'){const sec=Math.round((Date.now()-B.start)/1000);sheet('Biberon terminé · '+mmss(sec),'<div class="grid2"><label class="f">Quantité bue (ml)<input type="number" id="m_ml" inputmode="numeric" value="60"></label><label class="f">Lait<select id="m_lait"><option value="maternel">Lait maternel frais</option><option value="congele">Lait maternel congelé</option><option value="preparation">Préparation commerciale</option></select></label></div><button class="btn" data-act="bibFin">Enregistrer</button>');return}
+  if(a==='bibFin'){const T=B;B=null;ecrire(null);Promise.resolve(logPush({type:'biberon',ml:+$('#m_ml').value||0,lait:$('#m_lait').value,sec:Math.round((Date.now()-T.start)/1000),t:T.start})).then(()=>{close();render();toast('Biberon enregistré')})}},true);
+setInterval(()=>{document.querySelectorAll('[data-bibtick]').forEach(el=>{el.textContent=mmss((Date.now()-(+el.dataset.bibtick))/1000)})},1000);
+})();

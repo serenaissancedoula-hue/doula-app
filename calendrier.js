@@ -43,4 +43,5 @@ document.addEventListener('click',e=>{const x=e.target.closest('[data-act]');if(
   else if(a==='calJour'){const [y,m,d]=x.dataset.k.split('-').map(Number);sel=new Date(y,m-1,d);dessiner()}
   else if(a==='calFam'){fermer();S.vue=null;S.dtab='clientes';S.dsub='';S.openClient=x.dataset.id;S.ctab='messages';chargerClientDetail(x.dataset.id).then(render)}},true);
 const _r=render;render=function(){_r.apply(this,arguments);try{b.hidden=g.hidden}catch(e){}};
+window.calEvt=evenements;window.calOpen=function(){sel=new Date();cur=new Date();cur.setDate(1);ouvrir()};
 })();
