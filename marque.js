@@ -6,9 +6,11 @@ const logoOk=()=>{const l=mq().logo;return /^data:image\/(png|jpeg|webp);base64,
 if(typeof lireCoul==='function'){const _lc=lireCoul;lireCoul=function(){const m=mq();return (m.pal||m.perso)?{pal:m.pal,perso:m.perso}:_lc()}}
 function appliquer(){try{appliquerCoul()}catch(e){}
   const l=logoOk();if(!l)return;
-  document.querySelectorAll('img').forEach(i=>{const s=i.getAttribute('src')||'';if(/(^|\/)(logo|logo-icone)\.png$/.test(s)&&i.src!==l){i.setAttribute('src',l);i.style.objectFit='contain'}});
+  window.MARQUE_ON=true;document.querySelectorAll('img').forEach(i=>{if(i.hasAttribute('data-acad'))return;const s=i.getAttribute('src')||'';if(/(^|\/)(logo|logo-icone)\.png$/.test(s)&&i.src!==l){i.setAttribute('src',l);i.style.objectFit='contain'}});
   try{if(typeof LOGO_BYTES!=='undefined'){const b=atob(l.split(',')[1]),u=new Uint8Array(b.length);for(let k=0;k<b.length;k++)u[k]=b.charCodeAt(k);LOGO_BYTES=u}}catch(e){}}
 new MutationObserver(()=>{if(logoOk())appliquer()}).observe(document.documentElement,{childList:true,subtree:true});
+const CREDIT='<div class="acad-credit" style="display:flex;align-items:center;justify-content:center;gap:6px;margin-top:12px;font-size:.7rem;color:#8a7a70"><img data-acad src="img/logo-icone.png" alt="" style="height:18px;width:auto"> Modèle de l\'Académie Sérénaissance</div>';
+if(typeof docVue==='function'){const _dv=docVue;docVue=function(d){const h=_dv.apply(this,arguments);try{if(!logoOk()||String(d&&d.contenu||'').startsWith('@fichier ')||h.includes('acad-credit'))return h;const i=h.lastIndexOf('</div>');return i<0?h:h.slice(0,i)+CREDIT+h.slice(i)}catch(e){return h}}}
 const _r=render;render=function(){const x=_r.apply(this,arguments);try{appliquer();bienvenue()}catch(e){}return x};
 async function sauver(patch){const m=Object.assign({},ME_DOULA.modeles||{});m.marque=Object.assign({},m.marque||{},patch);Object.keys(m.marque).forEach(k=>{if(m.marque[k]==null)delete m.marque[k]});if(await sauverModeles(m)){appliquer();return true}return false}
 function reduire(f,max,jpg){return new Promise((ok,ko)=>{const fr=new FileReader();fr.onload=()=>{const im=new Image();im.onload=()=>{const k=Math.min(1,max/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.max(1,Math.round(im.width*k));c.height=Math.max(1,Math.round(im.height*k));const x=c.getContext('2d');if(jpg){x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height)}x.drawImage(im,0,0,c.width,c.height);ok(jpg?c.toDataURL('image/jpeg',.82):c.toDataURL('image/png'))};im.onerror=ko;im.src=fr.result};fr.onerror=ko;fr.readAsDataURL(f)})}

@@ -28,6 +28,7 @@ async function recuPdf(c,p,k,corrige){await chargerScript('lib/pdf-lib.min.js');
   T('TVH',M,y-40,8,FB,gris);T(D.tvh?'No de TVH : '+D.tvh:'Non inscrite à la TVH (aucune taxe perçue)',M,y-54,10,F);
   y-=120;T('Merci de votre confiance 🌿'.replace(' 🌿',''),M,y,13,TI,A);y-=16;T('Ce reçu confirme la réception du paiement ci-dessus. Conservez-le pour vos dossiers.',M,y,9,F,gris);
   pg.drawLine({start:{x:M,y:50},end:{x:W-M,y:50},thickness:.5,color:filet});T([I.ent,I.nom,I.tel,I.courriel].filter(Boolean).filter((v,i,a)=>a.indexOf(v)===i).join(' · '),M,36,8,F,gris);
+  if(window.MARQUE_ON){try{if(!window.ACAD_BYTES)window.ACAD_BYTES=new Uint8Array(await (await fetch('img/logo-icone.png')).arrayBuffer());const ac=await pdf.embedPng(window.ACAD_BYTES),ah=15,aw=ah*ac.width/ac.height,tx="Créé avec l'appli de l'Académie Sérénaissance";pg.drawImage(ac,{x:W-M-aw,y:20,width:aw,height:ah});TR(tx,W-M-aw-4,25,6.5,F,gris)}catch(e){}}
   return await pdf.save()}
 function b64(u8){let s='';for(let i=0;i<u8.length;i+=0x8000)s+=String.fromCharCode.apply(null,u8.subarray(i,i+0x8000));return btoa(s)}
 window.recuPdf=recuPdf;

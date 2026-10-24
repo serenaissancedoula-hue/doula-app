@@ -14,21 +14,23 @@ async function construirePDF(liste){const {PDFDocument,StandardFonts,rgb}=window
   const pdf=await PDFDocument.create();pdf.setTitle(pdfTxt(liste[0].lot_titre&&liste.length>1?liste[0].lot_titre:liste[0].titre));pdf.setCreator('Sérénaissance');
   const F=await pdf.embedFont(StandardFonts.Helvetica),FB=await pdf.embedFont(StandardFonts.HelveticaBold),T=await pdf.embedFont(StandardFonts.TimesRoman),TI=await pdf.embedFont(StandardFonts.TimesRomanItalic);
   const W=612,H=792,M=54,L=W-2*M;const hex=h=>rgb(parseInt(h.slice(1,3),16)/255,parseInt(h.slice(3,5),16)/255,parseInt(h.slice(5,7),16)/255);
-  const brun=hex('#3d312b'),encre=hex('#2c221e'),terra=hex('#b5644d'),gris=hex('#8a7a70'),filet=hex('#e6d2c6'),ligne=hex('#d9a08a'),sauge=hex('#7f9a78');
+  const brun=hex('#3d312b'),encre=hex('#2c221e'),terra=hex((()=>{const v=window.MARQUE_ON?getComputedStyle(document.documentElement).getPropertyValue('--accent').trim():'';return /^#[0-9a-f]{6}$/i.test(v)?v:'#b5644d'})()),gris=hex('#8a7a70'),filet=hex('#e6d2c6'),ligne=hex('#d9a08a'),sauge=hex('#7f9a78');
   const I=infoDoula();let logo=null;if(LOGO_BYTES)try{logo=await pdf.embedPng(LOGO_BYTES)}catch(e){}
+  let acad=null;if(window.MARQUE_ON){try{if(!window.ACAD_BYTES)window.ACAD_BYTES=new Uint8Array(await (await fetch('img/logo-icone.png')).arrayBuffer());acad=await pdf.embedPng(window.ACAD_BYTES)}catch(e){}}
   const espace=(t,x,y,s,f,c,sp)=>{let xx=x;for(const ch of pdfTxt(t)){pg.drawText(ch,{x:xx,y,size:s,font:f,color:c});xx+=f.widthOfTextAtSize(ch,s)+sp}return xx};
   const largEsp=(t,s,f,sp)=>[...pdfTxt(t)].reduce((a,ch)=>a+f.widthOfTextAtSize(ch,s)+sp,0);
   const coupe=(t,f,s,w)=>{const out=[];String(t).split(/\n/).forEach(par=>{let l='';par.split(' ').forEach(m=>{const e=l?l+' '+m:m;if(f.widthOfTextAtSize(e,s)<=w)l=e;else{if(l)out.push(l);l=m;while(f.widthOfTextAtSize(l,s)>w){let k=l.length;while(k>1&&f.widthOfTextAtSize(l.slice(0,k),s)>w)k--;out.push(l.slice(0,k));l=l.slice(k)}}});out.push(l)});return out};
   let pg,y;const pages=[];
   const nouvellePage=(di)=>{pg=pdf.addPage([W,H]);pages.push({pg,di});
     const a=[233,184,166],b=[181,113,92],c=[143,165,138];for(let i=0;i<120;i++){const t=i/119,u=t<.5?t*2:(t-.5)*2,A=t<.5?a:b,B=t<.5?b:c;pg.drawRectangle({x:i*W/120,y:H-7,width:W/120+1,height:7,color:rgb((A[0]+(B[0]-A[0])*u)/255,(A[1]+(B[1]-A[1])*u)/255,(A[2]+(B[2]-A[2])*u)/255)})}
-    if(logo){const lh=30,lw=lh*logo.width/logo.height;pg.drawImage(logo,{x:M,y:H-66,width:lw,height:lh})}
-    pg.drawText(pdfTxt(I.ent||'Sérénaissance'),{x:M+(logo?42:0),y:H-58,size:16,font:TI,color:terra});
+    let lwx=0;if(logo){const lh=30,lw=Math.min(110,lh*logo.width/logo.height),lh2=lw/(logo.width/logo.height);lwx=lw;pg.drawImage(logo,{x:M,y:H-66+(lh-lh2)/2,width:lw,height:lh2})}
+    pg.drawText(pdfTxt(I.ent||'Sérénaissance'),{x:M+(logo?lwx+12:0),y:H-58,size:16,font:TI,color:terra});
     const cat=CATEGORIE[liste[di].type]||'DOCUMENTS';pg.drawText('',{x:0,y:0,size:1,font:F});const lc=largEsp(cat,6.5,F,1.4);espace(cat,W-M-lc,H-56,6.5,F,gris,1.4);
     pg.drawLine({start:{x:M,y:H-72},end:{x:W-M,y:H-72},thickness:.6,color:filet});
     y=H-126;
     const pied=pdfTxt([I.ent,I.nom,I.tel,I.courriel].filter(Boolean).join(' · '));pg.drawLine({start:{x:M,y:50},end:{x:W-M,y:50},thickness:.5,color:filet});
-    pg.drawText(pied,{x:M,y:38,size:7,font:F,color:gris})};
+    pg.drawText(pied,{x:M,y:38,size:7,font:F,color:gris});
+    if(acad){const ah=15,aw=ah*acad.width/acad.height,tx="Modèle de l'Académie Sérénaissance",tw=F.widthOfTextAtSize(pdfTxt(tx),6.5);pg.drawImage(acad,{x:W-M-aw,y:30,width:aw,height:ah});pg.drawText(pdfTxt(tx),{x:W-M-aw-4-tw,y:35,size:6.5,font:F,color:gris})}};
   const place=h=>{if(y-h<66)nouvellePage(pages[pages.length-1].di)};
   const para=(t,o={})=>{const f=o.f||F,s=o.s||9.5,lh=s*1.5;coupe(pdfTxt(t),f,s,o.w||L).forEach(l=>{place(lh);y-=lh;pg.drawText(l,{x:o.x||M,y:y+3,size:s,font:f,color:o.c||brun})});y-=(o.apres??3)};
   const section=t=>{y-=10;place(30);y-=12;espace(String(t).toUpperCase(),M,y,8,FB,terra,1.3);y-=7;pg.drawLine({start:{x:M,y},end:{x:W-M,y},thickness:.5,color:filet});y-=6};
