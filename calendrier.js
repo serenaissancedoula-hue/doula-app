@@ -9,6 +9,7 @@ const cle=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+Stri
 const hh=d=>d.toLocaleTimeString('fr-CA',{hour:'2-digit',minute:'2-digit'});
 function evenements(){const E={};const add=(d,e)=>{if(!d||isNaN(d))return;(E[cle(d)]=E[cle(d)]||[]).push(e)};
   try{if(S.role==='parent'){(RDV||[]).forEach(r=>{const d=new Date(r.debut);add(d,{t:'rdv',txt:(r.statut==='demande'?'Demande · ':'')+(r.type||'Rendez-vous'),h:hh(d)})});
+      ((S.parent&&S.parent.rdvsMed)||[]).forEach(r=>{const d=parseD(r.date);add(d,{t:'rdv',txt:(r.type||'Rendez-vous médical')+(r.pro?' · '+r.pro:''),h:r.heure||''})});
       const dp=(()=>{try{return preg(S.parent).dpa}catch(e){return null}})();if(dp)add(dp,{t:'dpa',txt:'Date prévue de l\'accouchement'});
       const nb=parseD(S.parent&&S.parent.naissance&&S.parent.naissance.date);if(nb)add(nb,{t:'nais',txt:'Naissance'})}
     else{const nom=id=>{const c=(S.clients||[]).find(x=>x.id===id);return c?cName(c):'Famille'};
@@ -16,7 +17,7 @@ function evenements(){const E={};const add=(d,e)=>{if(!d||isNaN(d))return;(E[cle
       (S.clients||[]).forEach(c=>{const dp=parseD(c.dpa),nb=parseD(c.naiss);
         if(dp&&!nb){add(dp,{t:'dpa',txt:'Date prévue · '+cName(c),fam:c.id});for(let i=-14;i<=14;i++)if(i)add(addD(dp,i),{t:'garde',txt:'En garde · '+cName(c),fam:c.id,sec:1})}
         if(nb)add(nb,{t:'nais',txt:'Naissance · '+cName(c),fam:c.id});
-        (c.rdv||[]).forEach(r=>{const d=parseD(r.prochaine);if(d)add(d,{t:'rdv',txt:'Rencontre prévue · '+cName(c),fam:c.id})})})}}catch(e){}
+        (c.rdv||[]).forEach(r=>{const d=parseD(r.prochaine);if(d)add(d,{t:'rdv',txt:'Rencontre prévue · '+cName(c),fam:c.id})});((c.parent_data||{}).rdvsMed||[]).forEach(r=>{const d=parseD(r.date);if(d)add(d,{t:'rdv',txt:(r.type||'Rendez-vous médical')+' · '+cName(c),h:r.heure||'',fam:c.id})})})}}catch(e){}
   return E}
 function ouvrir(){fermer();const o=document.createElement('div');o.id='calOv';o.style.cssText='position:fixed;inset:0;z-index:80;background:var(--bg,#faf5ef);overflow:auto;padding:calc(env(safe-area-inset-top,0px) + 12px) 16px calc(env(safe-area-inset-bottom,0px) + 20px)';document.body.appendChild(o);dessiner()}
 function fermer(){document.getElementById('calOv')?.remove()}

@@ -429,3 +429,9 @@ details.acc .tiles{gap:12px}
 details.acc .tile{background:var(--bg);border:1px solid var(--line);border-radius:16px;box-shadow:0 1px 0 rgba(0,0,0,.03)}
 details.acc .tile:active{transform:scale(.99)}
 .tiles>.tile{border:1px solid var(--line)}
+/* champs de dates/nombres : pas de débordement (iOS) */
+.soft .grid2,.soft .grid3{display:grid;gap:10px;min-width:0}
+.soft .grid2{grid-template-columns:1fr 1fr}.soft .grid3{grid-template-columns:2fr 1fr 1fr}
+.soft .grid2>*,.soft .grid3>*{min-width:0}
+.soft input[type=date],.soft input[type=number],.soft input[type=time]{width:100%;max-width:100%;min-width:0;box-sizing:border-box;-webkit-appearance:none;appearance:none;min-height:48px;text-align:left}
+.soft input[type=date]::-webkit-date-and-time-value{text-align:left}
