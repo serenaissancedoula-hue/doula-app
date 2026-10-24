@@ -9,7 +9,10 @@
 body{margin:0}
 .b3-page{max-width:560px;margin:0 auto;padding:18px max(16px,env(safe-area-inset-right,0px)) 40px max(16px,env(safe-area-inset-left,0px));display:flex;flex-direction:column;gap:14px}
 .b3-test{font-size:.78rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--accent)}
-.b3-photo{position:relative;width:100%;aspect-ratio:1/1;border-radius:26px;overflow:hidden;background:#140c0f;touch-action:pan-y}
+.b3-cadre{perspective:900px}
+.b3-photo{position:relative;width:100%;aspect-ratio:1/1;border-radius:26px;overflow:hidden;background:#140c0f;touch-action:pan-y;transform-style:preserve-3d;transition:transform .5s cubic-bezier(.2,.8,.2,1);box-shadow:0 18px 40px rgba(60,20,30,.28);cursor:grab}
+.b3-photo.actif{transition:none}
+.b3-photo .reflet{position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at var(--rx,50%) var(--ry,40%),rgba(255,235,230,.22),transparent 55%)}
 .b3-photo img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:opacity .35s ease}
 .b3-photo .aide{position:absolute;left:0;right:0;bottom:10px;text-align:center;font-size:.75rem;color:#f3dde2;opacity:.8;pointer-events:none}
 .b3-nav{display:flex;align-items:center;justify-content:space-between;gap:10px}
@@ -30,7 +33,7 @@ body{margin:0}
 <body>
 <main class="b3-page">
   <span class="b3-test">Page de test · bébé semaine par semaine</span>
-  <div class="b3-photo" id="b3Photo"><img id="b3Img" alt=""><span class="aide">Glissez le doigt pour changer de semaine</span></div>
+  <div class="b3-cadre"><div class="b3-photo" id="b3Photo"><img id="b3Img" alt=""><div class="reflet"></div><span class="aide">Glissez le doigt sur bébé pour le voir bouger</span></div></div>
   <div class="b3-nav"><button id="b3Prev" aria-label="Semaine précédente">‹</button>
     <div class="b3-sem"><h1 id="b3Titre">Semaine 20</h1><span class="pill" id="b3Pill" hidden>Cette semaine</span></div>
     <button id="b3Next" aria-label="Semaine suivante">›</button></div>
@@ -56,9 +59,19 @@ function afficher(){
   $('b3Prev').disabled=w<=0;$('b3Next').disabled=w>=42;$('b3Texte').innerHTML=bebe3dTexte(w);
   [w-1,w+1].forEach(k=>{if(k>=0&&k<=42)new Image().src=img(k)})}
 $('b3Prev').onclick=()=>{if(w>0){w--;afficher()}};$('b3Next').onclick=()=>{if(w<42){w++;afficher()}};
-let x0=null;$('b3Photo').addEventListener('touchstart',e=>{x0=e.touches[0].clientX},{passive:true});
-$('b3Photo').addEventListener('touchend',e=>{if(x0===null)return;const dx=e.changedTouches[0].clientX-x0;x0=null;
-  if(dx<-40&&w<42){w++;afficher()}else if(dx>40&&w>0){w--;afficher()}});
+/* Effet de relief : bébé s'incline sous le doigt, puis revient doucement. Un grand glissement rapide change de semaine. */
+const P=$('b3Photo'),calme=matchMedia('(prefers-reduced-motion: reduce)').matches;let d0=null;
+function incliner(cx,cy){const r=P.getBoundingClientRect(),nx=(cx-r.left)/r.width-.5,ny=(cy-r.top)/r.height-.5;
+  if(!calme)P.style.transform='rotateY('+(nx*22)+'deg) rotateX('+(-ny*18)+'deg) scale(1.03)';
+  P.style.setProperty('--rx',(nx+.5)*100+'%');P.style.setProperty('--ry',(ny+.5)*100+'%')}
+P.addEventListener('pointerdown',e=>{d0={x:e.clientX,t:Date.now()};P.classList.add('actif');incliner(e.clientX,e.clientY)});
+P.addEventListener('pointermove',e=>{if(d0||e.pointerType==='mouse')incliner(e.clientX,e.clientY)});
+const lacher=e=>{P.classList.remove('actif');P.style.transform='';
+  if(d0&&e&&e.clientX!=null){const dx=e.clientX-d0.x,v=Math.abs(dx)/Math.max(1,Date.now()-d0.t);
+    if(Math.abs(dx)>110&&v>.6){if(dx<0&&w<42){w++;afficher()}else if(dx>0&&w>0){w--;afficher()}}}d0=null};
+P.addEventListener('pointerup',lacher);P.addEventListener('pointercancel',()=>lacher());P.addEventListener('pointerleave',()=>{if(!d0){P.style.transform=''}});
+/* petit mouvement de respiration quand on ne touche pas */
+if(!calme){let t=0;setInterval(()=>{if(d0)return;t+=.05;P.style.transform='rotateY('+(Math.sin(t)*4)+'deg) rotateX('+(Math.cos(t*.8)*2.5)+'deg)'},60)}
 $('b3Ok').onclick=()=>{const v=$('b3Dpa').value;if(!v)return;dpa=v;try{localStorage.setItem('sere-b3-dpa',v)}catch(e){}actu=semaineActuelle();w=actu;afficher()};
 afficher();
 </script>
