@@ -473,3 +473,7 @@ input[type=date]::-webkit-date-and-time-value,input[type=time]::-webkit-date-and
 @keyframes feIn{from{opacity:0}to{opacity:1}}@keyframes feB{50%{transform:scale(1.15) rotate(-6deg)}}@keyframes feF{to{transform:translateY(110vh) rotate(40deg)}}
 @media (prefers-reduced-motion:reduce){#felic .fe-c,#felic .fe-em{animation:none}#felic .fe-c{display:none}}
 .tiles.t2{grid-template-columns:1fr 1fr}.tiles.t2 .tile{padding:12px}
+/* Mode sombre : les documents à signer et la zone de signature restent clairs */
+html[data-theme=dark] .papier,html[data-theme=dark] .fid-pg,html[data-theme=dark] #docImp{--ink:#2c221e;--muted:#7a685e;--line:#e3d5c8;--card:#fffbf8;--white:#fff;--soft:#f7ece5;--accent:#a85743;color:#2c221e}
+html[data-theme=dark] canvas.sig,html[data-theme=dark] .pap-sigs canvas.sig,html[data-theme=dark] .pad-zone.fait{background:#fffdfb;color:#2c221e}
+html[data-theme=dark] img{filter:none}
