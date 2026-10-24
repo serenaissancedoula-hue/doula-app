@@ -13,7 +13,7 @@ let _chatT=null;
 function chatReleve(){clearTimeout(_chatT);_chatT=setTimeout(async()=>{try{const t=document.getElementById('msgTxt'),v=t?t.value:'',foc=document.activeElement===t;
   await rafraichir();const t2=document.getElementById('msgTxt');if(t2&&v){t2.value=v;if(foc)try{t2.focus()}catch(x){}}majBoutonChat()}catch(e){}},500)}
 function chatAbonner(){try{if(window._chatCh||!MOI)return;window._chatCh=sb.channel('chat-live').on('postgres_changes',{event:'INSERT',schema:'public',table:'fam_messages'},p=>{
-  try{const m=p.new||{};const mien=S.role==='parent'?!m.de_doula:!!m.de_doula;if(!mien){try{navigator.vibrate&&navigator.vibrate(60)}catch(x){}}chatReleve()}catch(e){}}).subscribe()}catch(e){}}
+  try{const m=p.new||{};const mien=S.role==='parent'?!m.de_doula:!!m.de_doula;if(!mien){try{navigator.vibrate&&(!window.Reglages||Reglages.lire().vibration!==false)&&navigator.vibrate([200,100,200])}catch(x){}}chatReleve()}catch(e){}}).subscribe()}catch(e){}}
 setInterval(chatAbonner,3000);
 const _stF=document.createElement('style');_stF.textContent='#chatFab{position:fixed;right:max(14px,env(safe-area-inset-right,0px));bottom:calc(84px + env(safe-area-inset-bottom,0px));z-index:30;display:flex;align-items:center;gap:8px;border:0;border-radius:999px;padding:10px 14px;background:var(--card);color:var(--accent-dk);border:1px solid var(--accent-lt);font:700 .85rem/1 inherit;box-shadow:0 4px 12px rgba(44,34,30,.14);cursor:pointer}#chatFab b{background:var(--accent);color:#fff;border-radius:999px;min-width:20px;padding:2px 6px;font-size:.75rem}@media(max-width:380px){#chatFab span{display:none}}';document.head.appendChild(_stF);
 

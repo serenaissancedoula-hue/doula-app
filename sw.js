@@ -1,7 +1,7 @@
 /* Sérénaissance — appli des doulas et des familles (service worker).
    Toujours la version la plus récente quand il y a Internet; Supabase ne passe jamais par le cache.
    Reçoit les notifications (messages, rendez-vous, documents, rappels, mot du jour). */
-var VERSION = 'sere-app-v5';
+var VERSION = 'sere-app-v6';
 var BASE = self.registration.scope;
 self.addEventListener('install', function (e) {
   e.waitUntil(caches.open(VERSION).then(function (c) { return c.addAll(['./', 'style.css', 'logo.png', 'icones/icone-192.png']).catch(function () {}); }).then(function () { return self.skipWaiting(); }));
@@ -23,8 +23,8 @@ self.addEventListener('push', function (e) {
   var d = {};
   try { d = e.data ? e.data.json() : {}; } catch (x) { d = { titre: 'Sérénaissance', message: e.data ? e.data.text() : '' }; }
   var url = d.url && /^https?:/.test(d.url) ? d.url : BASE;
-  var options = { body: d.message || '', icon: 'icones/icone-192.png', badge: 'icones/icone-192.png', data: { url: url }, tag: d.tag || undefined, renotify: !!d.tag, silent: d.son === false };
-  if (d.vibration !== false) options.vibrate = [120, 60, 120];
+  var options = { body: d.message || '', icon: 'icones/icone-192.png', badge: 'icones/icone-192.png', data: { url: url }, tag: d.tag || undefined, renotify: !!d.tag };
+  if (d.vibration !== false) options.vibrate = [200, 100, 200, 100, 200];
   var avis = self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function (l) { l.forEach(function (c) { c.postMessage({ type: 'push', donnees: d }); }); });
   e.waitUntil(Promise.all([avis, self.registration.showNotification(d.titre || 'Sérénaissance', options)]));
 });

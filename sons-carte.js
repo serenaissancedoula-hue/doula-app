@@ -8,6 +8,7 @@ function carte(){const d=Reglages.lire(),Ls=Reglages.listes,sel=(cls,L,cur)=>'<s
    lg('Son quand on touche un bouton','Désactivez-le pour un appli silencieux','<input type="checkbox" role="switch" class="sc-tch"'+(d.touches===false?'':' checked')+'>')+
    lg('Choix du son des touches','Écoutez en changeant',sel('sc-stch',Ls.touche,d.sonTouche||'goutte'))+
    lg('Son d’un nouveau message','Écoutez en changeant',sel('sc-smsg',Ls.msg,d.sonMsg||'carillon'))+
+   lg('Vibration','À chaque touche et à chaque message (Android)','<input type="checkbox" role="switch" class="sc-vib"'+(d.vibration===false?'':' checked')+'>')+
    lg('Volume','Touches et messages','<input type="range" min="0" max="100" step="5" class="sc-vol" value="'+(d.volume==null?70:d.volume)+'" style="max-width:150px">')+
    '</div></div>'}
 const _pp=pParametres;pParametres=function(){let h=_pp.apply(this,arguments);try{
@@ -17,5 +18,6 @@ document.addEventListener('change',e=>{const t=e.target;if(!t||!t.classList)retu
   if(t.classList.contains('sc-tch')){Reglages.regler({touches:t.checked});if(t.checked)Reglages.tap(true)}
   else if(t.classList.contains('sc-stch')){Reglages.regler({sonTouche:t.value});Reglages.tap(true)}
   else if(t.classList.contains('sc-smsg')){Reglages.regler({sonMsg:t.value});Reglages.sonner(true,t.value)}
+  else if(t.classList.contains('sc-vib')){Reglages.regler({vibration:t.checked});if(t.checked&&navigator.vibrate)try{navigator.vibrate([200,100,200])}catch(x){}}
   else if(t.classList.contains('sc-vol')){Reglages.regler({volume:+t.value});Reglages.tap(true)}},true);
 })();

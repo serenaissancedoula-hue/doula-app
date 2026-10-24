@@ -73,15 +73,15 @@
   document.addEventListener('click', function (e) {
     var t = e.target && e.target.closest && e.target.closest('button, [data-act], .chip, .tile, .qbtn, a[href], summary, [role=tab], [role=switch], label.btn');
     if (!t || t.disabled || t.classList.contains('rg-test')) return;
+    try { if (lire().vibration !== false && navigator.vibrate) navigator.vibrate(8); } catch (x) {}
     tap();
   }, true);
 
   /* ---- Son dans l'appli (volume réglable) ---- */
   function sonner(forcer, nom) {
     var d = lire();
-    if (!forcer && !d.son) return;
     nom = nom || d.sonMsg || 'carillon';
-    if (nom !== 'aucun') try {
+    if (d.son && nom !== 'aucun' || (forcer && nom !== 'aucun')) try {
       var a = ctx(true), vol = Math.max(0, Math.min(1, (d.volume || 0) / 100)) * 0.5, t = a.currentTime;
       var Z = {
         carillon: [[880, 0, .5, 'sine'], [1318.5, .14, .5, 'sine']],
@@ -93,7 +93,7 @@
       };
       (Z[nom] || Z.carillon).forEach(function (n, i) { note(a, t + n[1], n[0], 0, n[2], n[3], vol * (nom === 'cloche' && i > 0 ? 0.4 : 1), 0.02); });
     } catch (e) {}
-    if (d.vibration && navigator.vibrate) try { navigator.vibrate([120, 60, 120]); } catch (e) {}
+    if (d.vibration !== false && navigator.vibrate) try { navigator.vibrate([200, 100, 200]); } catch (e) {}
   }
 
   /* ---- Abonnement de cet appareil ---- */
@@ -141,7 +141,6 @@
       '<div class="rg-actions" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:6px;"><button type="button" class="btn rg-activer" hidden>' + L('Activer les notifications', 'Turn on notifications') + '</button></div>' +
       '<div class="rg-reglages" style="display:flex;flex-direction:column;gap:12px;margin-top:8px;">' +
         '<label class="rg-ligne"><span><strong>' + L('Son', 'Sound') + '</strong><small>' + L('Un petit carillon à chaque notification', 'A little chime with each notification') + '</small></span><input type="checkbox" class="rg-son" role="switch"' + (d.son ? ' checked' : '') + '></label>' +
-        '<label class="rg-ligne"><span><strong>Vibration</strong><small>' + L('Quand le téléphone le permet', 'When the phone supports it') + '</small></span><input type="checkbox" class="rg-vib" role="switch"' + (d.vibration ? ' checked' : '') + '></label>' +
         '<label class="rg-ligne rg-vol"><span><strong>' + L('Volume dans l\'appli', 'In-app volume') + '</strong><small>' + L('Quand l\'appli est ouverte', 'While the app is open') + '</small></span><input type="range" class="rg-volume" min="0" max="100" step="5" value="' + (d.volume == null ? 70 : d.volume) + '"></label>' +
         '<p style="font-size:.78rem;color:var(--doux,#7a685e);">' + L('Appli fermée : le volume suit celui de ton téléphone. ', 'When the app is closed, the volume follows your phone. ') + (IOS ? L('Sur iPhone, tu peux aussi choisir le style d\'alerte dans Réglages → Notifications.', 'On iPhone, you can also choose the alert style in Settings → Notifications.') : '') + '</p>' +
         '<div style="display:flex;flex-wrap:wrap;gap:8px;"><button type="button" class="btn gris rg-test">' + L('Essayer', 'Test') + '</button><button type="button" class="btn gris rg-desactiver" hidden>' + L('Désactiver sur cet appareil', 'Turn off on this device') + '</button></div>' +
@@ -161,8 +160,7 @@
       var x = lire(); for (var k in ch) x[k] = ch[k]; ecrire(x);
       abonnementActuel().then(function (ab) { if (ab && Notification.permission === 'granted') enregistrer(ab); });
     }
-    q('.rg-son').addEventListener('change', function () { sauver({ son: this.checked }); if (this.checked) sonner(); });
-    q('.rg-vib').addEventListener('change', function () { sauver({ vibration: this.checked }); if (this.checked && navigator.vibrate) navigator.vibrate(150); });
+    q('.rg-son').addEventListener('change', function () { sauver({ son: this.checked }); if (this.checked) sonner(true); });
     q('.rg-volume').addEventListener('change', function () { sauver({ volume: +this.value }); sonner(true); });
     q('.rg-activer').addEventListener('click', function () {
       Notification.requestPermission().then(function (p) {
@@ -191,7 +189,7 @@
       }
     });
     if (navigator.serviceWorker) navigator.serviceWorker.addEventListener('message', function (ev) {
-      if (ev.data && ev.data.type === 'push') { if (document.visibilityState === 'visible') sonner(); if (opts.surPush) opts.surPush(ev.data.donnees || {}); }
+      if (ev.data && ev.data.type === 'push') { if (document.visibilityState === 'visible') sonner(); else if (lire().vibration !== false && navigator.vibrate) try { navigator.vibrate([200, 100, 200]); } catch (x) {} if (opts.surPush) opts.surPush(ev.data.donnees || {}); }
     });
     etat();
   }
