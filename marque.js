@@ -19,8 +19,8 @@ function choixDocs(cur){return Object.keys(MODES).map(k=>'<button class="cl" dat
 const BIB_MAX=3*1024*1024;
 function biblioBloc(){const B=(ME_DOULA&&ME_DOULA.biblio)||[];
   return '<div class="stack" style="gap:8px;margin-top:10px"><span class="eyebrow acc">Ma bibliothèque</span><p class="xs muted">Téléversez vos documents une seule fois (PDF ou image, 3 Mo max). Ensuite, envoyez-les à n\'importe quelle famille en un clic, avec ou sans signature.</p>'+
-  (B.length?'<div class="list">'+B.map((d,i)=>'<div class="li"><div class="ic">'+icon('fa-file-pdf')+'</div><div class="tx"><b>'+esc(d.titre)+'</b></div><button class="btn sm" data-act="mqEnvoi" data-i="'+i+'">Envoyer</button><button class="btn sm ghost" data-act="mqBibDel" data-i="'+i+'" aria-label="Retirer">'+icon('fa-trash')+'</button></div>').join('')+'</div>':'<p class="small muted">Aucun document pour l\'instant.</p>')+
-  '<label class="btn ghost" style="cursor:pointer;text-align:center">'+icon('fa-upload')+'Ajouter un document<input type="file" id="mqBibUp" accept="application/pdf,image/*" hidden></label></div>'}
+  (B.length?'<div class="list">'+B.map((d,i)=>'<div class="li"><label class="check" style="flex:1;min-width:0;padding:4px 0"><input type="checkbox" class="mqSel" data-i="'+i+'"><span><b>'+esc(d.titre)+'</b></span></label><button class="btn sm" data-act="mqEnvoi" data-i="'+i+'">Envoyer</button><button class="btn sm ghost" data-act="mqBibDel" data-i="'+i+'" aria-label="Retirer">'+icon('fa-trash')+'</button></div>').join('')+'</div>':'<p class="small muted">Aucun document pour l\'instant.</p>')+
+  (B.length>1?'<button class="btn" data-act="mqEnvoiSel">'+icon('fa-paper-plane')+'Envoyer les documents cochés</button>':'')+'<label class="btn ghost" style="cursor:pointer;text-align:center">'+icon('fa-upload')+'Ajouter des documents<input type="file" id="mqBibUp" accept="application/pdf,image/*" multiple hidden></label></div>'}
 async function bibSauver(B){const {error}=await sb.from('fam_doulas').update({biblio:B}).eq('id',ME_DOULA.id);if(error){toast(error.message);return false}ME_DOULA.biblio=B;return true}
 function dataUrl(f){return new Promise(r=>{const fr=new FileReader();fr.onload=()=>r(fr.result);fr.readAsDataURL(f)})}
 if(typeof DSUB!=='undefined'){DSUB.marque=function(){const m=mq(),l=logoOk(),c=lireCoul(),cur=PALETTES[c.pal]?c.pal:'terracotta',acc=c.perso||PALETTES[cur].accent;
@@ -41,22 +41,22 @@ document.addEventListener('click',async e=>{const x=e.target.closest('[data-act]
   else if(a==='mqDocs'){if(await sauver({docs:x.dataset.v})){$('#layer').innerHTML='';toast('Choix enregistré');render()}}
 
   else if(a==='mqBibDel'){const B=(ME_DOULA.biblio||[]).slice();B.splice(+x.dataset.i,1);if(await bibSauver(B))render()}
-  else if(a==='mqEnvoi'){const d=(ME_DOULA.biblio||[])[+x.dataset.i];if(!d)return;const fam=(S.clients||[]).filter(c=>c.statut!=='archive');
-    sheet('Envoyer « '+esc(d.titre)+' »','<label class="check"><input type="checkbox" id="bibSig" checked><span>À faire signer par la famille dans l\'appli</span></label><label class="check"><input type="checkbox" id="bibPart"><span>Pour le partenaire</span></label><span class="eyebrow acc">Choisir la famille</span><div class="list">'+(fam.length?fam.map(c=>'<button class="li" data-act="mqEnvF" data-i="'+x.dataset.i+'" data-f="'+c.id+'" style="background:none;border:0;width:100%;text-align:left;cursor:pointer;color:inherit"><div class="tx"><b>'+esc(cName(c))+'</b></div>'+icon('fa-chevron-right')+'</button>').join(''):'<p class="small muted">Aucune famille pour l\'instant.</p>')+'</div>')}
-  else if(a==='mqEnvF'){const d=(ME_DOULA.biblio||[])[+x.dataset.i];if(!d)return;const sg=!!document.getElementById('bibSig').checked,pt=!!document.getElementById('bibPart').checked;x.disabled=true;
-    const titre=(pt?'Pour le partenaire · ':'')+d.titre;
-    const {error}=await sb.from('fam_documents').insert({famille_id:x.dataset.f,type:'autre',titre,contenu:'@fichier '+d.nom+'|'+d.url,champs:[],sig_parent_requise:sg,sig_doula_requise:false,statut:sg?'a_remplir':'signe'});
-    if(error){toast(error.message);x.disabled=false;return}$('#layer').innerHTML='';try{await chargerClientDetail(x.dataset.f);notifierFamille(x.dataset.f,'document',titre)}catch(e){}render();toast(sg?'Envoyé : la famille pourra le signer':'Envoyé à la famille')}
+  else if(a==='mqEnvoi'||a==='mqEnvoiSel'){const idx=a==='mqEnvoi'?[+x.dataset.i]:[...document.querySelectorAll('.mqSel:checked')].map(c=>+c.dataset.i);
+    if(!idx.length){toast('Cochez au moins un document');return}window._mqSel=idx;const B=ME_DOULA.biblio||[],fam=(S.clients||[]).filter(c=>c.statut!=='archive');
+    sheet(idx.length>1?'Envoyer '+idx.length+' documents':'Envoyer « '+esc((B[idx[0]]||{}).titre)+' »','<ul class="small" style="margin:0 0 8px 18px">'+idx.map(i=>'<li>'+esc((B[i]||{}).titre)+'</li>').join('')+'</ul><label class="check"><input type="checkbox" id="bibSig" checked><span>À faire signer par la famille dans l\'appli</span></label><label class="check"><input type="checkbox" id="bibPart"><span>Pour le partenaire</span></label><span class="eyebrow acc">Choisir la famille</span><div class="list">'+(fam.length?fam.map(c=>'<button class="li" data-act="mqEnvF" data-f="'+c.id+'" style="background:none;border:0;width:100%;text-align:left;cursor:pointer;color:inherit"><div class="tx"><b>'+esc(cName(c))+'</b></div>'+icon('fa-chevron-right')+'</button>').join(''):'<p class="small muted">Aucune famille pour l\'instant.</p>')+'</div>')}
+  else if(a==='mqEnvF'){const B=ME_DOULA.biblio||[],ds=(window._mqSel||[]).map(i=>B[i]).filter(Boolean);if(!ds.length)return;const sg=!!document.getElementById('bibSig').checked,pt=!!document.getElementById('bibPart').checked;x.disabled=true;
+    const rows=ds.map(d=>({famille_id:x.dataset.f,type:'autre',titre:(pt?'Pour le partenaire · ':'')+d.titre,contenu:'@fichier '+d.nom+'|'+d.url,champs:[],sig_parent_requise:sg,sig_doula_requise:false,statut:sg?'a_remplir':'signe'}));
+    const {error}=await sb.from('fam_documents').insert(rows);
+    if(error){toast(error.message);x.disabled=false;return}$('#layer').innerHTML='';window._mqSel=[];try{await chargerClientDetail(x.dataset.f);notifierFamille(x.dataset.f,'document',rows.length>1?rows.length+' documents':rows[0].titre)}catch(e){}render();toast(rows.length>1?rows.length+' documents envoyés':(sg?'Envoyé : la famille pourra le signer':'Envoyé à la famille'))}
   else if(a==='mqPlusTard'){try{localStorage.setItem('sere-mq-vu','1')}catch(e){}$('#layer').innerHTML=''}},true);
 document.addEventListener('change',async e=>{const i=e.target.closest('#mqLogo');if(!i||!i.files[0])return;const f=i.files[0];
   if(!/^image\//.test(f.type)){toast('Choisissez une image');i.value='';return}
   try{let u=await reduire(f,480);if(u.length>400000)u=await reduire(f,300);if(u.length>400000){toast('Image trop lourde');return}
     if(await sauver({logo:u})){toast('Logo enregistré');render()}}catch(x){toast('Image illisible')}i.value=''});
-document.addEventListener('change',async e=>{const i=e.target.closest('#mqBibUp');if(!i||!i.files[0])return;const f=i.files[0];
-  if(!/^(application\/pdf|image\/)/.test(f.type)){toast('PDF ou image seulement');i.value='';return}
-  if(f.type==='application/pdf'&&f.size>BIB_MAX){toast('PDF trop gros (3 Mo max)');i.value='';return}
-  let url;try{url=f.type==='application/pdf'?await dataUrl(f):await reduire(f,1600,true)}catch(x){toast('Fichier illisible');return}
-  if(url.length>BIB_MAX*1.4){toast('Fichier trop gros');i.value='';return}
-  const B=((ME_DOULA.biblio)||[]).concat([{id:Date.now().toString(36),titre:f.name.replace(/\.[^.]+$/,'').slice(0,80),nom:f.name,url}]);
-  if(await bibSauver(B)){toast('Document ajouté à votre bibliothèque');render()}i.value=''});
+document.addEventListener('change',async e=>{const i=e.target.closest('#mqBibUp');if(!i||!i.files.length)return;const B=((ME_DOULA.biblio)||[]).slice();let n=0,ko=0;
+  for(const f of i.files){try{
+    if(!/^(application\/pdf|image\/)/.test(f.type)||(f.type==='application/pdf'&&f.size>BIB_MAX)){ko++;continue}
+    const url=f.type==='application/pdf'?await dataUrl(f):await reduire(f,1600,true);if(url.length>BIB_MAX*1.4){ko++;continue}
+    B.push({id:Date.now().toString(36)+n,titre:f.name.replace(/\.[^.]+$/,'').slice(0,80),nom:f.name,url});n++}catch(x){ko++}}
+  i.value='';if(n&&await bibSauver(B)){toast(n+' document'+(n>1?'s ajoutés':' ajouté')+(ko?' · '+ko+' refusé'+(ko>1?'s':'')+' (trop gros ou format non permis)':''));render()}else if(ko)toast('Fichier refusé (PDF ou image, 3 Mo max)')});
 })();
