@@ -3,8 +3,13 @@
    et bébé grossit un peu jusqu'au stade suivant. Le texte de la semaine vient de SEMAINES (bebe-donnees.js).
    Ajoutez ?bebe3d=debug à l'adresse pour voir la liste des stades trouvés dans le modèle. */
 /* Modèle choisi : « Fetus (animated) » par Ebers (un seul bébé). Pour une série par stades, mettre BEBE3D_STADES=true. */
-const BEBE3D_UID='45febe76c3c940b2befabbf8596a8974';
+/* Modèle : « Human Fetus / Stages of fetal development » par arloopa. Son animation fait grandir bébé :
+   on l'arrête au moment qui correspond à la semaine (image fixe, qu'on peut faire tourner).
+   BEBE3D_TEMPS permet d'ajuster le moment exact de chaque semaine après un essai : [[semaine, secondes], ...]. */
+const BEBE3D_UID='db86ba90c4d3400f8fada9ffa8bf3c55';
 const BEBE3D_STADES=false;
+const BEBE3D_ANIM=true;
+const BEBE3D_TEMPS=null;
 /* Teintes de peau : multiplient la couleur d'origine du modèle. */
 const BEBE3D_PEAUX=[['Naturelle',[1,1,1],'#efb6a6'],['Dorée',[.93,.8,.66],'#d9a37f'],['Mate',[.78,.6,.46],'#b9825f'],['Brune',[.6,.43,.31],'#8e5d40'],['Foncée',[.44,.3,.21],'#63402c']];
 const BEBE3D_SENS=[
@@ -42,7 +47,7 @@ function bebe3dChoix(w){const S=_b3.stades;let i=0;for(let k=0;k<S.length;k++)if
   else if(!nxt&&w>cur.sem)f=1+.03*Math.min(4,w-cur.sem);
   if(w<cur.sem)f=Math.max(.75,1-.06*(cur.sem-w));
   return{i,f:1}} // bébé reste fixe : il change seulement quand on passe à un autre stade
-function bebe3dMontrer(w){_b3.w=w;const api=_b3.api;if(!api||!_b3.stades.length)return;
+function bebe3dMontrer(w){_b3.w=w;const api=_b3.api;if(api&&_b3.anim)bebe3dTemps(w);if(!api||!_b3.stades.length)return;
   const {i,f}=bebe3dChoix(w),S=_b3.stades;
   const echelle=()=>{const s=S[i];if(!s.base)return;const m=s.base.slice();for(const k of[0,1,2,4,5,6,8,9,10])m[k]*=f;api.setMatrix(s.id,m)};
   if(i!==_b3.dernier){S.forEach((s,k)=>{k===i?api.show(s.id):api.hide(s.id)});
@@ -55,9 +60,13 @@ function bebe3dMonter(conteneur,w){
   const fr=conteneur.querySelector('iframe'),charge=conteneur.querySelector('.b3-charge');_b3.w=w;_b3.dernier=-1;
   bebe3dChargerAPI().then(()=>{
     const client=new Sketchfab('1.12.1',fr);
-    client.init(BEBE3D_UID,{autostart:1,preload:1,transparent:1,camera:0,dnt:1,ui_hint:0,ui_infos:0,ui_controls:0,ui_stop:0,ui_inspector:0,ui_help:0,ui_settings:0,ui_vr:0,ui_ar:0,ui_fullscreen:0,ui_annotations:0,ui_loading:0,ui_theme:'dark',
+    client.init(BEBE3D_UID,{autostart:1,animation_autoplay:0,preload:1,transparent:1,camera:0,dnt:1,ui_hint:0,ui_infos:0,ui_controls:0,ui_stop:0,ui_inspector:0,ui_help:0,ui_settings:0,ui_vr:0,ui_ar:0,ui_fullscreen:0,ui_annotations:0,ui_loading:0,ui_theme:'dark',
       success(api){_b3.api=api;api.start();api.addEventListener('viewerready',()=>{charge.hidden=true;
         api.getMaterialList((e,mats)=>{if(!e&&mats){_b3.mats=mats;const dbg=document.getElementById('b3Liste');if(dbg)dbg.textContent+=' · Matériaux : '+mats.map(m=>m.name).join(', ');bebe3dPeau(_b3.peau||0)}});
+        if(BEBE3D_ANIM)api.getAnimations((e,an)=>{if(e||!an||!an.length){const d=document.getElementById('b3Liste');if(d)d.textContent+=' · Aucune animation dans ce modèle';return}
+          an.sort((a,b)=>b[2]-a[2]);_b3.anim={uid:an[0][0],nom:an[0][1],duree:an[0][2]};
+          const d=document.getElementById('b3Liste');if(d)d.textContent+=' · Animations : '+an.map(a=>a[1]+' ('+a[2].toFixed(1)+' s)').join(', ');
+          api.setCurrentAnimationByUID(_b3.anim.uid,()=>{api.pause();bebe3dTemps(_b3.w)})});
         if(!BEBE3D_STADES)return;
         api.getNodeMap((e,map)=>{if(e||!map)return;_b3.stades=bebe3dStades(map);bebe3dSemainesStades();
           const dbg=document.getElementById('b3Liste');if(dbg)dbg.textContent='Stades trouvés ('+_b3.stades.length+') : '+_b3.stades.map(s=>s.nom+' → sem. '+s.sem).join(' | ');
@@ -87,3 +96,13 @@ function bebe3dPeau(i){_b3.peau=i;const api=_b3.api,mats=_b3.mats;if(!api||!mats
   cibles.forEach(m=>{const ch=m.channels||{};
     for(const k of['AlbedoPBR','DiffusePBR','DiffuseColor','SubsurfaceScattering']){if(ch[k]){if(!m._orig)m._orig={};if(!m._orig[k])m._orig[k]=(ch[k].color||[1,1,1]).slice();const o=m._orig[k];ch[k].color=[o[0]*c[0],o[1]*c[1],o[2]*c[2]]}}
     api.setMaterial(m,()=>{})})}
+
+/* Animation : moment de l'animation pour une semaine donnée, puis pause (bébé fixe). */
+function bebe3dTemps(w){const api=_b3.api,A=_b3.anim;if(!api||!A)return;
+  let t;const T=BEBE3D_TEMPS;
+  if(T&&T.length){let a=T[0],b=T[T.length-1];for(let k=0;k<T.length-1;k++)if(w>=T[k][0]&&w<=T[k+1][0]){a=T[k];b=T[k+1];break}
+    t=b[0]===a[0]?a[1]:a[1]+(b[1]-a[1])*(w-a[0])/(b[0]-a[0])}
+  else t=A.duree*Math.max(0,Math.min(1,(w-4)/36));
+  t=Math.max(0,Math.min(A.duree-.05,t));
+  api.pause();api.seekTo(t);setTimeout(()=>{try{api.pause()}catch(e){}},150);
+  const d=document.getElementById('b3Debug');if(d)d.textContent='Semaine '+w+' → '+t.toFixed(2)+' s sur '+A.duree.toFixed(1)+' s ('+A.nom+')'}
