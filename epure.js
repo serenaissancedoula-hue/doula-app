@@ -2,7 +2,7 @@
 if(window.ESPACE==='doula'){
 const GROUPES=[
  ['Chaque jour',['demandes','annuaire','contr','calc','sac']],
- ['Documents et messages',['modeles','messages','lettre']],
+ ['Documents et messages',['modeles','biblio','messages','lettre']],
  ['Rencontres et guides',['rencontres','approche','retour','positions','confort','partenaire','cadre']],
  ['Avis des familles',['temoignages']],
  ['Mon compte',['profil','couleurs','aide']],
