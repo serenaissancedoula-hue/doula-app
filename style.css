@@ -435,3 +435,14 @@ details.acc .tile:active{transform:scale(.99)}
 .soft .grid2>*,.soft .grid3>*{min-width:0}
 .soft input[type=date],.soft input[type=number],.soft input[type=time]{width:100%;max-width:100%;min-width:0;box-sizing:border-box;-webkit-appearance:none;appearance:none;min-height:48px;text-align:left}
 .soft input[type=date]::-webkit-date-and-time-value{text-align:left}
+/* iOS : les champs date/heure débordent et se chevauchent dans les grilles → partout */
+.grid2,.grid3,.grid2.resp{min-width:0}
+.grid2>*,.grid3>*,.row>label.f{min-width:0}
+label.f{min-width:0;max-width:100%}
+label.f input,label.f select,label.f textarea,.grid2 input,.grid3 input,.grid2 select,.grid3 select{width:100%;max-width:100%;min-width:0;box-sizing:border-box}
+input[type=date],input[type=time],input[type=datetime-local],input[type=month]{-webkit-appearance:none;appearance:none;min-width:0;max-width:100%;width:100%;box-sizing:border-box;min-height:48px;text-align:left}
+input[type=date]::-webkit-date-and-time-value,input[type=time]::-webkit-date-and-time-value,input[type=datetime-local]::-webkit-date-and-time-value{text-align:left;min-width:0}
+.pad-zone{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-width:90px;min-height:40px;padding:6px 10px;border:1.5px dashed var(--accent,#b5644d);border-radius:10px;background:var(--soft,#f6efe8);color:var(--accent,#b5644d);font:inherit;font-weight:600;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.pad-zone.fait{border-style:solid;background:#fffdfb;color:inherit}
+.pad-zone small{font-size:.58rem;font-weight:500;color:#8a7a70}
+.fid .sig-cell .pad-zone{width:100%;min-height:56px}

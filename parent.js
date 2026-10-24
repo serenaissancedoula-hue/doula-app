@@ -133,7 +133,7 @@ function contrCard(force){const A=S.contrActive,st=contrStats();if(!A&&!S.showCo
 
 /* ================== PARENTS · SUIVI ================== */
 function cardGrossesse(){const p=S.parent,g=preg(p);
-  return '<div class="card"><div class="grid2 resp">'+ui.text('parent.prenom','Mon prénom')+ui.text('parent.partenaire','Partenaire')+ui.text('parent.lieu','Lieu de naissance prévu')+ui.text('parent.prof','Professionnel de suivi')+'</div>'+
+  return '<div class="card"><span class="eyebrow acc">Ma grossesse et mes dates</span><div class="grid2 resp">'+ui.text('parent.lieu','Lieu de naissance prévu')+ui.text('parent.prof','Professionnel de suivi')+'</div>'+
    '<div class="soft" style="gap:10px"><b class="small">1. Dernières règles</b><div class="grid2">'+ui.text('parent.ddr','1er jour','date',0,1)+ui.text('parent.cycle','Cycle (jours)','number',0,1)+'</div>'+(g&&g.ddrDPA?'<p class="xs muted">Date calculée : '+fmtD(g.ddrDPA)+'</p>':'')+'</div>'+
    '<div class="soft" style="gap:10px"><b class="small">2. Échographie de datation</b><div class="grid3">'+ui.text('parent.echoDate','Date','date',0,1)+ui.text('parent.echoSA','Semaines','number',0,1)+ui.text('parent.echoJ','Jours','number',0,1)+'</div>'+(g&&g.echoDPA?'<p class="xs muted">Date calculée : '+fmtD(g.echoDPA)+'</p>':'')+'</div>'+
    '<div class="soft" style="gap:10px"><b class="small">3. Date prévue donnée par l\'équipe (a priorité)</b>'+ui.text('parent.dpaEquipe','Date prévue','date',0,1)+'</div>'+
