@@ -42,17 +42,33 @@
   ['touchstart', 'pointerdown', 'keydown', 'click'].forEach(function (n) { document.addEventListener(n, debloquer, { capture: true, passive: true }); });
   /* ---- Petit « tic » doux à chaque bouton touché ---- */
   var dernierTap = 0;
-  function tap() {
-    var d = lire(); if (!d.son || d.touches === false) return;
+  var SONS_TOUCHE = [['goutte', 'Goutte', 'Drop'], ['bulle', 'Bulle', 'Bubble'], ['bois', 'Bois', 'Wood'], ['cristal', 'Cristal', 'Crystal'], ['clic', 'Clic sec', 'Dry click'], ['clochette', 'Clochette', 'Little bell'], ['aucun', 'Aucun', 'None']];
+  var SONS_MSG = [['carillon', 'Carillon', 'Chime'], ['harpe', 'Harpe', 'Harp'], ['cristal', 'Cristal', 'Crystal'], ['berceuse', 'Berceuse', 'Lullaby'], ['cloche', 'Cloche douce', 'Soft bell'], ['goutte', 'Gouttes', 'Drops'], ['aucun', 'Aucun', 'None']];
+  function note(a, t, f, f2, dur, type, vol, att) {
+    var o = a.createOscillator(), g = a.createGain();
+    o.type = type || 'sine'; o.frequency.setValueAtTime(f, t); if (f2) o.frequency.exponentialRampToValueAtTime(f2, t + dur * 0.8);
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(Math.max(vol, 0.0002), t + (att || 0.01)); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g); g.connect(a.destination); o.start(t); o.stop(t + dur + 0.03);
+  }
+  function jouerTouche(a, nom, vol) {
+    var t = a.currentTime;
+    if (nom === 'goutte') note(a, t, 1200, 600, 0.09, 'sine', vol);
+    else if (nom === 'bulle') note(a, t, 380, 900, 0.1, 'sine', vol * 1.2);
+    else if (nom === 'bois') { note(a, t, 520, 260, 0.06, 'triangle', vol * 1.5, 0.003); }
+    else if (nom === 'cristal') { note(a, t, 2093, 0, 0.16, 'sine', vol * 0.8); note(a, t, 3136, 0, 0.1, 'sine', vol * 0.4); }
+    else if (nom === 'clic') {
+      var n = Math.floor(a.sampleRate * 0.012), buf = a.createBuffer(1, n, a.sampleRate), dd = buf.getChannelData(0);
+      for (var i = 0; i < n; i++) dd[i] = (Math.random() * 2 - 1) * (1 - i / n);
+      var s = a.createBufferSource(), g = a.createGain(), h = a.createBiquadFilter(); h.type = 'highpass'; h.frequency.value = 1800; g.gain.value = vol * 3;
+      s.buffer = buf; s.connect(h); h.connect(g); g.connect(a.destination); s.start(t);
+    } else if (nom === 'clochette') { note(a, t, 1760, 0, 0.22, 'sine', vol * 0.9); note(a, t, 2637, 0, 0.14, 'sine', vol * 0.35); }
+  }
+  function tap(forcer) {
+    var d = lire(); if (!forcer && (!d.son || d.touches === false)) return;
+    var nom = d.sonTouche || 'goutte'; if (nom === 'aucun') return;
     var now = Date.now(); if (now - dernierTap < 60) return; dernierTap = now;
     var a = ctx(false); if (!a) return;
-    try {
-      var vol = Math.max(0, Math.min(1, (d.volume || 0) / 100)) * 0.22, t = a.currentTime;
-      var o = a.createOscillator(), g = a.createGain();
-      o.type = 'sine'; o.frequency.setValueAtTime(1500, t); o.frequency.exponentialRampToValueAtTime(700, t + 0.05);
-      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(Math.max(vol, 0.0002), t + 0.006); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.07);
-      o.connect(g); g.connect(a.destination); o.start(t); o.stop(t + 0.08);
-    } catch (e) {}
+    try { jouerTouche(a, nom, Math.max(0, Math.min(1, (d.volume || 0) / 100)) * 0.22); } catch (e) {}
   }
   document.addEventListener('click', function (e) {
     var t = e.target && e.target.closest && e.target.closest('button, [data-act], .chip, .tile, .qbtn, a[href], summary, [role=tab], [role=switch], label.btn');
@@ -61,20 +77,21 @@
   }, true);
 
   /* ---- Son dans l'appli (volume réglable) ---- */
-  function sonner(forcer) {
+  function sonner(forcer, nom) {
     var d = lire();
     if (!forcer && !d.son) return;
-    try {
-      ctx(true);
-      var vol = Math.max(0, Math.min(1, (d.volume || 0) / 100)) * 0.5, t = audio.currentTime;
-      [[880, 0], [1318.5, 0.14]].forEach(function (n) {
-        var o = audio.createOscillator(), g = audio.createGain();
-        o.type = 'sine'; o.frequency.value = n[0];
-        g.gain.setValueAtTime(0.0001, t + n[1]);
-        g.gain.exponentialRampToValueAtTime(Math.max(vol, 0.0002), t + n[1] + 0.02);
-        g.gain.exponentialRampToValueAtTime(0.0001, t + n[1] + 0.5);
-        o.connect(g); g.connect(audio.destination); o.start(t + n[1]); o.stop(t + n[1] + 0.55);
-      });
+    nom = nom || d.sonMsg || 'carillon';
+    if (nom !== 'aucun') try {
+      var a = ctx(true), vol = Math.max(0, Math.min(1, (d.volume || 0) / 100)) * 0.5, t = a.currentTime;
+      var Z = {
+        carillon: [[880, 0, .5, 'sine'], [1318.5, .14, .5, 'sine']],
+        harpe: [[523.3, 0, .7, 'triangle'], [659.3, .1, .7, 'triangle'], [784, .2, .7, 'triangle'], [1046.5, .3, .9, 'triangle']],
+        cristal: [[1568, 0, .8, 'sine'], [2093, .12, .8, 'sine'], [2637, .24, 1, 'sine']],
+        berceuse: [[659.3, 0, .5, 'triangle'], [587.3, .3, .5, 'triangle'], [523.3, .6, .9, 'triangle']],
+        cloche: [[784, 0, 1.3, 'sine'], [1568, 0, .9, 'sine'], [2349, 0, .5, 'sine']],
+        goutte: [[988, 0, .35, 'sine'], [740, .18, .45, 'sine']]
+      };
+      (Z[nom] || Z.carillon).forEach(function (n, i) { note(a, t + n[1], n[0], 0, n[2], n[3], vol * (nom === 'cloche' && i > 0 ? 0.4 : 1), 0.02); });
     } catch (e) {}
     if (d.vibration && navigator.vibrate) try { navigator.vibrate([120, 60, 120]); } catch (e) {}
   }
@@ -124,7 +141,9 @@
       '<div class="rg-actions" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:6px;"><button type="button" class="btn rg-activer" hidden>' + L('Activer les notifications', 'Turn on notifications') + '</button></div>' +
       '<div class="rg-reglages" style="display:flex;flex-direction:column;gap:12px;margin-top:8px;">' +
         '<label class="rg-ligne"><span><strong>' + L('Son', 'Sound') + '</strong><small>' + L('Un petit carillon à chaque notification', 'A little chime with each notification') + '</small></span><input type="checkbox" class="rg-son" role="switch"' + (d.son ? ' checked' : '') + '></label>' +
-        '<label class="rg-ligne"><span><strong>' + L('Sons des touches', 'Tap sounds') + '</strong><small>' + L('Un petit « tic » doux quand on touche un bouton', 'A soft tick when you tap a button') + '</small></span><input type="checkbox" class="rg-tch" role="switch"' + (d.touches === false ? '' : ' checked') + '></label>' +
+        '<label class="rg-ligne"><span><strong>' + L('Sons des touches', 'Tap sounds') + '</strong><small>' + L('Quand on touche un bouton', 'When you tap a button') + '</small></span><input type="checkbox" class="rg-tch" role="switch"' + (d.touches === false ? '' : ' checked') + '></label>' +
+        '<label class="rg-ligne"><span><strong>' + L('Choix du son des touches', 'Tap sound choice') + '</strong><small>' + L('Touchez pour écouter', 'Change to listen') + '</small></span>' + '<select class="rg-stch" style="max-width:150px">' + SONS_TOUCHE.map(function (x) { return '<option value="' + x[0] + '"' + (((d.sonTouche || 'goutte') === x[0]) ? ' selected' : '') + '>' + L(x[1], x[2]) + '</option>'; }).join('') + '</select>' + '</label>' +
+        '<label class="rg-ligne"><span><strong>' + L('Son d\'un nouveau message', 'New message sound') + '</strong><small>' + L('Choisissez celui que vous préférez', 'Pick the one you like') + '</small></span>' + '<select class="rg-smsg" style="max-width:150px">' + SONS_MSG.map(function (x) { return '<option value="' + x[0] + '"' + (((d.sonMsg || 'carillon') === x[0]) ? ' selected' : '') + '>' + L(x[1], x[2]) + '</option>'; }).join('') + '</select>' + '</label>' +
         '<label class="rg-ligne"><span><strong>Vibration</strong><small>' + L('Quand le téléphone le permet', 'When the phone supports it') + '</small></span><input type="checkbox" class="rg-vib" role="switch"' + (d.vibration ? ' checked' : '') + '></label>' +
         '<label class="rg-ligne rg-vol"><span><strong>' + L('Volume dans l\'appli', 'In-app volume') + '</strong><small>' + L('Quand l\'appli est ouverte', 'While the app is open') + '</small></span><input type="range" class="rg-volume" min="0" max="100" step="5" value="' + (d.volume == null ? 70 : d.volume) + '"></label>' +
         '<p style="font-size:.78rem;color:var(--doux,#7a685e);">' + L('Appli fermée : le volume suit celui de ton téléphone. ', 'When the app is closed, the volume follows your phone. ') + (IOS ? L('Sur iPhone, tu peux aussi choisir le style d\'alerte dans Réglages → Notifications.', 'On iPhone, you can also choose the alert style in Settings → Notifications.') : '') + '</p>' +
@@ -146,7 +165,9 @@
       abonnementActuel().then(function (ab) { if (ab && Notification.permission === 'granted') enregistrer(ab); });
     }
     q('.rg-son').addEventListener('change', function () { sauver({ son: this.checked }); if (this.checked) sonner(); });
-    q('.rg-tch').addEventListener('change', function () { sauver({ touches: this.checked }); if (this.checked) { dernierTap = 0; tap(); } });
+    q('.rg-tch').addEventListener('change', function () { sauver({ touches: this.checked }); if (this.checked) { dernierTap = 0; tap(true); } });
+    q('.rg-stch').addEventListener('change', function () { sauver({ sonTouche: this.value }); dernierTap = 0; tap(true); });
+    q('.rg-smsg').addEventListener('change', function () { sauver({ sonMsg: this.value }); sonner(true, this.value); });
     q('.rg-vib').addEventListener('change', function () { sauver({ vibration: this.checked }); if (this.checked && navigator.vibrate) navigator.vibrate(150); });
     q('.rg-volume').addEventListener('change', function () { sauver({ volume: +this.value }); sonner(true); });
     q('.rg-activer').addEventListener('click', function () {
