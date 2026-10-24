@@ -134,6 +134,12 @@ function contrCard(force){const A=S.contrActive,st=contrStats();if(!A&&!S.showCo
   return h+'<p class="xs muted">Eaux qui crèvent, saignement rouge clair, liquide vert ou brun, bébé qui bouge moins : appelez sans attendre, peu importe le rythme.</p></div>'}
 
 /* ================== PARENTS · SUIVI ================== */
+function cardGrossesse(){const p=S.parent,g=preg(p);
+  return '<div class="card"><div class="grid2 resp">'+ui.text('parent.prenom','Mon prénom')+ui.text('parent.partenaire','Partenaire')+ui.text('parent.lieu','Lieu de naissance prévu')+ui.text('parent.prof','Professionnel de suivi')+'</div>'+
+   '<div class="soft" style="gap:10px"><b class="small">1. Dernières règles</b><div class="grid2">'+ui.text('parent.ddr','1er jour','date',0,1)+ui.text('parent.cycle','Cycle (jours)','number',0,1)+'</div>'+(g&&g.ddrDPA?'<p class="xs muted">Date calculée : '+fmtD(g.ddrDPA)+'</p>':'')+'</div>'+
+   '<div class="soft" style="gap:10px"><b class="small">2. Échographie de datation</b><div class="grid3">'+ui.text('parent.echoDate','Date','date',0,1)+ui.text('parent.echoSA','Semaines','number',0,1)+ui.text('parent.echoJ','Jours','number',0,1)+'</div>'+(g&&g.echoDPA?'<p class="xs muted">Date calculée : '+fmtD(g.echoDPA)+'</p>':'')+'</div>'+
+   '<div class="soft" style="gap:10px"><b class="small">3. Date prévue donnée par l\'équipe (a priorité)</b>'+ui.text('parent.dpaEquipe','Date prévue','date',0,1)+'</div>'+
+   '</div>';}
 function pSuivi(){const p=S.parent,st=stage();let h='';
   if(st.k==='pp'){const day=st.day,sel=S.ppSel??day,info=ppInfo(sel);
     h+=sh('Mon 4<sup>e</sup> trimestre','Jour par jour, jusqu\'au jour 120');
@@ -143,12 +149,8 @@ function pSuivi(){const p=S.parent,st=stage();let h='';
     h+='<div class="card"><span class="eyebrow acc">Naissance</span><p>'+esc(p.naissance.prenomBebe||'Bébé')+' est né(e) le '+fmtD(st.birth)+(p.naissance.heure?' à '+esc(p.naissance.heure):'')+'.</p><div class="row"><button class="btn sm ghost" data-act="birthForm">'+icon('fa-pen')+'Modifier</button><button class="btn sm ghost" data-act="go" data-v="souvenirs|recit">Mon récit de naissance</button></div></div>';
     return h}
   const g=preg(p);
-  h+=sh('Mon dossier de grossesse','Tout se recalcule à chaque changement');
-  h+='<div class="card"><div class="grid2 resp">'+ui.text('parent.prenom','Mon prénom')+ui.text('parent.partenaire','Partenaire')+ui.text('parent.lieu','Lieu de naissance prévu')+ui.text('parent.prof','Professionnel de suivi')+'</div>'+
-   '<div class="soft" style="gap:10px"><b class="small">1. Dernières règles</b><div class="grid2">'+ui.text('parent.ddr','1er jour','date',0,1)+ui.text('parent.cycle','Cycle (jours)','number',0,1)+'</div>'+(g&&g.ddrDPA?'<p class="xs muted">Date calculée : '+fmtD(g.ddrDPA)+'</p>':'')+'</div>'+
-   '<div class="soft" style="gap:10px"><b class="small">2. Échographie de datation</b><div class="grid3">'+ui.text('parent.echoDate','Date','date',0,1)+ui.text('parent.echoSA','Semaines','number',0,1)+ui.text('parent.echoJ','Jours','number',0,1)+'</div>'+(g&&g.echoDPA?'<p class="xs muted">Date calculée : '+fmtD(g.echoDPA)+'</p>':'')+'</div>'+
-   '<div class="soft" style="gap:10px"><b class="small">3. Date prévue donnée par l\'équipe (a priorité)</b>'+ui.text('parent.dpaEquipe','Date prévue','date',0,1)+'</div>'+
-   '</div>';
+  h+=sh('Mon suivi de grossesse','Se recalcule selon les dates de vos Paramètres');
+   if(!g)h+='<div class="card tint"><p class="small">Pour voir votre suivi semaine par semaine, entrez la date de vos dernières règles, de votre échographie ou la date prévue donnée par votre équipe.</p><button class="btn" data-act="params">'+icon('fa-gear')+'Aller dans Paramètres</button></div>';
   if(g){h+='<div class="card"><div class="row between"><div><span class="eyebrow acc">Résultat</span><h2>'+g.w+' semaines + '+g.d+' jours</h2></div><span class="pill acc">'+g.tri+'<sup>e</sup> trimestre</span></div><p>Date prévue : <b>'+fmtD(g.dpa)+'</b></p><p class="xs muted">Source : '+g.src+'</p>'+(g.warn?'<div class="banner gold">'+icon('fa-circle-info')+'<div>Les règles et l\'échographie divergent de plus de 7 jours : l\'échographie est retenue.</div></div>':'')+'<div class="prog"><i style="width:'+Math.min(100,Math.max(0,g.gaDays/280*100))+'%"></i></div><div class="grid3"><div class="stat"><b>'+fmtS(addD(g.dpa,-21))+'</b><span>37 SA · à terme</span></div><div class="stat"><b>'+fmtS(addD(g.dpa,-14))+'</b><span>38 SA · garde de la doula</span></div><div class="stat"><b>'+fmtS(addD(g.dpa,14))+'</b><span>42 SA</span></div></div></div>';
     const wk=S.wkSel??Math.max(4,Math.min(42,g.w)),wi=weekInfo(wk),f=fruit(wk);
     h+='<div class="card"><span class="eyebrow acc">Semaine par semaine</span><h2>Semaine '+wk+(wk===g.w?' (actuelle)':'')+' · '+esc(f[0])+'</h2><input type="range" id="wkRange" min="4" max="42" value="'+wk+'" data-act="wkSel" style="width:100%;accent-color:var(--accent)"><p class="xs muted num">Semaine du '+fmtD(addD(g.dpa,(wk-40)*7))+' · environ '+cm(f[1])+' cm'+(f[2]?', '+f[2]+' g':'')+'</p><div class="grid2 resp"><div class="soft"><b class="small">Bébé</b><p class="small">'+wi[2]+'</p></div><div class="soft"><b class="small">Vous</b><p class="small">'+wi[3]+'</p></div></div></div>';
