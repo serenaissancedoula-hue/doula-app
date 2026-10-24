@@ -26,6 +26,10 @@ body{margin:0}
 .b3-date input{flex:1;min-width:0;padding:10px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--ink);font:inherit}
 .b3-date button{border:0;border-radius:12px;padding:10px 14px;background:var(--accent);color:#fff;font-weight:700}
 .b3-note{font-size:.78rem;color:var(--muted);margin:0}
+.b3-peau{display:flex;flex-direction:column;gap:6px;font-weight:700}
+.b3-sw{display:flex;gap:10px;flex-wrap:wrap}
+.b3-sw button{width:40px;height:40px;border-radius:50%;border:2px solid var(--card);box-shadow:0 0 0 1px var(--line);cursor:pointer}
+.b3-sw button[aria-pressed="true"]{box-shadow:0 0 0 3px var(--accent)}
 #b3Liste,#b3Debug{font-size:.75rem;color:var(--muted);word-break:break-word}
 </style>
 </head>
@@ -33,13 +37,14 @@ body{margin:0}
 <main class="b3-page">
   <span class="b3-test">Page de test · bébé en 3D</span>
   <div class="b3-scene" id="b3Scene"></div>
+  <div class="b3-peau"><span>Couleur de peau</span><div id="b3Peaux" class="b3-sw"></div></div>
   <div class="b3-nav"><button id="b3Prev" aria-label="Semaine précédente">‹</button>
     <div class="b3-sem"><h1 id="b3Titre">Semaine 20</h1><span class="pill" id="b3Pill" hidden>Cette semaine</span></div>
     <button id="b3Next" aria-label="Semaine suivante">›</button></div>
   <div id="b3Texte" style="display:flex;flex-direction:column;gap:10px"></div>
   <label for="b3Dpa" style="font-weight:700">Date prévue d'accouchement (pour l'essai)</label>
   <div class="b3-date"><input type="date" id="b3Dpa"><button id="b3Ok">Mettre à jour</button></div>
-  <p class="b3-note">Modèle 3D « Human Fetus / Stages of fetal development » par arloopa, affiché avec le lecteur Sketchfab. Information générale : votre équipe de soins reste votre référence.</p>
+  <p class="b3-note">Modèle 3D « Fetus (animated) » par Ebers, affiché avec le lecteur Sketchfab. Information générale : votre équipe de soins reste votre référence.</p>
   <p id="b3Liste" hidden></p><p id="b3Debug" hidden></p>
 </main>
 <script src="bebe-donnees.js?v=114"></script>
@@ -56,7 +61,10 @@ function afficher(){$('b3Titre').textContent='Semaine '+w;$('b3Pill').hidden=(w!
   $('b3Prev').disabled=w<=4;$('b3Next').disabled=w>=42;$('b3Texte').innerHTML=bebe3dTexte(w);bebe3dMontrer(w)}
 $('b3Prev').onclick=()=>{w--;afficher()};$('b3Next').onclick=()=>{w++;afficher()};
 $('b3Ok').onclick=()=>{const v=$('b3Dpa').value;if(!v)return;dpa=v;try{localStorage.setItem('sere-b3-dpa',v)}catch(e){}actu=semaineActuelle();w=actu;afficher()};
-bebe3dMonter($('b3Scene'),w);afficher();
+let peau=0;try{peau=+(localStorage.getItem('sere-b3-peau')||0)}catch(e){}
+function peaux(){$('b3Peaux').innerHTML=BEBE3D_PEAUX.map((p,i)=>'<button style="background:'+p[2]+'" aria-label="'+p[0]+'" title="'+p[0]+'" aria-pressed="'+(i===peau)+'" data-i="'+i+'"></button>').join('')}
+$('b3Peaux').onclick=e=>{const b=e.target.closest('button');if(!b)return;peau=+b.dataset.i;try{localStorage.setItem('sere-b3-peau',peau)}catch(x){}peaux();bebe3dPeau(peau)};
+peaux();_b3.peau=peau;bebe3dMonter($('b3Scene'),w);afficher();
 </script>
 </body>
 </html>

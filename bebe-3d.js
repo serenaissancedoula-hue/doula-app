@@ -2,7 +2,11 @@
    affiché avec le lecteur officiel de Sketchfab. Chaque semaine, on montre le stade le plus proche
    et bébé grossit un peu jusqu'au stade suivant. Le texte de la semaine vient de SEMAINES (bebe-donnees.js).
    Ajoutez ?bebe3d=debug à l'adresse pour voir la liste des stades trouvés dans le modèle. */
-const BEBE3D_UID='db86ba90c4d3400f8fada9ffa8bf3c55';
+/* Modèle choisi : « Fetus (animated) » par Ebers (un seul bébé). Pour une série par stades, mettre BEBE3D_STADES=true. */
+const BEBE3D_UID='45febe76c3c940b2befabbf8596a8974';
+const BEBE3D_STADES=false;
+/* Teintes de peau : multiplient la couleur d'origine du modèle. */
+const BEBE3D_PEAUX=[['Naturelle',[1,1,1],'#efb6a6'],['Dorée',[.93,.8,.66],'#d9a37f'],['Mate',[.78,.6,.46],'#b9825f'],['Brune',[.6,.43,.31],'#8e5d40'],['Foncée',[.44,.3,.21],'#63402c']];
 const BEBE3D_SENS=[
   [4,8,'Ses sens ne fonctionnent pas encore : le cerveau, le cœur et la moelle épinière se mettent en place.'],
   [9,13,'Il réagit au toucher : quand sa main frôle sa bouche, il bouge. Il ne voit et n\'entend pas encore.'],
@@ -53,6 +57,8 @@ function bebe3dMonter(conteneur,w){
     const client=new Sketchfab('1.12.1',fr);
     client.init(BEBE3D_UID,{autostart:1,preload:1,transparent:1,camera:0,dnt:1,ui_hint:0,ui_infos:0,ui_controls:0,ui_stop:0,ui_inspector:0,ui_help:0,ui_settings:0,ui_vr:0,ui_ar:0,ui_fullscreen:0,ui_annotations:0,ui_loading:0,ui_theme:'dark',
       success(api){_b3.api=api;api.start();api.addEventListener('viewerready',()=>{charge.hidden=true;
+        api.getMaterialList((e,mats)=>{if(!e&&mats){_b3.mats=mats;const dbg=document.getElementById('b3Liste');if(dbg)dbg.textContent+=' · Matériaux : '+mats.map(m=>m.name).join(', ');bebe3dPeau(_b3.peau||0)}});
+        if(!BEBE3D_STADES)return;
         api.getNodeMap((e,map)=>{if(e||!map)return;_b3.stades=bebe3dStades(map);bebe3dSemainesStades();
           const dbg=document.getElementById('b3Liste');if(dbg)dbg.textContent='Stades trouvés ('+_b3.stades.length+') : '+_b3.stades.map(s=>s.nom+' → sem. '+s.sem).join(' | ');
           if(_b3.stades.length>1)bebe3dMontrer(_b3.w)})})},
@@ -73,3 +79,11 @@ function bebe3dTexte(w){
     bloc('Ce qu\'il entend et ressent',bebe3dSens(w))+
     bloc('À quoi vous attendre',I?I[2]:'')+
     bloc('Petit conseil',I?I[3]:'')}
+
+/* Couleur de peau : on teinte les matériaux du bébé (pas le placenta ni le cordon). */
+function bebe3dPeau(i){_b3.peau=i;const api=_b3.api,mats=_b3.mats;if(!api||!mats)return;
+  const c=BEBE3D_PEAUX[i][1],exclu=/placenta|cord|umbil|uter|amnio|sac|vein|arter|blood|eye|oeil|nail|ongle/i;
+  let cibles=mats.filter(m=>/skin|body|fetus|foetus|baby|peau|bebe/i.test(m.name));if(!cibles.length)cibles=mats.filter(m=>!exclu.test(m.name));
+  cibles.forEach(m=>{const ch=m.channels||{};
+    for(const k of['AlbedoPBR','DiffusePBR','DiffuseColor','SubsurfaceScattering']){if(ch[k]){if(!m._orig)m._orig={};if(!m._orig[k])m._orig[k]=(ch[k].color||[1,1,1]).slice();const o=m._orig[k];ch[k].color=[o[0]*c[0],o[1]*c[1],o[2]*c[2]]}}
+    api.setMaterial(m,()=>{})})}
