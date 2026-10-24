@@ -2,9 +2,9 @@
    Doulas : acceptation demandée avant de s'inscrire ; familles et doulas invitées : à la création du compte seulement.
    L'acceptation est gardée dans le compte (métadonnées) avec la version, la date et le nom tapé. */
 (function(){
-const V='2026-10',EN=window.LANG==='en',LS='sere-cgu-ok';
+const V='2026-10-24',EN=window.LANG==='en',LS='sere-cgu-ok';
 const T={
- fr:{titre:'Conditions d\'utilisation et confidentialité',intro:'Avant de continuer, veuillez lire et accepter ce qui suit.',
+ fr:{titre:'Conditions d\'utilisation et confidentialité',intro:'Avant de continuer, veuillez lire et accepter ce qui suit.',maj:'<b>Nos conditions d\'utilisation ont changé.</b> Veuillez les relire et les accepter de nouveau pour continuer à utiliser l\'appli.',
   corps:[
   ['Ce qu\'est l\'appli','L\'appli Sérénaissance est un outil de suivi et de communication entre une doula et les familles qu\'elle accompagne. Elle ne donne aucun avis médical, ne remplace jamais un médecin, une sage-femme ou les services d\'urgence. En cas d\'urgence, composez le 911.'],
   ['Vos renseignements','Vous nous confiez des renseignements personnels (nom, courriel, téléphone, dates de grossesse, rendez-vous, messages, documents signés, photos). Ils servent seulement à faire fonctionner l\'appli. Ils sont conservés de façon sécurisée, ne sont jamais vendus et ne sont partagés qu\'avec la doula ou la famille concernée et avec les services techniques nécessaires (hébergement, courriels, paiements).'],
@@ -15,7 +15,7 @@ const T={
   ['Utilisation correcte','Utilisez l\'appli de bonne foi, sans contenu illégal, trompeur ou offensant. Nous pouvons suspendre un compte qui ne respecte pas ces conditions. L\'appli est offerte telle quelle : nous faisons de notre mieux pour qu\'elle soit disponible et sécuritaire, mais ne pouvons garantir l\'absence d\'interruption ou d\'erreur.'],
   ['Questions','Pour toute question ou demande sur vos renseignements, écrivez-nous depuis l\'appli (« Écrire à Sérénaissance » ou « Signaler un problème »).']],
   ok:'J\'ai lu et j\'accepte les conditions d\'utilisation et la politique de confidentialité.',nom:'Votre nom complet (signature)',btn:'Accepter et continuer',sortir:'Me déconnecter',fermer:'Annuler',nomOb:'Tapez votre nom complet pour signer.',caseOb:'Cochez la case pour accepter.'},
- en:{titre:'Terms of use and privacy',intro:'Before continuing, please read and accept the following.',
+ en:{titre:'Terms of use and privacy',intro:'Before continuing, please read and accept the following.',maj:'<b>Our terms of use have changed.</b> Please read and accept them again to keep using the app.',
   corps:[
   ['What the app is','The Sérénaissance app is a tracking and communication tool between a doula and the families she supports. It gives no medical advice and never replaces a physician, midwife or emergency services. In an emergency, call 911.'],
   ['Your information','You entrust us with personal information (name, email, phone, pregnancy dates, appointments, messages, signed documents, photos). It is used only to run the app. It is stored securely, never sold, and shared only with the doula or family concerned and with the technical services required (hosting, email, payments).'],
@@ -32,7 +32,7 @@ const local=()=>{try{const o=JSON.parse(localStorage.getItem(LS)||'null');return
 function ecran(opts){document.getElementById('cguOv')?.remove();const t=L(),o=document.createElement('div');o.id='cguOv';
   o.style.cssText='position:fixed;inset:0;z-index:99995;background:var(--bg,#faf5ef);overflow:auto;padding:calc(env(safe-area-inset-top,0px) + 16px) 16px calc(env(safe-area-inset-bottom,0px) + 24px)';
   o.setAttribute('data-notr','1');
-  o.innerHTML='<div style="max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:12px"><h2 style="margin:0">'+t.titre+'</h2><p class="small muted">'+t.intro+'</p>'+
+  o.innerHTML='<div style="max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:12px"><h2 style="margin:0">'+t.titre+'</h2><p class="small muted">'+(opts.maj?t.maj:t.intro)+'</p>'+
    '<div class="card" style="gap:12px">'+t.corps.map(c=>'<div><b class="small">'+c[0]+'</b><p class="small" style="margin:4px 0 0">'+c[1]+'</p></div>').join('')+'</div>'+
    '<label class="check" style="display:flex;gap:10px;align-items:flex-start"><input type="checkbox" id="cguCase" style="margin-top:4px;accent-color:var(--accent)"><span class="small">'+t.ok+'</span></label>'+
    '<label class="f">'+t.nom+'<input id="cguNom" type="text" autocomplete="name" value="'+((opts.nom||'').replace(/"/g,'&quot;'))+'"></label>'+
@@ -56,9 +56,9 @@ async function gate(){if(verifie||typeof MOI==='undefined'||!MOI)return;if(docum
     const l=local();
     const enregistrer=async nom=>{try{await sb.auth.updateUser({data:{cgu:{v:V,nom,date:new Date().toISOString()}}})}catch(e){}};
     if(l){await enregistrer(l.nom);return}
-    if(!S.nouveauCompte&&S.role!=='parent')return; /* familles : toujours à la première connexion, même si le lien du courriel n'est pas reconnu comme une invitation */ /* seulement à la création du compte (lien d'invitation) ; les comptes existants ne sont pas dérangés */
+    /* tout compte sans acceptation à jour doit accepter : nouveau compte, ou conditions modifiées depuis sa dernière signature */ /* familles : toujours à la première connexion, même si le lien du courriel n'est pas reconnu comme une invitation */ /* seulement à la création du compte (lien d'invitation) ; les comptes existants ne sont pas dérangés */
     const nomDefaut=(MOI.prenom?MOI.prenom+' '+(MOI.nom||''):'');
-    ecran({bloquant:true,nom:nomDefaut.trim(),ok:enregistrer})}catch(e){verifie=false}}
+    ecran({bloquant:true,maj:!!(c&&c.v),nom:(c&&c.nom)||nomDefaut.trim(),ok:enregistrer})}catch(e){verifie=false}}
 window.cguVerifier=()=>{verifie=false;gate()};
 const _r=render;render=function(){_r.apply(this,arguments);gate()};
 })();
