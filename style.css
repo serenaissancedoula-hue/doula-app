@@ -451,3 +451,4 @@ input[type=date]::-webkit-date-and-time-value,input[type=time]::-webkit-date-and
 .fid-row .dchd{flex:1;min-width:0;font:400 .84rem/1.5 'Poppins',var(--f-body);border:0!important;border-bottom:1px solid #d9a08a!important;background:transparent;color:#2c221e;border-radius:0!important;box-shadow:none!important;padding:0 2px!important;height:auto!important;min-height:1.5em}
 .fid-cx{cursor:pointer;padding:6px 0;align-items:center}
 .fid-cx input{flex:none;width:22px;height:22px;margin:0;accent-color:#b5644d}
+.pap-sigs .pad-zone{width:100%}

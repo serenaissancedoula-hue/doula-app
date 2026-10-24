@@ -10,7 +10,7 @@ function fidForfaits(d){const nomF=(typeof forfaitDe==='function')?forfaitDe(d):
   return {cases,cartes}}
 function fidTokens(d){const F=fidForfaits(d);return String(d.contenu||'').replace(/\{\{cases_forfaits\}\}/g,F.cases).replace(/\{\{cartes_forfaits\}\}/g,F.cartes)}
 /* lignes et cases libres du document : chacune a une clé stable (cx1, ln1…) pour que la famille et la doula puissent les remplir */
-const FID_DOULA=/TVH|Total payé|Valeur des services|Pénalité|Remboursement dû|Remboursé le|Date limite/,FID_FORF=/ · \d[\d\s\u00a0\u202f]*\s?\$/,FID_SIG=/^(Parent 1|Parent 2|Doula · date)\b/;
+const FID_DOULA=/^Doula · date|TVH|Total payé|Valeur des services|Pénalité|Remboursement dû|Remboursé le|Date limite/,FID_FORF=/ · \d[\d\s\u00a0\u202f]*\s?\$/,FID_SIG=/^\u0000$/;
 window._fid={n:0,ed:null,R:{}};
 function fidKey(p){return p+(++window._fid.n)}
 function fidEd(d){if(!d||!d.id)return null;if(S.role==='parent'&&d.statut==='a_remplir')return 'p';if(S.role==='doula'&&d.statut==='a_signer_doula')return 'd';return null}
@@ -24,9 +24,10 @@ function fidChamp(d,k,lect){const R=d.reponses||{},c=(d.champs||[]).find(x=>x.k=
   return '<input type="text" class="dch" data-k="'+k+'" placeholder="'+esc(c.t)+'">'}
 window.sigInline=function(q,d,s){if(s)return null;const ok=((q==='Parent'||q==='Parent 1')&&S.role==='parent'&&d.statut==='a_remplir'&&d.sig_parent_requise)||(q==='Doula'&&S.role==='doula'&&d.statut==='a_signer_doula');if(!ok)return null;
   return {nom:'<input type="text" id="sigNom" class="sig-nom" placeholder="Votre nom complet">',sig:'<canvas class="sig" id="sigC" width="600" height="180"></canvas><button type="button" class="btn sm ghost" data-act="sigEff">Effacer</button>'}};
-function fidSigs(d){const I=infoDoula();const rangs=[['Doula',d.signature_doula,I.nom],['Parent 1',d.signature_parent,''],['Parent 2',null,'']];
+function fidSig2(d){try{const r=fidVals(d).sig2;const o=r?(typeof r==='string'?JSON.parse(r):r):null;return o&&o.image&&/^data:image\/png;base64,[A-Za-z0-9+\/=]+$/.test(o.image)?o:null}catch(e){return null}}
+function fidSigs(d){const I=infoDoula();const rangs=[['Doula',d.signature_doula,I.nom],['Parent 1',d.signature_parent,''],['Parent 2',fidSig2(d),'']];
   const F=window._fid,sa=F.ed?'<input type="text" class="'+(F.ed==='d'?'dchd':'dch')+'" data-k="'+(F.ed==='d'?'signe_a_d':'signe_a')+'" placeholder="Ville, date" aria-label="Signé à · le">':esc([F.R.signe_a,F.R.signe_a_d].filter(Boolean).join(' / '))||'&nbsp;';
-  return '<div class="fid-row"><span>Signé à · le</span><b>'+sa+'</b></div><div class="pap-sigs">'+rangs.map(([q,s,n])=>{const ins=sigInline(q,d,s);return '<div>'+(ins?ins.nom:esc(s?s.nom:n))+'</div><div class="'+(ins?'sig-cell':'')+'">'+(ins?ins.sig:(s&&s.image?'<img src="'+esc(s.image)+'" alt="Signature">':''))+'</div><div>'+(s&&s.le?fmtD(new Date(s.le),{day:'numeric',month:'short',year:'numeric'}):'')+'</div><small>Nom en lettres moulées : '+q+'</small><small>Signature</small><small>Date</small>'}).join('')+'</div>'}
+  return '<div class="fid-row"><span>Signé à · le</span><b>'+sa+'</b></div><div class="pap-sigs">'+rangs.map(([q,s,n])=>{const ins=(q==='Parent 2'&&!s&&F.ed==='p')?{nom:'<input type="text" id="sigNom2" class="sig-nom" placeholder="Nom du parent 2 (facultatif)">',sig:'<button type="button" class="pad-zone" data-act="padOpen" data-t="sig2">✎ Toucher pour signer</button><input type="hidden" class="dch" data-k="sig2" id="sig2v"><canvas id="sigC2" width="600" height="180" hidden></canvas>'}:sigInline(q,d,s);return '<div>'+(ins?ins.nom:esc(s?s.nom:n))+'</div><div class="'+(ins?(q==='Parent 2'?'sig-cell2':'sig-cell'):'')+'">'+(ins?ins.sig:(s&&s.image?'<img src="'+esc(s.image)+'" alt="Signature">':''))+'</div><div>'+(s&&s.le?fmtD(new Date(s.le),{day:'numeric',month:'short',year:'numeric'}):'')+'</div><small>Nom en lettres moulées : '+q+'</small><small>Signature</small><small>Date</small>'}).join('')+'</div>'}
 function fidBloc(l,d,lect,st){
   if(l.startsWith('## '))return '<h3 class="pap-sec">'+esc(l.slice(3))+'</h3>';
   if(l==='{{signatures}}')return fidSigs(d);

@@ -42,9 +42,10 @@ async function construirePDF(liste){const {PDFDocument,StandardFonts,rgb}=window
       else champ(c.t,v)})}
     {const ip=(d.reponses||{}).initiales,idl=d.signature_doula&&d.signature_doula.initiales,ok=v=>typeof v==='string'&&/^data:image\/png;base64,[A-Za-z0-9+\/=]+$/.test(v);
       if(ok(ip)||ok(idl)){section('Initiales');place(44);y-=34;let xx=M;for(const [v,q] of [[ip,'Parents'],[idl,'Doula']]){if(!ok(v))continue;try{const im=await pdf.embedPng(octets(v)),h=28,w=Math.min(110,h*im.width/im.height);pg.drawText(q,{x:xx,y:y+10,size:8.5,font:F,color:gris});pg.drawImage(im,{x:xx+48,y:y,width:w,height:h});xx+=48+w+40}catch(e){}}}}
+    let s2=null;try{const r=d.reponses&&d.reponses.sig2;s2=r?(typeof r==='string'?JSON.parse(r):r):null;if(s2&&!(s2.image&&s2.nom))s2=null}catch(e){}
     const sigs=[[d.signature_doula,'Doula'],[d.signature_parent,'Parent']].filter(x=>x[0]);
     if(d.sig_parent_requise||d.sig_doula_requise||sigs.length){section('Signatures');
-      const rangs=[];if(d.sig_doula_requise||d.signature_doula)rangs.push([d.signature_doula,'Doula']);if(d.sig_parent_requise||d.signature_parent)rangs.push([d.signature_parent,'Parent']);
+      const rangs=[];if(d.sig_doula_requise||d.signature_doula)rangs.push([d.signature_doula,'Doula']);if(d.sig_parent_requise||d.signature_parent)rangs.push([d.signature_parent,'Parent']);if(s2)rangs.push([s2,'Parent 2']);
       for(const [s,qui] of rangs){place(62);y-=52;const c1=M,c2=M+L*.42,c3=M+L*.8;
         if(s){try{const im=await pdf.embedPng(octets(s.image));const h=40,w=Math.min(L*.34,h*im.width/im.height);pg.drawImage(im,{x:c2,y:y+2,width:w,height:h})}catch(e){}
           pg.drawText(pdfTxt(s.nom),{x:c1,y:y+4,size:9.5,font:F,color:encre});pg.drawText(pdfTxt(fmtD(new Date(s.le))),{x:c3,y:y+4,size:9,font:F,color:encre})}

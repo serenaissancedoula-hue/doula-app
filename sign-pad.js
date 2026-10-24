@@ -2,19 +2,19 @@
 (function(){
 const FONT='"Segoe Script","Brush Script MT","Snell Roundhand",cursive';
 function zone(t){return '<button type="button" class="pad-zone" data-act="padOpen" data-t="'+t+'">'+(t==='sig'?'✎ Toucher pour signer':'✎ initiales')+'</button>'}
-function previews(s){const sg=s.querySelector('#sigC'),ic=s.querySelector('#iniC'),id=s.querySelector('#iniD');
+function previews(s){const s2=s.querySelector('#sigC2');s.querySelectorAll('.pad-zone[data-t=sig2]').forEach(z=>{z.innerHTML=s2&&!s2._vide?'<img src="'+s2.toDataURL('image/png')+'" alt="Signature" style="max-height:44px;max-width:100%"><small>Toucher pour modifier</small>':'✎ Toucher pour signer';z.classList.toggle('fait',!!(s2&&!s2._vide))});const sg=s.querySelector('#sigC'),ic=s.querySelector('#iniC'),id=s.querySelector('#iniD');
   s.querySelectorAll('.pad-zone[data-t=sig]').forEach(z=>{z.innerHTML=sg&&!sg._vide?'<img src="'+sg.toDataURL('image/png')+'" alt="Signature" style="max-height:44px;max-width:100%"><small>Toucher pour modifier</small>':'✎ Toucher pour signer';z.classList.toggle('fait',!!(sg&&!sg._vide))});
   s.querySelectorAll('.pad-zone[data-t=inid]').forEach(z=>{z.innerHTML=id&&!id._vide?'<img src="'+id.toDataURL('image/png')+'" alt="Initiales" style="height:20px">':'✎ initiales';z.classList.toggle('fait',!!(id&&!id._vide))});
   s.querySelectorAll('.pad-zone[data-t=ini]').forEach(z=>{z.innerHTML=ic&&!ic._vide?'<img src="'+ic.toDataURL('image/png')+'" alt="Initiales" style="height:20px">':'✎ initiales';z.classList.toggle('fait',!!(ic&&!ic._vide))})}
 const _od=ouvrirDoc;ouvrirDoc=async function(id){await _od(id);try{
-  const s=document.querySelector('.sheet');if(!s||s.querySelector('.pad-zone'))return;
+  const s=document.querySelector('.sheet');if(!s)return;const c2=s.querySelector('#sigC2');if(c2&&c2._vide===undefined){c2._vide=true;previews(s)}if(s.querySelector('.pad-zone[data-t=sig],.pad-zone[data-t=ini],.pad-zone[data-t=inid]'))return;
   const sg=s.querySelector('#sigC'),ic=s.querySelector('#iniC');if(!sg&&!ic)return;
   if(sg&&S.role==='doula'&&!s.querySelector('#iniD')){const cv=document.createElement('canvas');cv.id='iniD';cv.width=300;cv.height=120;cv.hidden=true;cv._vide=true;s.appendChild(cv);s.querySelectorAll('.fid-pied span,.fid p').forEach(sp=>{if(/Doula _{3,}/.test(sp.textContent))sp.innerHTML=sp.innerHTML.replace(/Doula _{3,}/g,'Doula '+zone('inid'))})}
   if(ic)s.querySelectorAll('.fid-pied span,.fid p').forEach(sp=>{if(/Parents _{3,}/.test(sp.textContent))sp.innerHTML=sp.innerHTML.replace(/Parents _{3,}/g,'Parents '+zone('ini'))});
   if(sg){const cell=s.querySelector('.fid .sig-cell');if(cell){[...cell.children].forEach(c=>{c.style.display='none'});cell.insertAdjacentHTML('beforeend',zone('sig'))}}
   const b=s.querySelector('.gp-ban');if(b)b.querySelector('.small').innerHTML='<b>À remplir et signer</b> · touchez les lignes du document.';
   previews(s)}catch(e){}};
-function pad(type){const s=document.querySelector('.sheet');if(!s)return;const cible=s.querySelector(type==='ini'?'#iniC':type==='inid'?'#iniD':'#sigC');if(!cible)return;const nomIn=s.querySelector('#sigNom'),ini=type==='ini'||type==='inid';
+function pad(type){const s=document.querySelector('.sheet');if(!s)return;const cible=s.querySelector(type==='ini'?'#iniC':type==='inid'?'#iniD':type==='sig2'?'#sigC2':'#sigC');if(!cible)return;const nomIn=s.querySelector(type==='sig2'?'#sigNom2':'#sigNom'),ini=type==='ini'||type==='inid',sigL=type==='sig'||type==='sig2';
   const o=document.createElement('div');o.id='padOv';o.style.cssText='position:fixed;inset:0;z-index:9999;background:rgba(40,30,26,.5);display:flex;align-items:flex-end;justify-content:center;overscroll-behavior:contain';
   o.innerHTML='<div style="background:var(--bg,#faf5ef);width:100%;max-width:560px;border-radius:20px 20px 0 0;padding:16px 16px calc(env(safe-area-inset-bottom,0px) + 16px);display:flex;flex-direction:column;gap:10px;box-sizing:border-box"><div class="row between"><b style="font-size:1.1rem">'+(ini?'Mes initiales':'Ma signature')+'</b><button type="button" class="icon-btn" data-p="non" aria-label="Fermer">✕</button></div>'+
    '<label class="f">Votre nom complet<input type="text" id="padNom" autocomplete="name" placeholder="Prénom et nom" value="'+esc((nomIn&&nomIn.value)||'')+'"></label>'+
@@ -30,9 +30,10 @@ function pad(type){const s=document.querySelector('.sheet');if(!s)return;const c
       const txt=ini?nom.split(/\s+/).map(w=>w[0]).join('').toUpperCase().slice(0,4):nom;ctx.clearRect(0,0,cv.width,cv.height);ctx.fillStyle='#2c221e';ctx.textBaseline='middle';
       let px=Math.round(cv.height*.5);ctx.font='italic '+px+'px '+FONT;while(ctx.measureText(txt).width>cv.width-40&&px>16){px-=2;ctx.font='italic '+px+'px '+FONT}ctx.fillText(txt,20,cv.height/2);cv._vide=false;return}
     if(p==='ok'){if(cv._vide){toast(ini?'Écrivez vos initiales':'Signez dans le cadre');return}
-      if(!nom&&type==='sig'){toast('Écrivez votre nom');o.querySelector('#padNom').focus();return}
-      if(nomIn&&nom&&type==='sig')nomIn.value=nom;
+      if(!nom&&sigL){toast('Écrivez votre nom');o.querySelector('#padNom').focus();return}
+      if(nomIn&&nom&&sigL)nomIn.value=nom;
       const t=cible.getContext('2d');t.clearRect(0,0,cible.width,cible.height);t.drawImage(cv,0,0,cible.width,cible.height);cible._vide=false;
+      if(type==='sig2'){const h=s.querySelector('#sig2v');if(h)h.value=JSON.stringify({nom:nom,image:cible.toDataURL('image/png'),le:new Date().toISOString()})}
       if(type==='ini'){const h=s.querySelector('input.dch[data-k=initiales]');if(h)h.value=cible.toDataURL('image/png')}
       o.remove();previews(s);toast(ini?'Initiales ajoutées':'Signature ajoutée')}});
   setTimeout(()=>{if(!ini&&!o.querySelector('#padNom').value)o.querySelector('#padNom').focus()},50)}
