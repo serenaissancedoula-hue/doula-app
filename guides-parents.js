@@ -43,7 +43,7 @@ const _odGP2=ouvrirDoc;ouvrirDoc=async function(id){await _odGP2(id);try{
   const ok=s.querySelector('#sigOk'),bloc=document.createElement('div');bloc.className='stack';bloc.style.gap='6px';
   bloc.innerHTML='<span class="eyebrow acc">Vos initiales</span><span class="xs muted">Écrivez vos initiales avec le doigt : elles seront placées au bas de chaque page du contrat.</span><canvas class="sig" id="iniC" width="300" height="120" style="height:90px;max-width:220px"></canvas><button class="btn sm ghost" data-act="gpIniEff" style="align-self:flex-start">Effacer</button><input type="hidden" class="dch" data-k="initiales" value="">';
   (ok?ok.closest('label'):s).parentNode.insertBefore(bloc,ok?ok.closest('label'):null);
-  const cv=bloc.querySelector('#iniC');initSig(cv);cv.addEventListener('pointerup',()=>{bloc.querySelector('input.dch').value=cv._vide?'':cv.toDataURL('image/png')})
+  const cv=bloc.querySelector('#iniC');initSig(cv);cv.addEventListener('pointerup',()=>{const h=document.querySelector('.sheet input.dch[data-k=initiales]');if(h)h.value=cv._vide?'':cv.toDataURL('image/png')})
 }catch(e){}};
 document.addEventListener('click',e=>{const s=document.querySelector('.sheet');if(!s)return;
   const p=e.target.closest('.gp-case');if(p){e.stopPropagation();s.querySelectorAll('.gp-case').forEach(x=>x.querySelector('.bx').textContent='');p.querySelector('.bx').textContent='✕';s.querySelector('input.dch[data-k=forfait_choisi]').value=p.dataset.n;return}
@@ -76,3 +76,37 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-act="gpCla
   let px=Math.round(cv.height*.6);x.font='italic '+px+'px "Segoe Script","Brush Script MT","Snell Roundhand",cursive';while(x.measureText(txt).width>cv.width-30&&px>14){px-=2;x.font='italic '+px+'px "Segoe Script","Brush Script MT","Snell Roundhand",cursive'}
   x.fillText(txt,15,cv.height/2);cv._vide=false;
   if(b.dataset.c==='#iniC')s.querySelector('input.dch[data-k=initiales]').value=cv.toDataURL('image/png');toast('Ajouté : vous pouvez effacer et recommencer')},true);
+
+/* Présentation propre : nom, signature et initiales réunis dans un seul bloc, pleine largeur (cellulaire comme ordinateur) */
+const _odGP4=ouvrirDoc;ouvrirDoc=async function(id){await _odGP4(id);try{
+  const s=document.querySelector('.sheet');if(!s||S.role!=='parent'||s.querySelector('.gp-card'))return;
+  const nom=s.querySelector('#sigNom'),sig=s.querySelector('#sigC'),ini=s.querySelector('#iniC');if(!nom||!sig)return;
+  const card=document.createElement('div');card.className='card stack gp-card';card.style.gap='10px';
+  const cap=t=>{const e=document.createElement('span');e.className='eyebrow acc';e.textContent=t;return e};
+  const rang=()=>{const r=document.createElement('div');r.style.cssText='display:flex;flex-wrap:wrap;gap:8px';return r};
+  const sigBtns=[...sig.parentNode.querySelectorAll('button')];
+  const lab=document.createElement('label');lab.className='f';lab.append('Votre nom complet');nom.className='';nom.style.cssText='width:100%';lab.appendChild(nom);
+  card.append(cap('Ma signature'),lab);
+  sig.style.cssText='width:100%;height:130px;max-width:100%;display:block';card.appendChild(sig);
+  const r1=rang();sigBtns.forEach(b=>r1.appendChild(b));card.appendChild(r1);
+  if(ini){const bloc=ini.closest('.stack');if(bloc){const ib=[...bloc.querySelectorAll('button')],hid=bloc.querySelector('input.dch');
+    const t=document.createElement('span');t.className='xs muted';t.textContent=(bloc.querySelector('.xs.muted')||{}).textContent||'';
+    card.append(cap('Mes initiales'),t);ini.style.cssText='width:100%;max-width:240px;height:100px;display:block';card.appendChild(ini);
+    const r2=rang();ib.forEach(b=>r2.appendChild(b));card.appendChild(r2);if(hid)card.appendChild(hid);bloc.remove()}}
+  card.querySelectorAll('.btn').forEach(b=>{b.style.whiteSpace='nowrap';b.style.alignSelf='auto'});
+  const okL=s.querySelector('#sigOk');const ref=okL?okL.closest('label'):null;
+  if(ref)ref.parentNode.insertBefore(card,ref);else s.appendChild(card);
+  s.querySelectorAll('.fid .sig-cell').forEach(c=>{c.innerHTML='<span class="xs muted">Voir « Ma signature » sous le document</span>'})
+}catch(e){}};
+
+/* Lignes vides du contrat (« Signé à · le », professionnel de santé, etc.) : la famille les remplit directement dans l'appli */
+const _dvGP2=docVue;docVue=function(d,doula){let h=_dvGP2(d,doula);
+  if(!d||d.type!=='contrat'||!/class="fid-row"/.test(h))return h;
+  const edit=!doula&&S.role==='parent'&&d.statut==='a_remplir',R=d.reponses||{};
+  const t=document.createElement('div');t.innerHTML=h;let i=0,ch=false;
+  t.querySelectorAll('.fid-row').forEach(r=>{const b=r.querySelector('b');if(!b||b.querySelector('input,select,textarea'))return;
+    const v=b.textContent.replace(/ /g,' ').trim();if(v&&!/^\[[^\]]*\]$/.test(v))return;
+    const lab=(r.querySelector('span')||{}).textContent||'';if(/doula|TVH|^parent\s*\d/i.test(lab))return;const k='lib'+(i++);
+    if(edit){b.innerHTML='<input type="text" class="dch" data-k="'+k+'" placeholder="'+esc(lab.replace(/\s*\(.*$/,'').trim()||'À remplir')+'" maxlength="160">';ch=true}
+    else if(R[k]){b.textContent=R[k];ch=true}});
+  return ch?t.innerHTML:h};
