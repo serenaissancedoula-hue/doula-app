@@ -27,6 +27,7 @@ if(typeof blocForfaits!=='undefined'){const _bfPV=blocForfaits;blocForfaits=func
 if(typeof hautAccueil!=='undefined'){const _haPV=hautAccueil;hautAccueil=function(){let h=_haPV.apply(this,arguments);try{if(FAM&&FAM.suivi_suspendu&&S.role==='parent')h+='<div class="banner gold" style="margin-bottom:10px">'+icon('fa-pause')+'<div class="small"><b>Suivi suspendu : paiement en retard.</b> Réglez votre versement dans Ma doula › Forfaits : le suivi reprend dès sa réception.</div></div>'}catch(e){}return h}}
 
 /* ---------------- côté doula ---------------- */
+const pvProprio=()=>typeof PAIE_PROPRIO!=='undefined'&&ME_DOULA&&PAIE_PROPRIO.courriels.includes(String(ME_DOULA.courriel||'').toLowerCase());
 if(typeof chargerClientDetail!=='undefined'){const _ccPV=chargerClientDetail;chargerClientDetail=async function(id){await _ccPV(id);try{
   const [d,f]=await Promise.all([sb.from('fam_versements_declares').select('*').eq('famille_id',id).order('created_at',{ascending:false}),sb.from('fam_familles').select('suivi_suspendu').eq('id',id).maybeSingle()]);
   CDECL[id]=d.data||[];const c=(S.clients||[]).find(x=>x.id===id);if(c)c.suivi_suspendu=!!(f.data&&f.data.suivi_suspendu)}catch(e){}}}
@@ -42,8 +43,7 @@ if(typeof cPaie!=='undefined'){const _cpPV=cPaie;cPaie=function(c){let h=_cpPV.a
 DSUB.paiements=function(){const C=((ME_DOULA&&ME_DOULA.modeles)||{}).paiement||{};
   let h=back('dsub','','Outils')+sh('Paiements','Soldes de vos familles, et comment elles vous paient');
   h+='<div class="card"><span class="eyebrow acc">Comment mes familles me paient</span>'+
-    '<label class="f">Mon lien de paiement par carte (Stripe, PayPal, Square…)<input id="pvLien" type="url" placeholder="https://buy.stripe.com/…" value="'+pvEsc(C.lienCarte)+'"></label>'+
-    '<p class="xs muted">Créez un lien de paiement dans votre compte Stripe (ou autre) et collez-le ici : la famille paie sur la page sécurisée du fournisseur, l\'argent va directement dans votre compte, et l\'appli ne voit jamais de numéro de carte.</p>'+
+    (pvProprio()?'<div class="banner sage">'+icon('fa-circle-check')+'<div class="small"><b>Vos liens Stripe sont déjà dans l\'appli.</b> Vous en avez un par forfait et par nombre de versements : la famille voit automatiquement le bon lien (selon son forfait et ce qu\'elle a choisi dans son contrat). Rien à ajouter ici.</div></div>':'<label class="f">Mon lien de paiement par carte (Stripe, PayPal, Square…)<input id="pvLien" type="url" placeholder="https://buy.stripe.com/…" value="'+pvEsc(C.lienCarte)+'"></label><p class="xs muted">Créez un lien de paiement dans votre compte Stripe (ou autre) et collez-le ici : la famille paie sur la page sécurisée du fournisseur, l\'argent va directement dans votre compte, et l\'appli ne voit jamais de numéro de carte.</p>')+
     '<label class="f">Mon virement Interac (courriel ou téléphone)<input id="pvInterac" value="'+pvEsc(C.interac)+'" placeholder="vous@exemple.ca"></label>'+
     '<label class="f">Consigne pour la famille (facultatif)<input id="pvConsigne" value="'+pvEsc(C.consigne)+'" placeholder="Inscrivez votre nom dans le message"></label>'+
     '<button class="btn" data-act="pvSauver">'+icon('fa-check')+'Enregistrer</button></div>';
@@ -65,7 +65,7 @@ document.addEventListener('click',async e=>{const b=e.target.closest('[data-act^
     const {error}=await sb.from('fam_versements_declares').insert(row);if(error){toast(error.message);b.disabled=false;return}
     await sb.from('fam_messages').insert({famille_id:FAM.id,de_doula:false,type:'message',texte:'💳 J\'ai effectué un paiement de '+money(m)+' ('+row.mode+') le '+fmtD(parseD(row.date))+'. Pouvez-vous le valider ? Merci !'});
     close();await chargerEchanges();render();toast('Envoyé : votre doula valide et vous remet un reçu');return}
-  if(a==='pvSauver'){const C=Object.assign({},((ME_DOULA.modeles||{}).paiement)||{});const l=($('#pvLien').value||'').trim();if(l&&!pvUrl(l)){toast('Le lien doit commencer par https://');return}
+  if(a==='pvSauver'){const C=Object.assign({},((ME_DOULA.modeles||{}).paiement)||{});const lienEl=$('#pvLien'),l=lienEl?(lienEl.value||'').trim():(C.lienCarte||'');if(l&&!pvUrl(l)){toast('Le lien doit commencer par https://');return}
     C.lienCarte=l;C.interac=($('#pvInterac').value||'').trim();C.consigne=($('#pvConsigne').value||'').trim();ME_DOULA.modeles=Object.assign({},ME_DOULA.modeles||{},{paiement:C});
     const ok=await saveDoula();if(ok){toast('Enregistré : vos familles voient ces options');render()}return}
   if(a==='pvOuvrir'){S.dtab='clientes';S.dsub='';S.openClient=b.dataset.id;S.ctab='paiements';await chargerClientDetail(b.dataset.id);render();scrollTo(0,0);return}
