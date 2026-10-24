@@ -88,3 +88,7 @@ document.addEventListener('click',async e=>{const b=e.target.closest('[data-act^
     try{await sb.rpc('fam_echeances_run',{p_famille:c.id})}catch(x){}
     await chargerClientDetail(c.id);close();render();toast(renvoi?'Modifié : reçu corrigé envoyé':'Versement modifié');return}
   }catch(err){console.error(err);toast('Une erreur est survenue. Réessayez.')}},true);
+
+/* Accueil doula : la carte « Paiements » mène à l'outil Paiements */
+if(typeof dAccueil!=='undefined'){const _daPV=dAccueil;dAccueil=function(){const h=_daPV.apply(this,arguments);try{
+  return String(h).replace('<div class="card"><span class="eyebrow acc">Paiements</span>','<div class="card" data-act="dgo" data-v="outils|paiements" style="cursor:pointer" role="button" tabindex="0"><div class="row between"><span class="eyebrow acc">Paiements</span><span class="xs muted">Voir les paiements '+icon('fa-chevron-right')+'</span></div>')}catch(e){return h}}}
