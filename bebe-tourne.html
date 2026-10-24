@@ -72,24 +72,30 @@ let bebe=null;const cache={};
 function chargerImg(src){return new Promise((ok,ko)=>{const i=new Image();i.onload=()=>ok(i);i.onerror=ko;i.src=src})}
 async function construire(w){
   if(cache[w])return cache[w];
-  const L=new THREE.TextureLoader(),[rel,tex,dos]=await Promise.all([chargerImg('img/bebe3d/relief-'+pad(w)+'.png?v=1'),L.loadAsync('img/bebe3d/bebe-'+pad(w)+'.webp?v=1'),L.loadAsync('img/bebe3d/dos-'+pad(w)+'.webp?v=1')]);
+  const L=new THREE.TextureLoader(),[rel,tex,dos]=await Promise.all([chargerImg('img/bebe3d/relief-'+pad(w)+'.png?v=2'),L.loadAsync('img/bebe3d/bebe-'+pad(w)+'.webp?v=1'),L.loadAsync('img/bebe3d/dos-'+pad(w)+'.webp?v=1')]);
   tex.encoding=dos.encoding=THREE.sRGBEncoding;tex.anisotropy=4;
   const c=document.createElement('canvas');c.width=rel.width;c.height=rel.height;const cx=c.getContext('2d');cx.drawImage(rel,0,0);
   const D=cx.getImageData(0,0,c.width,c.height).data,RW=c.width,RH=c.height;
   const G=w<5?120:170,N=G+1;
-  const px=(u,v,ch)=>{const x=Math.min(RW-1,Math.round(u*(RW-1))),y=Math.min(RH-1,Math.round(v*(RH-1)));return D[(y*RW+x)*4+ch]/255};
+  // relief adouci : on floute la profondeur pour éviter les falaises qui étirent la photo
+  const dep=new Float32Array(RW*RH);for(let k=0;k<RW*RH;k++)dep[k]=D[k*4]/255;
+  for(let pass=0;pass<3;pass++){const t=new Float32Array(dep);for(let y=1;y<RH-1;y++)for(let x=1;x<RW-1;x++){let s=0;for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++)s+=t[(y+dy)*RW+x+dx];dep[y*RW+x]=s/9}}
+  const px=(u,v,ch)=>{const x=Math.min(RW-1,Math.round(u*(RW-1))),y=Math.min(RH-1,Math.round(v*(RH-1)));return ch===0?dep[y*RW+x]:D[(y*RW+x)*4+ch]/255};
   const dans=new Uint8Array(N*N),pos=[],uv=[],col=[],fi=new Int32Array(N*N).fill(-1),bi=new Int32Array(N*N).fill(-1);
   const plat=w<5; // ovule et premières cellules : plus rond
   for(let j=0;j<N;j++)for(let i=0;i<N;i++){const u=i/G,v=j/G,m=px(u,v,2);if(m<=.5)continue;
     const d=px(u,v,0),f=px(u,v,1),edge=Math.min(1,f*3.2);
-    const zf=plat?.55*f:(.2*f+.42*d*edge),zb=plat?-.55*f:-(.3*f+.1*d*edge);
+    const zf=plat?.55*f:(.22*f+.3*d*edge),zb=plat?-.55*f:-(.3*f+.08*d*edge);
     const x=(u-.5)*2,y=(.5-v)*2,k=j*N+i;dans[k]=1;
     fi[k]=pos.length/3;pos.push(x,y,zf);uv.push(u,1-v);col.push(1,1,1);
     bi[k]=pos.length/3;pos.push(x,y,zb);uv.push(u,1-v);col.push(1,1,1)}
   const idx=[],idxB=[],cell=(i,j)=>i>=0&&j>=0&&i<G&&j<G&&dans[j*N+i]&&dans[j*N+i+1]&&dans[(j+1)*N+i]&&dans[(j+1)*N+i+1];
   for(let j=0;j<G;j++)for(let i=0;i<G;i++){if(!cell(i,j))continue;
     const a=j*N+i,b=a+1,c2=a+N,d2=c2+1;
-    idx.push(fi[a],fi[c2],fi[b],fi[b],fi[c2],fi[d2]);   // devant
+    // devant : un triangle trop en pente étirerait la photo, on lui met la peau lisse
+    const tri=(p,q,r)=>{const P=pos,ax=P[q*3]-P[p*3],ay=P[q*3+1]-P[p*3+1],az=P[q*3+2]-P[p*3+2],bx=P[r*3]-P[p*3],by=P[r*3+1]-P[p*3+1],bz=P[r*3+2]-P[p*3+2];
+      const nx=ay*bz-az*by,ny=az*bx-ax*bz,nz=ax*by-ay*bx,l=Math.hypot(nx,ny,nz)||1;(nz/l>.5?idx:idxB).push(p,q,r)};
+    tri(fi[a],fi[c2],fi[b]);tri(fi[b],fi[c2],fi[d2]);
     idxB.push(bi[a],bi[b],bi[c2],bi[b],bi[d2],bi[c2]);   // dos
     const bord=(p,q)=>idxB.push(fi[p],fi[q],bi[q],fi[p],bi[q],bi[p]); // côtés
     if(!cell(i,j-1))bord(b,a);if(!cell(i,j+1))bord(c2,d2);if(!cell(i-1,j))bord(a,c2);if(!cell(i+1,j))bord(d2,b)}
