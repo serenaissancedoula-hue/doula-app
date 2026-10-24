@@ -4,7 +4,7 @@ function majBoutonChat(){try{let b=document.getElementById('chatFab');
   const parent=S.role==='parent'&&FAM&&!S.vue,doula=S.role==='doula'&&ME_DOULA&&!S.vue,surMsg=(parent&&S.tab==='madoula'&&(S.seg||'messages')==='messages')||(doula&&S.openClient&&S.ctab==='messages');
   if(!(parent||doula)||surMsg||document.getElementById('layer')&&document.getElementById('layer').innerHTML){if(b)b.remove();return}
   const n=chatNonLus();if(!b){b=document.createElement('button');b.id='chatFab';b.setAttribute('data-act','chatOuvrir');document.body.appendChild(b)}
-  b.innerHTML='<i class="fa-solid fa-comments"></i><span>'+(doula?'Chat avec une famille':'Chat avec ma doula')+'</span>'+(n?'<b>'+n+'</b>':'')}catch(e){}}
+  b.innerHTML='<i class="fa-solid fa-comments"></i><span>Chat</span>'+(n?'<b>'+n+'</b>':'')}catch(e){}}
 const _rChat=render;render=function(){const r=_rChat.apply(this,arguments);majBoutonChat();return r};
 document.addEventListener('click',e=>{const b=e.target.closest('[data-act="chatOuvrir"]');if(!b)return;e.stopPropagation();if(S.role==='doula'){chatListe();return}S.vue=null;S.tab='madoula';S.seg='messages';render();
   setTimeout(()=>{const t=document.getElementById('msgTxt');if(t){t.scrollIntoView({block:'center'});try{t.focus({preventScroll:true})}catch(x){}}},120)},true);
@@ -15,7 +15,7 @@ function chatReleve(){clearTimeout(_chatT);_chatT=setTimeout(async()=>{try{const
 function chatAbonner(){try{if(window._chatCh||!MOI)return;window._chatCh=sb.channel('chat-live').on('postgres_changes',{event:'INSERT',schema:'public',table:'fam_messages'},p=>{
   try{const m=p.new||{};const mien=S.role==='parent'?!m.de_doula:!!m.de_doula;if(!mien){try{navigator.vibrate&&navigator.vibrate(60)}catch(x){}}chatReleve()}catch(e){}}).subscribe()}catch(e){}}
 setInterval(chatAbonner,3000);
-const _stF=document.createElement('style');_stF.textContent='#chatFab{position:fixed;right:max(14px,env(safe-area-inset-right,0px));bottom:calc(84px + env(safe-area-inset-bottom,0px));z-index:30;display:flex;align-items:center;gap:8px;border:0;border-radius:999px;padding:12px 16px;background:var(--accent);color:#fff;font:700 .88rem/1 inherit;box-shadow:0 6px 18px rgba(0,0,0,.22);cursor:pointer}#chatFab b{background:#fff;color:var(--accent);border-radius:999px;min-width:20px;padding:2px 6px;font-size:.75rem}@media(max-width:380px){#chatFab span{display:none}}';document.head.appendChild(_stF);
+const _stF=document.createElement('style');_stF.textContent='#chatFab{position:fixed;right:max(14px,env(safe-area-inset-right,0px));bottom:calc(84px + env(safe-area-inset-bottom,0px));z-index:30;display:flex;align-items:center;gap:8px;border:0;border-radius:999px;padding:10px 14px;background:var(--card);color:var(--accent-dk);border:1px solid var(--accent-lt);font:700 .85rem/1 inherit;box-shadow:0 4px 12px rgba(44,34,30,.14);cursor:pointer}#chatFab b{background:var(--accent);color:#fff;border-radius:999px;min-width:20px;padding:2px 6px;font-size:.75rem}@media(max-width:380px){#chatFab span{display:none}}';document.head.appendChild(_stF);
 
 /* doula : choisir n'importe quelle famille pour démarrer ou continuer une conversation */
 function chatListe(){const L=(S.clients||[]).filter(c=>!c.archivee_le&&c.statut!=='archivee');
