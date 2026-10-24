@@ -68,7 +68,8 @@ No de TVH (ou « non inscrite ») |
 - Prix en dollars canadiens. TVH de 15 % ajoutée seulement si la Doula est inscrite (voir ci-dessous).
 - Paiement par virement Interac à {{doula_courriel}} ou autre mode convenu avec la Doula.
 - Aucuns frais de crédit ni intérêts.
-- Retard de plus de 14 jours : rappel écrit; la garde peut être suspendue jusqu'au paiement.
+- Un rappel est envoyé aux Parents 48 heures avant chaque échéance (dans l'appli et par courriel).
+- Si un versement n'est pas reçu au plus tard le lendemain de son échéance, le suivi et les services de la Doula cessent (sont suspendus) jusqu'au paiement; ils reprennent dès la réception du versement. Le montant total du forfait demeure dû.
 - Un reçu est remis pour chaque paiement.
 _La présence à l'accouchement vaut 50 % du forfait; l'autre 50 % est réparti entre les rencontres. Ces valeurs servent au calcul en cas d'annulation._
 ## Initiales

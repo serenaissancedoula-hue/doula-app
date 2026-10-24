@@ -120,7 +120,7 @@ async function demarrer(){
 async function charger(){if(S.role==='parent')await chargerParent();else await chargerDoula()}
 async function rafraichir(){if(!MOI)return;try{if(S.role==='parent'){await chargerEchanges()}else{await chargerDoula();if(S.openClient)await chargerClientDetail(S.openClient)}if(!$('#layer').innerHTML)render()}catch(e){}}
 function routeHash(){const h=location.hash.slice(1);if(!h)return;
-  if(S.role==='parent'){if(h==='messages'){S.tab='madoula';S.seg='messages'}else if(h==='rdv'){S.tab='madoula';S.seg='rdv'}else if(h==='documents'){S.tab='madoula';S.seg='docs'}}
+  if(S.role==='parent'){if(h==='messages'){S.tab='madoula';S.seg='messages'}else if(h==='rdv'){S.tab='madoula';S.seg='rdv'}else if(h==='documents'){S.tab='madoula';S.seg='docs'}else if(h==='forfaits'){S.tab='madoula';S.seg='forfaits'}}
   else if(h[0]==='f'&&h.length>30){S.dtab='clientes';S.openClient=h.slice(1);S.ctab='messages';chargerClientDetail(S.openClient).then(render)}}
 function motDePasseSheet(bienvenue){sheet(bienvenue?'Bienvenue ! Choisissez votre mot de passe':'Mon mot de passe','<p class="small">'+(bienvenue?'Votre inscription est presque terminée. Choisissez un mot de passe pour vous reconnecter facilement.':'Changez votre mot de passe.')+'</p><label class="f">Nouveau mot de passe (8 caractères ou plus)<input type="password" id="mdp1" autocomplete="new-password"></label><label class="f">Confirmez<input type="password" id="mdp2" autocomplete="new-password"></label><button class="btn" data-act="saveMdp">Enregistrer</button>')}
 
