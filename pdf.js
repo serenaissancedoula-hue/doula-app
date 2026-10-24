@@ -40,6 +40,8 @@ async function construirePDF(liste){const {PDFDocument,StandardFonts,rgb}=window
     if(C.length){y-=4;C.forEach(c=>{if(c.g){section(c.g);return}const v=R[c.k];
       if(c.type==='case'){place(16);y-=15;pg.drawRectangle({x:M,y:y+1,width:8,height:8,borderColor:terra,borderWidth:.8});if(v)pg.drawText('x',{x:M+1.6,y:y+2.2,size:8,font:FB,color:terra});coupe(pdfTxt(c.t),F,9,L-16).forEach((l,k)=>{if(k){place(13);y-=13}pg.drawText(l,{x:M+14,y:y+2,size:9,font:F,color:brun})})}
       else champ(c.t,v)})}
+    {const ip=(d.reponses||{}).initiales,idl=d.signature_doula&&d.signature_doula.initiales,ok=v=>typeof v==='string'&&/^data:image\/png;base64,[A-Za-z0-9+\/=]+$/.test(v);
+      if(ok(ip)||ok(idl)){section('Initiales');place(44);y-=34;let xx=M;for(const [v,q] of [[ip,'Parents'],[idl,'Doula']]){if(!ok(v))continue;try{const im=await pdf.embedPng(octets(v)),h=28,w=Math.min(110,h*im.width/im.height);pg.drawText(q,{x:xx,y:y+10,size:8.5,font:F,color:gris});pg.drawImage(im,{x:xx+48,y:y,width:w,height:h});xx+=48+w+40}catch(e){}}}}
     const sigs=[[d.signature_doula,'Doula'],[d.signature_parent,'Parent']].filter(x=>x[0]);
     if(d.sig_parent_requise||d.sig_doula_requise||sigs.length){section('Signatures');
       const rangs=[];if(d.sig_doula_requise||d.signature_doula)rangs.push([d.signature_doula,'Doula']);if(d.sig_parent_requise||d.signature_parent)rangs.push([d.signature_parent,'Parent']);

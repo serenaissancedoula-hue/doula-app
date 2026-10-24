@@ -33,7 +33,7 @@ function per(day){return day<=60?0:day<=120?1:2}
 function hero(st){const p=S.parent.naissance,nom=esc(p.prenomBebe||'Bébé'),d=st.day,sem=Math.floor(d/7),j=d%7,i=per(d);
   return '<div class="card" style="position:relative;overflow:hidden;padding:0;min-height:150px"><div style="position:relative;height:104px">'+art(i)+'</div><div style="padding:14px 18px 18px"><span class="eyebrow acc">'+PER[i].t+'</span><h2 style="margin:2px 0">'+nom+' a '+(d<14?d+' jour'+(d>1?'s':''):sem+' semaine'+(sem>1?'s':'')+(j&&d>=14?' et '+j+' jour'+(j>1?'s':''):''))+'</h2><p class="small muted">Jour '+d+' · né(e) le '+fmtD(st.birth)+'</p></div></div>'}
 function etapes(st){const cur=per(st.day);
-  return '<div class="card"><span class="eyebrow acc">Ce que bébé apprend, selon son âge</span><p class="xs muted" style="margin:2px 0 8px">Chaque bébé va à son rythme : ce sont des repères, pas des examens.</p>'+PER.map((x,i)=>'<details class="acc"'+(i===cur?' open':'')+'><summary><span style="font-size:1.2rem">'+x.ic+'</span> '+x.t+(i===cur?' <span class="pill acc">maintenant</span>':'')+'<i class="fa-solid fa-chevron-down chev"></i></summary><div class="body"><b class="small">Il peut…</b><ul class="clean small">'+x.ph.map(t=>'<li>'+t+'</li>').join('')+'</ul><b class="small">Pour l\'accompagner</b><ul class="clean small">'+x.tips.map(t=>'<li>'+t+'</li>').join('')+'</ul><div class="banner bad">'+icon('fa-user-doctor')+'<div class="small"><b>À mentionner à votre professionnel</b><ul class="clean">'+x.watch.map(t=>'<li>'+t+'</li>').join('')+'</ul></div></div><p class="xs muted">Sources : '+x.src.map(s=>lien(s[0],s[1])).join(' · ')+'</p></div></details>').join('')+'</div>'}
+  return '<div class="card"><span class="eyebrow acc">Ce que bébé apprend, selon son âge</span><p class="xs muted" style="margin:2px 0 8px">Chaque bébé va à son rythme : ce sont des repères, pas des examens.</p>'+PER.map((x,i)=>'<details class="acc"><summary><span style="font-size:1.2rem">'+x.ic+'</span> '+x.t+(i===cur?' <span class="pill acc">maintenant</span>':'')+'<i class="fa-solid fa-chevron-down chev"></i></summary><div class="body"><b class="small">Il peut…</b><ul class="clean small">'+x.ph.map(t=>'<li>'+t+'</li>').join('')+'</ul><b class="small">Pour l\'accompagner</b><ul class="clean small">'+x.tips.map(t=>'<li>'+t+'</li>').join('')+'</ul><div class="banner bad">'+icon('fa-user-doctor')+'<div class="small"><b>À mentionner à votre professionnel</b><ul class="clean">'+x.watch.map(t=>'<li>'+t+'</li>').join('')+'</ul></div></div><p class="xs muted">Sources : '+x.src.map(s=>lien(s[0],s[1])).join(' · ')+'</p></div></details>').join('')+'</div>'}
 function vacs(){return S.parent.vacBebe||(S.parent.vacBebe={})}
 function dateVac(b,m){const d=new Date(b);d.setMonth(d.getMonth()+m);return d}
 window.vacPrevus=function(){try{const b=parseD(S.parent.naissance.date);if(!b)return[];return VAC.filter(v=>!vacs()[v[0]]&&v[2]>0).map(v=>({d:dateVac(b,v[2]),txt:'Vaccins de '+v[1]+' (prévus)'}))}catch(e){return[]}};
@@ -48,6 +48,39 @@ function symptomes(){const L=(S.parent.bebeSymp||[]).slice().sort((a,b)=>b.t-a.t
 function conseilSymp(temp,mode,age){const seuil=mode==='rect'?38.1:37.6;
   if(temp&&temp>=seuil){if(age<90)return 'Fièvre chez un bébé de moins de 3 mois : consultez immédiatement (811, urgence ou votre professionnel).';if(temp>=39)return 'Fièvre de 39 °C ou plus : consultez aujourd\'hui. Appelez le 811 si vous hésitez.';return 'Fièvre : surveillez, habillez-le légèrement, offrez à boire. Consultez si elle dure plus d\'une journée ou s\'il est inhabituellement endormi, pâle ou refuse de boire.'}
   return 'Notez bien l\'évolution. Si quelque chose vous inquiète, appelez le 811 : votre instinct compte.'}
+
+/* ---- Courbe de poids (repères OMS, 3e–50e–97e percentile) ---- */
+const OMS={G:[[2.5,3.3,4.3],[3.4,4.5,5.7],[4.4,5.6,7.0],[5.1,6.4,7.9],[5.6,7.0,8.6],[6.1,7.5,9.2],[6.4,7.9,9.7]],
+ F:[[2.4,3.2,4.2],[3.2,4.2,5.4],[4.0,5.1,6.5],[4.6,5.8,7.4],[5.1,6.4,8.1],[5.5,6.9,8.7],[5.8,7.3,9.2]]};
+const WG='https://cdn.who.int/media/docs/default-source/child-growth/child-growth-standards/indicators/weight-for-age/sft-wfa-girls-p-0-5.pdf',WB='https://cdn.who.int/media/docs/default-source/child-growth/child-growth-standards/indicators/weight-for-age/sft-wfa-boys-p-0-5.pdf';
+function croissance(st){const n=S.parent.naissance||{},sx=/^f/i.test(n.sexe||'')?'F':/^g/i.test(n.sexe||'')?'G':'';
+  if(!sx)return '<div class="card"><span class="eyebrow acc">Courbe de poids de bébé</span><p class="small muted">Pour comparer avec les repères de l\'OMS, indiquez le sexe de bébé (les courbes diffèrent).</p>'+ui.pick('parent.naissance.sexe',['Fille','Garçon'])+'</div>';
+  const T=OMS[sx],mo=t=>(t-+st.birth)/864e5/30.44,pts=[];
+  if(+n.poids)pts.push([0,+n.poids/1000]);
+  (S.logs||[]).filter(l=>l.type==='poids'&&+l.g).forEach(l=>{const m=mo(l.t);if(m>=0&&m<=6.3)pts.push([m,l.g/1000])});
+  pts.sort((a,b)=>a[0]-b[0]);
+  const Wd=340,Ht=190,L=34,R=8,Tp=10,B=26,X=m=>L+m/6*(Wd-L-R),Y=k=>Ht-B-(k-2)/(10.4-2)*(Ht-B-Tp),line=i=>T.map((r,m)=>X(m).toFixed(1)+','+Y(r[i]).toFixed(1)).join(' ');
+  const band=line(0)+' '+T.map((r,m)=>[X(6-m).toFixed(1),Y(T[6-m][2]).toFixed(1)].join(',')).join(' ');
+  let svg='<svg viewBox="0 0 '+Wd+' '+Ht+'" style="width:100%;height:auto" role="img" aria-label="Courbe de poids de bébé">';
+  for(let k=2;k<=10;k+=2)svg+='<line x1="'+L+'" x2="'+(Wd-R)+'" y1="'+Y(k)+'" y2="'+Y(k)+'" stroke="var(--line,#e6d2c6)" stroke-width=".6"/><text x="'+(L-4)+'" y="'+(Y(k)+3)+'" font-size="9" text-anchor="end" fill="var(--muted,#8a7a70)">'+k+'</text>';
+  for(let m=0;m<=6;m++)svg+='<text x="'+X(m)+'" y="'+(Ht-8)+'" font-size="9" text-anchor="middle" fill="var(--muted,#8a7a70)">'+m+'</text>';
+  svg+='<text x="'+(Wd/2)+'" y="'+(Ht-0)+'" font-size="8" text-anchor="middle" fill="var(--muted,#8a7a70)">mois</text><polygon points="'+band+'" fill="var(--sage,#8fa58a)" opacity=".22"/><polyline points="'+line(1)+'" fill="none" stroke="var(--sage-dk,#5a7a52)" stroke-width="1.4" stroke-dasharray="4 3"/>';
+  if(pts.length>1)svg+='<polyline points="'+pts.map(p=>X(p[0]).toFixed(1)+','+Y(p[1]).toFixed(1)).join(' ')+'" fill="none" stroke="var(--accent)" stroke-width="2"/>';
+  pts.forEach(p=>{svg+='<circle cx="'+X(p[0]).toFixed(1)+'" cy="'+Y(p[1]).toFixed(1)+'" r="3.6" fill="var(--accent)"/>'});
+  svg+='</svg>';
+  const dernier=pts[pts.length-1];
+  return '<div class="card"><div class="row between"><span class="eyebrow acc">Courbe de poids de bébé</span><button class="btn sm" data-act="poids">'+icon('fa-plus')+'Une pesée</button></div>'+svg+
+   '<p class="xs muted"><i style="display:inline-block;width:10px;height:10px;background:var(--sage,#8fa58a);opacity:.4"></i> zone où se trouvent 94 % des bébés (3e à 97e percentile) · ligne pointillée : la moyenne (50e) · points : '+(pts.length?'les pesées de votre bébé':'ajoutez une pesée')+'.</p>'+
+   (dernier?'<p class="small">Dernière pesée : <b>'+String(dernier[1].toFixed(2)).replace('.',',')+' kg</b>. Un bébé peut suivre sa propre courbe, plus haut ou plus bas : c\'est la régularité qui compte, pas un point isolé.</p>':'')+
+   '<p class="xs muted">Votre professionnel interprète la courbe. Repères : '+lien('OMS, '+(sx==='F'?'filles':'garçons'),sx==='F'?WG:WB)+' (0 à 6 mois). Information générale.</p></div>'}
+/* ---- Résumé de la semaine ---- */
+function semaine(st){const J=864e5,fin=Date.now(),L=S.logs||[],P=(a,b)=>L.filter(l=>l.t>=a&&l.t<b);
+  const R=(a,b)=>{const x=P(a,b),jours=Math.max(1,Math.min(7,Math.ceil((b-Math.max(a,+st.birth))/J)));return {j:jours,b:x.filter(l=>l.type==='sein'||l.type==='biberon').length,m:x.filter(l=>l.type==='couche'&&l.pipi).length,s:x.filter(l=>l.type==='couche'&&l.selle).length,dor:x.filter(l=>l.type==='sommeil').reduce((c,l)=>c+(+l.sec||0),0),ml:x.filter(l=>l.type==='biberon').reduce((c,l)=>c+(+l.ml||0),0),sy:(S.parent.bebeSymp||[]).filter(y=>y.t>=a&&y.t<b).length,n:x.length}};
+  const a=R(fin-7*J,fin),b=R(fin-14*J,fin-7*J);if(!a.n&&!b.n)return '';
+  const m=(v,j)=>String(Math.round(v/j*10)/10).replace('.',','),h=s=>String(Math.round(s/360)/10).replace('.',',');
+  const row=(lbl,v,w)=>'<div class="li"><div class="tx"><b>'+lbl+'</b><span>'+v+(w?' · semaine précédente : '+w:'')+'</span></div></div>';
+  const txt='Résumé de la semaine de '+(S.parent.naissance.prenomBebe||'bébé')+' (jour '+st.day+')\nBoires par jour : '+m(a.b,a.j)+'\nCouches mouillées par jour : '+m(a.m,a.j)+' · selles par jour : '+m(a.s,a.j)+'\nSommeil noté : '+h(a.dor/a.j)+' h par jour'+(a.ml?'\nBiberon : '+Math.round(a.ml/a.j)+' ml par jour':'')+(a.sy?'\nSymptômes notés : '+a.sy:'');
+  return '<div class="card"><span class="eyebrow acc">Ma semaine</span><div class="list">'+row('Boires par jour',m(a.b,a.j),b.n?m(b.b,b.j):'')+row('Couches mouillées par jour',m(a.m,a.j),b.n?m(b.m,b.j):'')+row('Selles par jour',m(a.s,a.j),b.n?m(b.s,b.j):'')+(a.dor?row('Sommeil noté par jour',h(a.dor/a.j)+' h',b.dor?h(b.dor/b.j)+' h':''):'')+(a.sy?row('Symptômes notés',String(a.sy),''):'')+'</div><p class="xs muted">Selon ce que vous avez noté : plus vous notez, plus c\'est juste. À montrer à votre doula ou à votre infirmière.</p><button class="btn sm ghost" data-act="copyTxt" data-t="'+esc(txt)+'">'+icon('fa-copy')+'Copier le résumé</button></div>'}
 /* assemblage */
 const _p=pSuivi;pSuivi=function(){let h=_p.apply(this,arguments);try{const st=stage();if(S.role!=='parent'||st.k!=='pp')return h;
   /* retire les doublons : titre + explorateur de jours déjà à l'accueil, vaccins répétés dans la ligne du temps */
@@ -61,7 +94,7 @@ const _p=pSuivi;pSuivi=function(){let h=_p.apply(this,arguments);try{const st=st
   const seg=h.indexOf('</div>',h.indexOf('<div class="seg">'))+6;
   h=h.slice(0,seg)+hero(st)+h.slice(seg);
   const cal=h.indexOf('<div class="card"><div class="row between"><span class="eyebrow acc">Mon calendrier</span>');
-  if(cal>=0)h=h.slice(0,cal)+etapes(st)+vaccins(st)+symptomes()+h.slice(cal);else h+=etapes(st)+vaccins(st)+symptomes();
+  if(cal>=0)h=h.slice(0,cal)+etapes(st)+croissance(st)+semaine(st)+vaccins(st)+symptomes()+h.slice(cal);else h+=etapes(st)+croissance(st)+semaine(st)+vaccins(st)+symptomes();
   return h}catch(e){return h}};
 document.addEventListener('click',e=>{const b=e.target.closest('[data-act="vacFait"],[data-act="vacSave"],[data-act="vacDel"],[data-act="sympNew"],[data-act="sympSave"],[data-act="sympDel"]');if(!b)return;e.stopPropagation();e.preventDefault();const a=b.dataset.act,id=b.dataset.id;
   if(a==='vacFait'){const v=VAC.find(x=>x[0]===id),old=vacs()[id]||{};sheet('Vaccins de '+v[1],'<div class="stack" style="gap:10px"><p class="small muted">'+v[3]+'</p><label class="f">Date où le vaccin a été donné<input type="date" id="vcD" value="'+esc(old.date||iso(new Date()))+'"></label><label class="f">Note (réaction, remarque)<input type="text" id="vcN" value="'+esc(old.note||'')+'"></label><button class="btn" data-act="vacSave" data-id="'+id+'">Enregistrer</button></div>');return}

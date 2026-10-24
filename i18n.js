@@ -13,7 +13,7 @@
       });
     });
   }
-  var FILES=['tr/en-1.js','tr/en-2.js','tr/en-3.js','tr/en-4.js','tr/en-5.js','tr/en-6.js','tr/en-7.js'];
+  var FILES=['tr/en-8.js','tr/en-1.js','tr/en-2.js','tr/en-3.js','tr/en-4.js','tr/en-5.js','tr/en-6.js','tr/en-7.js'];
   var EX={},SUB=[],RX=null,cache=Object.create(null),vus=new WeakMap();
   var SKIP={SCRIPT:1,STYLE:1,TEXTAREA:1,CODE:1,NOSCRIPT:1};
   function prep(){
@@ -26,10 +26,10 @@
   function tr(s){
     if(lang!=='en'||!s||typeof s!=='string')return s;
     if(cache[s]!==undefined)return cache[s];
-    var m=s.match(/^(\s*)([\s\S]*?)(\s*)$/),core=m[2],out=core;
+    var m=s.match(/^(\s*)([\s\S]*?)(\s*)$/),core=m[2],out=core,SN=/Sérénaissance/g,prot=false;
     if(!core)return s;
     if(EX[core]!==undefined)out=EX[core];
-    else if(RX)out=core.replace(RX,function(x){return EX[x]});
+    else if(RX){if(SN.test(core)){prot=true;out=core.replace(SN,'\u0001')}out=out.replace(RX,function(x){return EX[x]});if(prot)out=out.replace(/\u0001/g,'Sérénaissance')}
     if(out===core)out=core.replace(/^Bonjour( [^\s,.!?:;]+( [^\s,.!?:;]+)?)?$/,'Hello$1');
     out=out.replace(/(\d{1,2}) h (\d{2})/g,'$1:$2').replace(/ à (?=\d)/g,' at ');
     out=m[1]+out+m[3];
