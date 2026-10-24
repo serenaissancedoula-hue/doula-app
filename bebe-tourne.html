@@ -84,13 +84,13 @@ let bebe=null;const cache={};
 /* ---- construit le bébé en relief à partir de la photo ---- */
 function chargerImg(src){return new Promise((ok,ko)=>{const i=new Image();i.onload=()=>ok(i);i.onerror=ko;i.src=src})}
 /* ---- vrais bébés 3D (Meshy), semaine par semaine ---- */
-const MODELES=[9, 10, 12, 13, 14, 15, 16, 17, 18, 21, 22, 23, 25, 26, 27, 28, 30, 31, 32, 33, 34, 35, 36, 38, 39, 40, 41, 42];
+const MODELES=[9, 10, 12, 13, 14, 15, 16, 17, 18, 21, 22, 23, 25, 26, 27, 28, 30, 31, 32, 33, 34, 35, 36, 38, 39, 40, 42];
 const PEAUX=[['Naturelle',[1,1,1],'#e8a693'],['Claire',[1.06,1.02,1],'#f2c4b2'],['Dorée',[.92,.78,.62],'#c98c66'],['Mate',[.74,.56,.43],'#9d6a4c'],['Foncée',[.5,.35,.26],'#5e3b2a']];
 let peau=0;try{peau=+(localStorage.getItem('sere-b3-peau')||0)}catch(e){}
 function modelePour(w){if(w<9)return null;let m=null;for(const k of MODELES)if(k<=w)m=k;return m===null?MODELES[0]:m}
 function teinter(o){const c=PEAUX[peau][1];o.traverse(n=>{if(n.isMesh)(Array.isArray(n.material)?n.material:[n.material]).forEach(m=>{if(!m.userData.c0)m.userData.c0=m.color.clone();m.color.copy(m.userData.c0).multiply(new THREE.Color(c[0],c[1],c[2]))})})}
 const gl=new THREE.GLTFLoader();
-function chargerModele(k){return new Promise((ok,ko)=>gl.load('img/bebe3d/modeles/semaine-'+pad(k)+'.glb?v=2',g=>{
+function chargerModele(k){return new Promise((ok,ko)=>gl.load('img/bebe3d/modeles/semaine-'+pad(k)+'.glb?v=3',g=>{
   const o=g.scene;o.traverse(n=>{if(n.isMesh){const m=n.material;m.side=THREE.DoubleSide;m.roughness=.55;m.metalness=0;if(m.map)m.map.anisotropy=4;
     m.emissive=new THREE.Color(0x3a1418);m.emissiveIntensity=.25}});
   const box=new THREE.Box3().setFromObject(o),sz=box.getSize(new THREE.Vector3()),c=box.getCenter(new THREE.Vector3());
