@@ -9,8 +9,8 @@ function previews(s){const sg=s.querySelector('#sigC'),ic=s.querySelector('#iniC
 const _od=ouvrirDoc;ouvrirDoc=async function(id){await _od(id);try{
   const s=document.querySelector('.sheet');if(!s||s.querySelector('.pad-zone'))return;
   const sg=s.querySelector('#sigC'),ic=s.querySelector('#iniC');if(!sg&&!ic)return;
-  if(sg&&S.role==='doula'&&!s.querySelector('#iniD')){const cv=document.createElement('canvas');cv.id='iniD';cv.width=300;cv.height=120;cv.hidden=true;cv._vide=true;s.appendChild(cv);s.querySelectorAll('.fid-pied span').forEach(sp=>{if(/Doula _{3,}/.test(sp.textContent))sp.innerHTML=sp.innerHTML.replace(/Doula _{3,}/,'Doula '+zone('inid'))})}
-  if(ic)s.querySelectorAll('.fid-pied span').forEach(sp=>{if(/Parents _{3,}/.test(sp.textContent))sp.innerHTML=sp.innerHTML.replace(/Parents _{3,}/,'Parents '+zone('ini'))});
+  if(sg&&S.role==='doula'&&!s.querySelector('#iniD')){const cv=document.createElement('canvas');cv.id='iniD';cv.width=300;cv.height=120;cv.hidden=true;cv._vide=true;s.appendChild(cv);s.querySelectorAll('.fid-pied span,.fid p').forEach(sp=>{if(/Doula _{3,}/.test(sp.textContent))sp.innerHTML=sp.innerHTML.replace(/Doula _{3,}/g,'Doula '+zone('inid'))})}
+  if(ic)s.querySelectorAll('.fid-pied span,.fid p').forEach(sp=>{if(/Parents _{3,}/.test(sp.textContent))sp.innerHTML=sp.innerHTML.replace(/Parents _{3,}/g,'Parents '+zone('ini'))});
   if(sg){const cell=s.querySelector('.fid .sig-cell');if(cell){[...cell.children].forEach(c=>{c.style.display='none'});cell.insertAdjacentHTML('beforeend',zone('sig'))}}
   const b=s.querySelector('.gp-ban');if(b)b.querySelector('.small').innerHTML='<b>À remplir et signer</b> · touchez les lignes du document.';
   previews(s)}catch(e){}};
