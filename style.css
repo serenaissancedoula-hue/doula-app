@@ -452,3 +452,24 @@ input[type=date]::-webkit-date-and-time-value,input[type=time]::-webkit-date-and
 .fid-cx{cursor:pointer;padding:6px 0;align-items:center}
 .fid-cx input{flex:none;width:22px;height:22px;margin:0;accent-color:#b5644d}
 .pap-sigs .pad-zone{width:100%}
+/* mot de passe : œil et jauge */
+.pw-wrap{position:relative;display:block}
+.pw-wrap input{padding-right:46px!important;width:100%;box-sizing:border-box}
+.pw-eye{position:absolute;right:4px;top:50%;transform:translateY(-50%);width:40px;height:40px;border:0;background:transparent;color:var(--muted,#8a7a70);display:flex;align-items:center;justify-content:center;cursor:pointer;border-radius:50%}
+.pw-eye:active{background:rgba(0,0,0,.06)}
+.pw-force{display:flex;align-items:center;gap:10px;margin-top:6px}
+.pw-barre{flex:1;display:grid;grid-template-columns:repeat(4,1fr);gap:4px}
+.pw-barre i{height:5px;border-radius:3px;background:var(--line,#e5d9d0)}
+.pw-force span{min-width:5.5em;text-align:right;font-weight:600}
+#nrCarte{position:relative}
+#nrCarte [data-nr=non]{position:absolute;top:6px;right:8px;width:32px;height:32px;border:0;background:transparent;font-size:1rem;color:var(--muted,#8a7a70)}
+#nrCarte .row.between>div{padding-right:34px}
+.pw-eye{-webkit-tap-highlight-color:transparent}
+#felic{position:fixed;inset:0;z-index:300;display:flex;align-items:center;justify-content:center;padding:max(24px,env(safe-area-inset-top,0px)) max(20px,env(safe-area-inset-right,0px)) max(24px,env(safe-area-inset-bottom,0px)) max(20px,env(safe-area-inset-left,0px));background:linear-gradient(160deg,var(--accent-lt,#f2c9b9),var(--bg,#f7f1ea) 60%,var(--soft,#f7ece5));overflow:hidden;animation:feIn .5s ease}
+#felic .fe-in{position:relative;z-index:2;max-width:420px;text-align:center;display:flex;flex-direction:column;gap:12px;align-items:center}
+#felic h1{font-size:1.9rem}#felic p{margin:0;font-size:1.05rem}#felic .fe-s{font-size:.92rem;color:var(--muted)}
+#felic .fe-em{font-size:3.4rem;animation:feB 1.4s ease-in-out infinite}
+#felic .fe-c{position:absolute;top:-30px;font-style:normal;font-size:1.4rem;opacity:.85;animation:feF 5s linear infinite}
+@keyframes feIn{from{opacity:0}to{opacity:1}}@keyframes feB{50%{transform:scale(1.15) rotate(-6deg)}}@keyframes feF{to{transform:translateY(110vh) rotate(40deg)}}
+@media (prefers-reduced-motion:reduce){#felic .fe-c,#felic .fe-em{animation:none}#felic .fe-c{display:none}}
+.tiles.t2{grid-template-columns:1fr 1fr}.tiles.t2 .tile{padding:12px}

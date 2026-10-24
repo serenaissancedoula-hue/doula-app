@@ -49,30 +49,48 @@ function conseilSymp(temp,mode,age){const seuil=mode==='rect'?38.1:37.6;
   if(temp&&temp>=seuil){if(age<90)return 'Fièvre chez un bébé de moins de 3 mois : consultez immédiatement (811, urgence ou votre professionnel).';if(temp>=39)return 'Fièvre de 39 °C ou plus : consultez aujourd\'hui. Appelez le 811 si vous hésitez.';return 'Fièvre : surveillez, habillez-le légèrement, offrez à boire. Consultez si elle dure plus d\'une journée ou s\'il est inhabituellement endormi, pâle ou refuse de boire.'}
   return 'Notez bien l\'évolution. Si quelque chose vous inquiète, appelez le 811 : votre instinct compte.'}
 
-/* ---- Courbe de poids (repères OMS, 3e–50e–97e percentile) ---- */
-const OMS={G:[[2.5,3.3,4.3],[3.4,4.5,5.7],[4.4,5.6,7.0],[5.1,6.4,7.9],[5.6,7.0,8.6],[6.1,7.5,9.2],[6.4,7.9,9.7]],
- F:[[2.4,3.2,4.2],[3.2,4.2,5.4],[4.0,5.1,6.5],[4.6,5.8,7.4],[5.1,6.4,8.1],[5.5,6.9,8.7],[5.8,7.3,9.2]]};
+/* ---- Courbe de poids (OMS : percentiles 3e, 15e, 50e, 85e, 97e, calculés par la méthode LMS) ---- */
+const LMS={G:[[.3487,3.3464,.14602],[.2297,4.4709,.13395],[.197,5.5675,.12385],[.1738,6.3762,.11727],[.1553,7.0023,.11316],[.1395,7.5105,.1108],[.1257,7.934,.10958],[.1134,8.297,.10902],[.1021,8.6151,.10882],[.0917,8.9014,.10881],[.082,9.1649,.10891],[.073,9.4122,.10906],[.0644,9.6479,.10925]],
+ F:[[.3809,3.2322,.14171],[.1714,4.1873,.13724],[.0962,5.1282,.13],[.0402,5.8458,.12619],[-.005,6.4237,.12402],[-.043,6.8985,.12274],[-.0756,7.297,.12204],[-.1039,7.6422,.12178],[-.1288,7.9487,.12181],[-.1507,8.2254,.12199],[-.17,8.48,.12223],[-.1872,8.7192,.12247],[-.2024,8.9481,.12274]]};
 const WG='https://cdn.who.int/media/docs/default-source/child-growth/child-growth-standards/indicators/weight-for-age/sft-wfa-girls-p-0-5.pdf',WB='https://cdn.who.int/media/docs/default-source/child-growth/child-growth-standards/indicators/weight-for-age/sft-wfa-boys-p-0-5.pdf';
+function lmsAt(sx,m){const T=LMS[sx],x=Math.max(0,Math.min(12,m)),i=Math.min(11,Math.floor(x)),f=x-i;return [0,1,2].map(k=>T[i][k]+(T[i+1][k]-T[i][k])*f)}
+function poidsZ(sx,m,kg){const [L,M,S]=lmsAt(sx,m);return L?(Math.pow(kg/M,L)-1)/(L*S):Math.log(kg/M)/S}
+function poidsKg(sx,m,z){const [L,M,S]=lmsAt(sx,m);return L?M*Math.pow(1+L*S*z,1/L):M*Math.exp(S*z)}
+function phi(z){const t=1/(1+.2316419*Math.abs(z)),d=.3989423*Math.exp(-z*z/2),p=d*t*(.3193815+t*(-.3565638+t*(1.781478+t*(-1.821256+t*1.330274))));return z>0?1-p:p}
+function pct(sx,m,kg){return Math.max(.1,Math.min(99.9,phi(poidsZ(sx,m,kg))*100))}
+function ord(p){const r=p<1?'moins du 1er':p>99?'plus du 99e':(Math.round(p)===1?'1er':Math.round(p)+'e');return r}
 function croissance(st){const n=S.parent.naissance||{},sx=/^f/i.test(n.sexe||'')?'F':/^g/i.test(n.sexe||'')?'G':'';
   if(!sx)return '<div class="card"><span class="eyebrow acc">Courbe de poids de bébé</span><p class="small muted">Pour comparer avec les repères de l\'OMS, indiquez le sexe de bébé (les courbes diffèrent).</p>'+ui.pick('parent.naissance.sexe',['Fille','Garçon'])+'</div>';
-  const T=OMS[sx],mo=t=>(t-+st.birth)/864e5/30.44,pts=[];
+  const mo=t=>(t-+st.birth)/864e5/30.44,pts=[];
   if(+n.poids)pts.push([0,+n.poids/1000]);
-  (S.logs||[]).filter(l=>l.type==='poids'&&+l.g).forEach(l=>{const m=mo(l.t);if(m>=0&&m<=6.3)pts.push([m,l.g/1000])});
+  (S.logs||[]).filter(l=>l.type==='poids'&&+l.g).forEach(l=>{const m=mo(l.t);if(m>=0&&m<=12)pts.push([Math.max(0,m),l.g/1000])});
   pts.sort((a,b)=>a[0]-b[0]);
-  const Wd=340,Ht=190,L=34,R=8,Tp=10,B=26,X=m=>L+m/6*(Wd-L-R),Y=k=>Ht-B-(k-2)/(10.4-2)*(Ht-B-Tp),line=i=>T.map((r,m)=>X(m).toFixed(1)+','+Y(r[i]).toFixed(1)).join(' ');
-  const band=line(0)+' '+T.map((r,m)=>[X(6-m).toFixed(1),Y(T[6-m][2]).toFixed(1)].join(',')).join(' ');
-  let svg='<svg viewBox="0 0 '+Wd+' '+Ht+'" style="width:100%;height:auto" role="img" aria-label="Courbe de poids de bébé">';
-  for(let k=2;k<=10;k+=2)svg+='<line x1="'+L+'" x2="'+(Wd-R)+'" y1="'+Y(k)+'" y2="'+Y(k)+'" stroke="var(--line,#e6d2c6)" stroke-width=".6"/><text x="'+(L-4)+'" y="'+(Y(k)+3)+'" font-size="9" text-anchor="end" fill="var(--muted,#8a7a70)">'+k+'</text>';
-  for(let m=0;m<=6;m++)svg+='<text x="'+X(m)+'" y="'+(Ht-8)+'" font-size="9" text-anchor="middle" fill="var(--muted,#8a7a70)">'+m+'</text>';
-  svg+='<text x="'+(Wd/2)+'" y="'+(Ht-0)+'" font-size="8" text-anchor="middle" fill="var(--muted,#8a7a70)">mois</text><polygon points="'+band+'" fill="var(--sage,#8fa58a)" opacity=".22"/><polyline points="'+line(1)+'" fill="none" stroke="var(--sage-dk,#5a7a52)" stroke-width="1.4" stroke-dasharray="4 3"/>';
-  if(pts.length>1)svg+='<polyline points="'+pts.map(p=>X(p[0]).toFixed(1)+','+Y(p[1]).toFixed(1)).join(' ')+'" fill="none" stroke="var(--accent)" stroke-width="2"/>';
-  pts.forEach(p=>{svg+='<circle cx="'+X(p[0]).toFixed(1)+'" cy="'+Y(p[1]).toFixed(1)+'" r="3.6" fill="var(--accent)"/>'});
+  const last=pts[pts.length-1],MX=last&&last[0]>5.6?12:6,Wd=340,Ht=210,L=36,R=10,Tp=10,B=28;
+  const ymax=Math.ceil(poidsKg(sx,MX,1.881)+.4),ymin=2,X=m=>L+m/MX*(Wd-L-R),Y=k=>Ht-B-(k-ymin)/(ymax-ymin)*(Ht-B-Tp);
+  const Z=[[-1.881,'3'],[-1.036,'15'],[0,'50'],[1.036,'85'],[1.881,'97']],step=MX*4,xs=[];for(let i=0;i<=step;i++)xs.push(i/4);
+  const path=z=>xs.map(m=>X(m).toFixed(1)+','+Y(poidsKg(sx,m,z)).toFixed(1)).join(' ');
+  const band=(a,b)=>path(a)+' '+xs.slice().reverse().map(m=>X(m).toFixed(1)+','+Y(poidsKg(sx,m,b)).toFixed(1)).join(' ');
+  const mut='var(--muted,#8a7a70)';
+  let svg='<svg viewBox="0 0 '+Wd+' '+Ht+'" style="width:100%;height:auto" role="img" aria-label="Courbe de poids de bébé et percentiles">';
+  const gs=ymax>12?2:1;for(let k=Math.ceil(ymin/gs)*gs;k<=ymax;k+=gs)svg+='<line x1="'+L+'" x2="'+(Wd-R)+'" y1="'+Y(k)+'" y2="'+Y(k)+'" stroke="var(--line,#e6d2c6)" stroke-width=".5"/><text x="'+(L-4)+'" y="'+(Y(k)+3)+'" font-size="9" text-anchor="end" fill="'+mut+'">'+k+'</text>';
+  for(let m=0;m<=MX;m++)svg+='<text x="'+X(m)+'" y="'+(Ht-14)+'" font-size="9" text-anchor="middle" fill="'+mut+'">'+m+'</text>';
+  svg+='<text x="'+(Wd/2)+'" y="'+(Ht-2)+'" font-size="8" text-anchor="middle" fill="'+mut+'">mois</text><text x="8" y="'+(Tp+4)+'" font-size="8" fill="'+mut+'">kg</text>'+
+   '<polygon points="'+band(-1.881,1.881)+'" fill="var(--sage,#8fa58a)" opacity=".14"/><polygon points="'+band(-1.036,1.036)+'" fill="var(--sage,#8fa58a)" opacity=".16"/>';
+  Z.forEach(([z,l])=>{svg+='<polyline points="'+path(z)+'" fill="none" stroke="var(--sage-dk,#5a7a52)" stroke-width="'+(z===0?1.4:.8)+'"'+(z===0?' stroke-dasharray="5 3"':' opacity=".75"')+'/><text x="'+(Wd-R+1)+'" y="'+(Y(poidsKg(sx,MX,z))+3)+'" font-size="7" fill="'+mut+'">'+l+'</text>'});
+  if(pts.length>1){const sm=[];for(let i=0;i<pts.length-1;i++){const a=pts[i],b=pts[i+1],p0=pts[i-1]||a,p3=pts[i+2]||b;for(let t=0;t<1;t+=.1){const t2=t*t,t3=t2*t,f=k=>.5*((2*a[k])+(-p0[k]+b[k])*t+(2*p0[k]-5*a[k]+4*b[k]-p3[k])*t2+(-p0[k]+3*a[k]-3*b[k]+p3[k])*t3);sm.push([f(0),f(1)])}}sm.push(last);
+    svg+='<polyline points="'+sm.map(p=>X(p[0]).toFixed(1)+','+Y(p[1]).toFixed(1)).join(' ')+'" fill="none" stroke="var(--accent)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>'}
+  pts.forEach(p=>{svg+='<circle cx="'+X(p[0]).toFixed(1)+'" cy="'+Y(p[1]).toFixed(1)+'" r="4" fill="var(--accent)" stroke="var(--card,#fff)" stroke-width="1.5"/>'});
   svg+='</svg>';
-  const dernier=pts[pts.length-1];
-  return '<div class="card"><div class="row between"><span class="eyebrow acc">Courbe de poids de bébé</span><button class="btn sm" data-act="poids">'+icon('fa-plus')+'Une pesée</button></div>'+svg+
-   '<p class="xs muted"><i style="display:inline-block;width:10px;height:10px;background:var(--sage,#8fa58a);opacity:.4"></i> zone où se trouvent 94 % des bébés (3e à 97e percentile) · ligne pointillée : la moyenne (50e) · points : '+(pts.length?'les pesées de votre bébé':'ajoutez une pesée')+'.</p>'+
-   (dernier?'<p class="small">Dernière pesée : <b>'+String(dernier[1].toFixed(2)).replace('.',',')+' kg</b>. Un bébé peut suivre sa propre courbe, plus haut ou plus bas : c\'est la régularité qui compte, pas un point isolé.</p>':'')+
-   '<p class="xs muted">Votre professionnel interprète la courbe. Repères : '+lien('OMS, '+(sx==='F'?'filles':'garçons'),sx==='F'?WG:WB)+' (0 à 6 mois). Information générale.</p></div>'}
+  const f1=k=>String(k.toFixed(2)).replace('.',','),w0=+n.poids?+n.poids/1000:0;
+  const stat=(a,b)=>'<div class="stat"><b>'+b+'</b><span>'+a+'</span></div>';
+  let top='';
+  if(last){const p=pct(sx,last[0],last[1]),gain=w0?last[1]-w0:null,p0=w0?pct(sx,0,w0):null;
+    top='<div class="grid3" style="margin:6px 0">'+stat('Poids de naissance',w0?f1(w0)+' kg':'à noter')+stat('Poids actuel',f1(last[1])+' kg')+stat('Percentile',ord(p))+'</div>'+
+     (gain!==null&&pts.length>1?'<p class="small"><b>Gain total : '+(gain>=0?'+':'')+f1(gain)+' kg</b>'+(p0!==null?' · à la naissance : '+ord(p0)+' percentile':'')+'. Bébé est plus lourd que '+Math.round(p)+' % des bébés du même âge et du même sexe.</p>':'');
+  }else top='<p class="small muted">Ajoutez le poids de naissance (dans le récit de naissance) et une première pesée pour voir le percentile.</p>';
+  return '<div class="card"><div class="row between"><span class="eyebrow acc">Courbe de poids de bébé</span><button class="btn sm" data-act="poids">'+icon('fa-plus')+'Une pesée</button></div>'+top+svg+
+   '<p class="xs muted">Lignes : 3e, 15e, <b>50e (pointillé, moyenne)</b>, 85e et 97e percentiles de l\'OMS · points : les pesées de bébé. Un bébé peut suivre sa propre courbe, plus haut ou plus bas : c\'est la régularité qui compte, pas un point isolé.</p>'+
+   '<p class="xs muted">Votre professionnel interprète la courbe. Repères : '+lien('OMS, '+(sx==='F'?'filles':'garçons'),sx==='F'?WG:WB)+'. Information générale.</p></div>'}
 /* ---- Résumé de la semaine ---- */
 function semaine(st){const J=864e5,fin=Date.now(),L=S.logs||[],P=(a,b)=>L.filter(l=>l.t>=a&&l.t<b);
   const R=(a,b)=>{const x=P(a,b),jours=Math.max(1,Math.min(7,Math.ceil((b-Math.max(a,+st.birth))/J)));return {j:jours,b:x.filter(l=>l.type==='sein'||l.type==='biberon').length,m:x.filter(l=>l.type==='couche'&&l.pipi).length,s:x.filter(l=>l.type==='couche'&&l.selle).length,dor:x.filter(l=>l.type==='sommeil').reduce((c,l)=>c+(+l.sec||0),0),ml:x.filter(l=>l.type==='biberon').reduce((c,l)=>c+(+l.ml||0),0),sy:(S.parent.bebeSymp||[]).filter(y=>y.t>=a&&y.t<b).length,n:x.length}};

@@ -11,7 +11,7 @@
   var IOS = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 
   function lire() {
-    var d = { son: true, vibration: true, volume: 70 };
+    var d = { son: true, vibration: true, volume: 70, touches: true };
     try { var x = JSON.parse(localStorage.getItem(CLE) || '{}'); for (var k in x) d[k] = x[k]; } catch (e) {}
     return d;
   }
@@ -23,13 +23,49 @@
   }
   function q(sel) { return racine.querySelector(sel); }
 
+  /* ---- Contexte audio partagé : débloqué dès le premier toucher (exigé par iOS/Android) ---- */
+  function ctx(carillon) {
+    try {
+      var AC = window.AudioContext || window.webkitAudioContext; if (!AC) return null;
+      if (!audio) audio = new AC();
+      try { if (navigator.audioSession) navigator.audioSession.type = carillon ? 'playback' : 'ambient'; } catch (e) {}
+      if (audio.state !== 'running') audio.resume();
+      return audio;
+    } catch (e) { return null; }
+  }
+  function debloquer() {
+    var a = ctx(false);
+    if (a && a.state === 'running' || (a && a.state === 'suspended')) {
+      try { var b = a.createBuffer(1, 1, 22050), s = a.createBufferSource(); s.buffer = b; s.connect(a.destination); s.start(0); } catch (e) {}
+    }
+  }
+  ['touchstart', 'pointerdown', 'keydown', 'click'].forEach(function (n) { document.addEventListener(n, debloquer, { capture: true, passive: true }); });
+  /* ---- Petit « tic » doux à chaque bouton touché ---- */
+  var dernierTap = 0;
+  function tap() {
+    var d = lire(); if (!d.son || d.touches === false) return;
+    var now = Date.now(); if (now - dernierTap < 60) return; dernierTap = now;
+    var a = ctx(false); if (!a) return;
+    try {
+      var vol = Math.max(0, Math.min(1, (d.volume || 0) / 100)) * 0.22, t = a.currentTime;
+      var o = a.createOscillator(), g = a.createGain();
+      o.type = 'sine'; o.frequency.setValueAtTime(1500, t); o.frequency.exponentialRampToValueAtTime(700, t + 0.05);
+      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(Math.max(vol, 0.0002), t + 0.006); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.07);
+      o.connect(g); g.connect(a.destination); o.start(t); o.stop(t + 0.08);
+    } catch (e) {}
+  }
+  document.addEventListener('click', function (e) {
+    var t = e.target && e.target.closest && e.target.closest('button, [data-act], .chip, .tile, .qbtn, a[href], summary, [role=tab], [role=switch], label.btn');
+    if (!t || t.disabled || t.classList.contains('rg-test')) return;
+    tap();
+  }, true);
+
   /* ---- Son dans l'appli (volume réglable) ---- */
   function sonner(forcer) {
     var d = lire();
     if (!forcer && !d.son) return;
     try {
-      audio = audio || new (window.AudioContext || window.webkitAudioContext)();
-      if (audio.state === 'suspended') audio.resume();
+      ctx(true);
       var vol = Math.max(0, Math.min(1, (d.volume || 0) / 100)) * 0.5, t = audio.currentTime;
       [[880, 0], [1318.5, 0.14]].forEach(function (n) {
         var o = audio.createOscillator(), g = audio.createGain();
@@ -88,6 +124,7 @@
       '<div class="rg-actions" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:6px;"><button type="button" class="btn rg-activer" hidden>' + L('Activer les notifications', 'Turn on notifications') + '</button></div>' +
       '<div class="rg-reglages" style="display:flex;flex-direction:column;gap:12px;margin-top:8px;">' +
         '<label class="rg-ligne"><span><strong>' + L('Son', 'Sound') + '</strong><small>' + L('Un petit carillon à chaque notification', 'A little chime with each notification') + '</small></span><input type="checkbox" class="rg-son" role="switch"' + (d.son ? ' checked' : '') + '></label>' +
+        '<label class="rg-ligne"><span><strong>' + L('Sons des touches', 'Tap sounds') + '</strong><small>' + L('Un petit « tic » doux quand on touche un bouton', 'A soft tick when you tap a button') + '</small></span><input type="checkbox" class="rg-tch" role="switch"' + (d.touches === false ? '' : ' checked') + '></label>' +
         '<label class="rg-ligne"><span><strong>Vibration</strong><small>' + L('Quand le téléphone le permet', 'When the phone supports it') + '</small></span><input type="checkbox" class="rg-vib" role="switch"' + (d.vibration ? ' checked' : '') + '></label>' +
         '<label class="rg-ligne rg-vol"><span><strong>' + L('Volume dans l\'appli', 'In-app volume') + '</strong><small>' + L('Quand l\'appli est ouverte', 'While the app is open') + '</small></span><input type="range" class="rg-volume" min="0" max="100" step="5" value="' + (d.volume == null ? 70 : d.volume) + '"></label>' +
         '<p style="font-size:.78rem;color:var(--doux,#7a685e);">' + L('Appli fermée : le volume suit celui de ton téléphone. ', 'When the app is closed, the volume follows your phone. ') + (IOS ? L('Sur iPhone, tu peux aussi choisir le style d\'alerte dans Réglages → Notifications.', 'On iPhone, you can also choose the alert style in Settings → Notifications.') : '') + '</p>' +
@@ -109,6 +146,7 @@
       abonnementActuel().then(function (ab) { if (ab && Notification.permission === 'granted') enregistrer(ab); });
     }
     q('.rg-son').addEventListener('change', function () { sauver({ son: this.checked }); if (this.checked) sonner(); });
+    q('.rg-tch').addEventListener('change', function () { sauver({ touches: this.checked }); if (this.checked) { dernierTap = 0; tap(); } });
     q('.rg-vib').addEventListener('change', function () { sauver({ vibration: this.checked }); if (this.checked && navigator.vibrate) navigator.vibrate(150); });
     q('.rg-volume').addEventListener('change', function () { sauver({ volume: +this.value }); sonner(true); });
     q('.rg-activer').addEventListener('click', function () {
@@ -143,5 +181,5 @@
     etat();
   }
 
-  window.Reglages = { monter: monter, sonner: sonner, lire: lire };
+  window.Reglages = { monter: monter, sonner: sonner, lire: lire, tap: tap };
 })();
