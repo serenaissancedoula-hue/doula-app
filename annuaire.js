@@ -23,18 +23,35 @@ function villesHtml(){selInit();const extra=SEL.filter(v=>!TOUTES.includes(v));
    +(extra.length?'<div class="row" style="gap:6px;flex-wrap:wrap;margin-top:8px">'+extra.map(chip).join('')+'</div>':'')
    +'<div class="row" style="gap:8px;margin-top:8px"><input type="text" id="pfAutre" placeholder="Une autre ville ?" style="flex:1"><button type="button" class="btn sm ghost" data-act="anAjoutVille">Ajouter</button></div>'}
 /* ---------- carte publique d'une doula (même rendu pour les familles et l'aperçu de la doula) ---------- */
-function carte(d,bouton){
+const MOIS=['janv.','févr.','mars','avril','mai','juin','juil.','août','sept.','oct.','nov.','déc.'];
+const moisLib=k=>{const [y,m]=k.split('-');return MOIS[+m-1]+' '+y};
+const moisProchains=()=>{const L=[],d=new Date();d.setDate(1);for(let i=0;i<12;i++){L.push(d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0'));d.setMonth(d.getMonth()+1)}return L};
+const moisDe=d=>{const cur=moisProchains()[0];return String(d.dispo_mois||'').split(',').filter(k=>/^\d{4}-\d{2}$/.test(k)&&k>=cur).sort()};
+const siteUrl=u=>{u=String(u||'').trim();if(!u)return '';if(!/^https?:\/\//i.test(u))u='https://'+u;return /^https?:\/\/[^\s<>"']+$/i.test(u)?u:''};
+const court=(t,n)=>{t=String(t||'').replace(/\s+/g,' ').trim();if(t.length<=n)return t;return t.slice(0,n).replace(/\s+\S*$/,'')+'…'};
+function enTete(d){
   const nom=esc((d.prenom||'')+(d.nom_initiale?' '+d.nom_initiale+'.':''));
   const ph=d.photo?'<img src="'+esc(d.photo)+'" alt="" style="width:64px;height:64px;border-radius:50%;object-fit:cover;flex:none">':'<span class="ic" style="width:64px;height:64px;border-radius:50%;flex:none;display:grid;place-items:center">'+icon('fa-user')+'</span>';
-  const lieux=[d.ville_base?d.ville_base+(d.rayon_km?' · jusqu\'à '+d.rayon_km+' km':''):d.region,d.zones].filter(Boolean).join(' · ');
-  return '<div class="card"><div class="row" style="gap:14px;align-items:flex-start">'+ph+'<div style="min-width:0;flex:1"><b style="font-size:17px">'+nom+'</b>'+(d.entreprise?'<div class="small muted">'+esc(d.entreprise)+'</div>':'')+(d._km!=null&&d._km>0?'<div class="xs muted">À environ '+d._km+' km de vous</div>':'')+(lieux?'<div class="small" style="margin-top:4px">'+icon('fa-location-dot')+' '+esc(lieux)+'</div>':'')+'</div></div>'
-    +(d.bio?'<p class="small" style="margin:12px 0 0;white-space:pre-line">'+esc(d.bio)+'</p>':'')
-    +'<div class="row" style="gap:6px;flex-wrap:wrap;margin-top:10px">'+(d.langues?'<span class="pill line">'+icon('fa-language')+' '+esc(d.langues)+'</span>':'')+(d.certification?'<span class="pill line">'+icon('fa-award')+' '+esc(d.certification)+'</span>':'')+'</div>'
-    +(bouton?'<button class="btn" style="margin-top:14px;width:100%" data-act="anEcrire" data-id="'+esc(d.id)+'">'+icon('fa-envelope')+'Écrire à '+esc(d.prenom||'cette doula')+'</button>':'')+'</div>'}
+  const lieu=d.ville_base?d.ville_base+(d.rayon_km?' · jusqu\'à '+d.rayon_km+' km':''):d.region;
+  return '<div class="row" style="gap:14px;align-items:center">'+ph+'<div style="min-width:0;flex:1"><b style="font-size:17px">'+nom+'</b>'+(d.entreprise?'<div class="small muted">'+esc(d.entreprise)+'</div>':'')+(lieu?'<div class="small" style="margin-top:2px">'+icon('fa-location-dot')+' '+esc(lieu)+'</div>':'')+(d._km!=null&&d._km>0?'<div class="xs muted">À environ '+d._km+' km de vous</div>':'')+'</div></div>'}
+function carte(d,bouton){
+  const mo=moisDe(d);
+  return '<div class="card">'+enTete(d)
+    +(d.bio?'<p class="small" style="margin:10px 0 0">'+esc(court(d.bio,150))+'</p>':'')
+    +(mo.length?'<div class="xs" style="margin-top:8px">'+icon('fa-calendar-check')+' <b>Places pour des naissances :</b> '+esc(mo.slice(0,4).map(moisLib).join(' · '))+(mo.length>4?' …':'')+'</div>':'')
+    +(bouton?'<div class="row" style="gap:8px;margin-top:12px"><button class="btn sm ghost" style="flex:1" data-act="anPlus" data-id="'+esc(d.id)+'">En savoir plus</button><button class="btn sm" style="flex:1" data-act="anEcrire" data-id="'+esc(d.id)+'">'+icon('fa-calendar-plus')+'Prendre rendez-vous</button></div>':'')+'</div>'}
+function ficheSheet(id){const d=(A.liste||[]).find(x=>x.id===id);if(!d)return;const mo=moisDe(d),site=siteUrl(d.site_web);
+  const lignes=[d.zones?['fa-map-location-dot','Autres villes',d.zones]:null,d.langues?['fa-language','Langues',d.langues]:null,d.certification?['fa-award','Formation',d.certification]:null].filter(Boolean);
+  sheet(esc((d.prenom||'')+(d.nom_initiale?' '+d.nom_initiale+'.':'')),enTete(d)
+   +(d.bio?'<p class="small" style="white-space:pre-line;margin:14px 0 0">'+esc(d.bio)+'</p>':'')
+   +(lignes.length?'<div class="list" style="margin-top:12px">'+lignes.map(l=>'<div class="li"><div class="ic">'+icon(l[0])+'</div><div class="tx"><b>'+l[1]+'</b><span>'+esc(l[2])+'</span></div></div>').join('')+'</div>':'')
+   +(mo.length?'<div class="card tint" style="margin-top:12px"><b>'+icon('fa-calendar-check')+' Disponibilités pour l\'accouchement</b><div class="row" style="gap:6px;flex-wrap:wrap;margin-top:8px">'+mo.map(k=>'<span class="pill acc">'+esc(moisLib(k))+'</span>').join('')+'</div><p class="xs muted" style="margin:8px 0 0">Mois de date prévue pour lesquels elle prend encore des familles.</p></div>':'')
+   +(site?'<p style="margin:12px 0 0"><a href="'+esc(site)+'" target="_blank" rel="noopener noreferrer">'+icon('fa-globe')+' Visiter son site web</a></p>':'')
+   +'<button class="btn" style="margin-top:14px;width:100%" data-act="anEcrire" data-id="'+esc(id)+'">'+icon('fa-calendar-plus')+'Prendre rendez-vous</button>')}
 
 /* ---------- côté famille ---------- */
 async function chargerAnnuaire(){
-  const [r,m]=await Promise.all([sb.rpc('fam_annuaire2',{p_q:null}),sb.from('fam_demandes').select('*').order('created_at',{ascending:false}).limit(30).then(x=>x,()=>({data:[]}))]);
+  const [r,m]=await Promise.all([sb.rpc('fam_annuaire3',{p_q:null}),sb.from('fam_demandes').select('*').order('created_at',{ascending:false}).limit(30).then(x=>x,()=>({data:[]}))]);
   A.liste=r.data||[];A.dem=(m&&m.data)||[];A.charge=true}
 function filtrer(){const q=norm(A.q);if(!q)return A.liste;const c=coord(A.q);
   if(c){const L=[];A.liste.forEach(d=>{let k=null;if(d.lat!=null&&d.rayon_km){const x=dist(c,{lat:d.lat,lng:d.lng});if(x<=d.rayon_km)k=Math.round(x)}
@@ -82,15 +99,17 @@ const nouvelles=()=>DEMANDES.filter(d=>d.statut==='nouvelle').length;
 const _cd=chargerDoula;
 chargerDoula=async function(){await _cd.apply(this,arguments);try{if(localStorage.getItem('an-vu'))ME_DOULA.annuaire_vu=true}catch(x){}await chargerDemandes()};
 
+let MSEL=null;const moisInit=()=>{if(MSEL===null)MSEL=moisDe(ME_DOULA||{})};
+function moisHtml(){moisInit();return moisProchains().map(k=>'<button type="button" class="pill '+(MSEL.includes(k)?'acc':'line')+'" style="cursor:pointer;border:0;font:inherit" data-act="anMois" data-v="'+k+'">'+(MSEL.includes(k)?icon('fa-check')+' ':'')+esc(moisLib(k))+'</button>').join('')}
 function profilHtml(){const D=ME_DOULA||{};
-  const apercu=carte({ville_base:D.ville_base,rayon_km:D.rayon_km,id:D.id,prenom:D.prenom,nom_initiale:(D.nom||'').slice(0,1),entreprise:D.entreprise,photo:D.photo,region:D.region,zones:D.zones,bio:D.bio,langues:D.langues,certification:D.certification},false);
+  const apercu=carte({site_web:D.site_web,dispo_mois:D.dispo_mois,ville_base:D.ville_base,rayon_km:D.rayon_km,id:D.id,prenom:D.prenom,nom_initiale:(D.nom||'').slice(0,1),entreprise:D.entreprise,photo:D.photo,region:D.region,zones:D.zones,bio:D.bio,langues:D.langues,certification:D.certification},false);
   return back('dsub','','Outils')+sh('Mon profil dans l\'annuaire','Les familles de votre région vous trouvent et vous écrivent')
    +'<div class="card"><label class="check"><input type="checkbox" id="pfOn" '+(D.annuaire?'checked':'')+'><span><b>Apparaître dans l\'annuaire « Trouver ma doula »</b><br><span class="xs muted">Optionnel. Seuls votre prénom, l\'initiale de votre nom, votre photo et le texte ci-dessous sont visibles. Votre courriel et votre téléphone ne le sont jamais : c\'est vous qui décidez de répondre.</span></span></label>'
    +'<label class="check" style="margin-top:8px"><input type="checkbox" id="pfAcc" '+(D.accepte_nouvelles===false?'':'checked')+'><span>J\'accepte de nouvelles familles en ce moment</span></label>'
    +'<div class="stack" style="margin-top:12px"><label class="f">Ma région<input type="text" id="pfRegion" value="'+esc(D.region||'')+'" placeholder="Ex. Restigouche (N.-B.)"></label>'
    +'<div class="grid2 resp"><label class="f">Ma ville de départ<select id="pfBase"><option value="">— Choisir —</option>'+TOUTES.map(v=>'<option'+(v===D.ville_base?' selected':'')+'>'+esc(v)+'</option>').join('')+'</select></label><label class="f">Je me déplace jusqu\'à<select id="pfRayon">'+[10,25,40,50,75,100,150,200].map(k=>'<option value="'+k+'"'+(+D.rayon_km===k?' selected':'')+'>'+k+' km</option>').join('')+'</select></label></div><div><span class="small"><b>Autres villes précises que je dessers (facultatif)</b></span><div id="pfVilles" class="stack" style="gap:6px;margin-top:6px">'+villesHtml()+'</div></div>'
    +'<div class="grid2 resp"><label class="f">Langues<input type="text" id="pfLangues" value="'+esc(D.langues||'')+'" placeholder="Français, anglais"></label><label class="f">Formation / certification<input type="text" id="pfCert" value="'+esc(D.certification||'')+'" placeholder="Ex. Académie Sérénaissance"></label></div>'
-   +'<label class="f">Ma présentation (jusqu\'à 2000 caractères)<textarea id="pfBio" rows="12" maxlength="2000" placeholder="Qui êtes-vous ? Comment accompagnez-vous les familles ?">'+esc(D.bio||'')+'</textarea></label>'
+   +'<label class="f">Mon site web<input type="text" id="pfSite" value="'+esc(D.site_web||'')+'" placeholder="academiesere.ca"></label><div><span class="small"><b>Mes disponibilités pour accoucher</b></span><p class="xs muted" style="margin:2px 0 6px">Touchez les mois de date prévue pour lesquels vous prenez encore des familles.</p><div id="pfMois" class="row" style="gap:6px;flex-wrap:wrap">'+moisHtml()+'</div></div><label class="f">Ma présentation (jusqu\'à 2000 caractères)<textarea id="pfBio" rows="12" maxlength="2000" placeholder="Qui êtes-vous ? Comment accompagnez-vous les familles ?">'+esc(D.bio||'')+'</textarea></label>'
    +'<p class="xs muted">Ajoutez une belle photo de vous dans Paramètres : elle s\'affiche ici.</p>'
    +'<button class="btn" data-act="anSauverProfil">'+icon('fa-check')+'Enregistrer mon profil</button></div></div>'
    +'<div class="eyebrow acc" style="margin:14px 0 6px">Ce que les familles verront</div>'+apercu+'<p class="xs muted">Votre abonnement doit être actif pour apparaître dans l\'annuaire.</p>'}
@@ -124,13 +143,13 @@ routeHash=function(){if(S.role==='doula'&&location.hash==='#demandes'){S.dtab='o
 
 /* ---------- actions ---------- */
 function ecrireSheet(id){const d=(A.liste||[]).find(x=>x.id===id);if(!d)return;const m=S.meta||{};
-  sheet('Écrire à '+esc(d.prenom||'cette doula'),'<p class="small">Votre message est envoyé à la doula avec vos coordonnées. Elle vous répond directement.</p><div class="stack">'
+  sheet('Rendez-vous avec '+esc(d.prenom||'cette doula'),'<p class="small">Votre demande est envoyée par courriel à la doula, avec vos coordonnées. Elle vous répond directement pour fixer une rencontre de connaissance.</p><div class="stack">'
    +'<label class="f">Votre nom<input type="text" id="deNom" value="'+esc(((m.prenom||'')+' '+(m.nom||'')).trim())+'" autocomplete="name"></label>'
    +'<div class="grid2 resp"><label class="f">Téléphone (facultatif)<input type="tel" id="deTel" autocomplete="tel"></label><label class="f">Votre ville<input type="text" id="deVille" autocomplete="address-level2"></label></div>'
    +'<label class="f">Date prévue d\'accouchement (si enceinte)<input type="date" id="deDpa"></label>'
    +'<label class="f">Votre message<textarea id="deMsg" rows="5" maxlength="1500" placeholder="Parlez-lui de vous, de ce que vous recherchez, de vos questions…"></textarea></label>'
    +'<label class="check"><input type="checkbox" id="deOk"><span>J\'accepte que cette doula voie mon nom, mon courriel et les informations ci-dessus pour me répondre.</span></label>'
-   +'<button class="btn" data-act="anEnvoyer" data-id="'+esc(id)+'">'+icon('fa-paper-plane')+'Envoyer ma demande</button></div>')}
+   +'<button class="btn" data-act="anEnvoyer" data-id="'+esc(id)+'">'+icon('fa-paper-plane')+'Envoyer ma demande de rendez-vous</button></div>')}
 
 document.addEventListener('click',async e=>{const b=e.target.closest('[data-act]');if(!b)return;const a=b.dataset.act,id=b.dataset.id;
   if(a.slice(0,2)!=='an')return;
@@ -143,18 +162,20 @@ document.addEventListener('click',async e=>{const b=e.target.closest('[data-act]
   case 'anPlusTard':{ME_DOULA.annuaire_vu=true;try{localStorage.setItem('an-vu','1')}catch(x){}render();return}
   case 'anBascule':{const on=!ME_DOULA.annuaire;if(on&&(!ME_DOULA.bio||!(ME_DOULA.region||ME_DOULA.zones))){toast('Ajoutez d\'abord votre région et une présentation');S.dsub='annuaire';render();return}
     const {error}=await sb.from('fam_doulas').update({annuaire:on}).eq('id',ME_DOULA.id);if(error){toast(error.message);return}ME_DOULA.annuaire=on;toast(on?'Vous êtes dans l\'annuaire':'Vous êtes retirée de l\'annuaire');render();return}
+  case 'anMois':{moisInit();const v=b.dataset.v;MSEL=MSEL.includes(v)?MSEL.filter(x=>x!==v):MSEL.concat(v);document.getElementById('pfMois').innerHTML=moisHtml();return}
   case 'anVille':{selInit();const v=b.dataset.v;SEL=SEL.includes(v)?SEL.filter(x=>x!==v):SEL.concat(v);const el=document.getElementById('pfVilles');if(el)el.innerHTML=villesHtml();return}
   case 'anAjoutVille':{selInit();const i=document.getElementById('pfAutre'),v=(i.value||'').trim().slice(0,60);if(!v)return;if(!SEL.includes(v))SEL.push(v);document.getElementById('pfVilles').innerHTML=villesHtml();return}
   case 'anMdp':motDePasseSheet(false);return;
+  case 'anPlus':ficheSheet(id);return;
   case 'anEcrire':{const {data:{session}}=await sb.auth.getSession();if(!session){sheet('Créez votre compte','<p class="small">Pour écrire à cette doula, créez un compte gratuit. Ça prend une minute, puis vous reviendrez ici.</p><button class="btn" data-act="anCompte">Créer mon compte</button>');return}ecrireSheet(id);return}
   case 'anCompte':close();S.vueCx='famille';ecranConnexion();return;
   case 'anEnvoyer':{const nom=document.getElementById('deNom').value.trim();if(!nom){toast('Entrez votre nom');return}if(!document.getElementById('deOk').checked){toast('Cochez la case pour que la doula puisse vous répondre');return}
-    b.disabled=true;const {data,error}=await sb.rpc('fam_demander_doula',{p_doula:id,p_nom:nom,p_tel:document.getElementById('deTel').value.trim(),p_ville:document.getElementById('deVille').value.trim(),p_dpa:document.getElementById('deDpa').value||null,p_message:document.getElementById('deMsg').value.trim()});
+    b.disabled=true;const {data,error}=await sb.functions.invoke('fam-contact',{body:{doula:id,nom:nom,tel:document.getElementById('deTel').value.trim(),ville:document.getElementById('deVille').value.trim(),dpa:document.getElementById('deDpa').value||null,message:document.getElementById('deMsg').value.trim()}});
     if(error||!data||!data.ok){b.disabled=false;toast((data&&data.erreur)||(error&&error.message)||'Pas envoyé, réessayez');return}
-    close();toast('Demande envoyée ! La doula vous répondra par courriel.');await chargerAnnuaire();const el=document.getElementById('anDem');if(el)el.innerHTML=demandesHtml();return}
-  case 'anSauverProfil':{const g=k=>(document.getElementById(k)||{}).value||'';const patch={annuaire:document.getElementById('pfOn').checked,accepte_nouvelles:document.getElementById('pfAcc').checked,region:g('pfRegion').trim()||null,ville_base:g('pfBase')||null,rayon_km:g('pfBase')?+g('pfRayon'):null,lat:(coord(g('pfBase'))||{}).lat??null,lng:(coord(g('pfBase'))||{}).lng??null,zones:(SEL&&SEL.length?SEL.join(', '):null),langues:g('pfLangues').trim()||null,certification:g('pfCert').trim()||null,bio:g('pfBio').trim()||null};
+    close();toast('Demande envoyée ! La doula vous répondra bientôt.');await chargerAnnuaire();const el=document.getElementById('anDem');if(el)el.innerHTML=demandesHtml();return}
+  case 'anSauverProfil':{const g=k=>(document.getElementById(k)||{}).value||'';const patch={annuaire:document.getElementById('pfOn').checked,accepte_nouvelles:document.getElementById('pfAcc').checked,region:g('pfRegion').trim()||null,site_web:g('pfSite').trim()||null,dispo_mois:(MSEL&&MSEL.length?MSEL.join(','):null),ville_base:g('pfBase')||null,rayon_km:g('pfBase')?+g('pfRayon'):null,lat:(coord(g('pfBase'))||{}).lat??null,lng:(coord(g('pfBase'))||{}).lng??null,zones:(SEL&&SEL.length?SEL.join(', '):null),langues:g('pfLangues').trim()||null,certification:g('pfCert').trim()||null,bio:g('pfBio').trim()||null};
     if(patch.annuaire&&(!patch.bio||!(patch.ville_base||patch.region||patch.zones))){toast('Ajoutez votre région (ou vos villes) et une courte présentation pour apparaître');return}
-    const {error}=await sb.from('fam_doulas').update(patch).eq('id',ME_DOULA.id);if(error){toast('Pas enregistré : '+error.message);return}Object.assign(ME_DOULA,patch);SEL=null;try{S.doula.region=patch.region||''}catch(x){}toast(patch.annuaire?'Votre profil est dans l\'annuaire':'Profil enregistré (non affiché dans l\'annuaire)');render();return}
+    const {error}=await sb.from('fam_doulas').update(patch).eq('id',ME_DOULA.id);if(error){toast('Pas enregistré : '+error.message);return}Object.assign(ME_DOULA,patch);SEL=null;MSEL=null;try{S.doula.region=patch.region||''}catch(x){}toast(patch.annuaire?'Votre profil est dans l\'annuaire':'Profil enregistré (non affiché dans l\'annuaire)');render();return}
   case 'anDecliner':{if(b.dataset.c!=='1'){b.dataset.c='1';toast('Touchez encore pour décliner');return}await sb.from('fam_demandes').update({statut:'declinee'}).eq('id',id);await chargerDemandes();render();return}
   case 'anAccepter':{const d=DEMANDES.find(x=>x.id===id);if(!d)return;if(d.statut!=='acceptee'){await sb.from('fam_demandes').update({statut:'acceptee'}).eq('id',id);d.statut='acceptee'}
     const mots=String(d.nom||'').trim().split(/\s+/);S.dtab='clientes';S.openClient=null;render();
