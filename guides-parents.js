@@ -56,3 +56,23 @@ document.addEventListener('click',e=>{const s=document.querySelector('.sheet');i
 /* initiales de la famille affichées au bas de chaque page une fois le contrat signé */
 const _dvGP=docVue;docVue=function(d,doula){let h=_dvGP(d,doula);const I=d&&d.reponses&&d.reponses.initiales;
   if(I&&/^data:image\/png;base64,[A-Za-z0-9+\/=]+$/.test(I))h=h.replace(/Parents _{3,}/g,'Parents <img src="'+I+'" alt="initiales" style="height:22px;vertical-align:middle">');return h};
+
+/* Ordinateur ou tablette/cellulaire : on adapte les consignes (doigt / souris) et on offre aussi de taper sa signature au clavier */
+const GP_TACTILE=(navigator.maxTouchPoints>0)&&!!(window.matchMedia&&matchMedia('(pointer:coarse)').matches);
+const _odGP3=ouvrirDoc;ouvrirDoc=async function(id){await _odGP3(id);try{
+  const s=document.querySelector('.sheet');if(!s||S.role!=='parent'||s.querySelector('.gp-clav'))return;
+  const outil=GP_TACTILE?'avec le doigt':'avec la souris ou le pavé tactile (maintenez le clic enfoncé et tracez)';
+  s.querySelectorAll('.xs.muted').forEach(x=>{if(/doigt/.test(x.textContent))x.textContent=x.textContent.replace(/avec le doigt/g,outil).replace(/Signez avec le doigt dans le cadre/,'Signez '+outil+' dans le cadre')});
+  s.querySelectorAll('.gp-case').forEach(()=>{});const m=[...s.querySelectorAll('p.xs.muted')].find(p=>/Touchez la case/.test(p.textContent));if(m)m.textContent=GP_TACTILE?'Touchez la case du forfait que vous choisissez.':'Cliquez sur la case du forfait que vous choisissez.';
+  [['#sigC','Taper ma signature au clavier'],['#iniC','Taper mes initiales au clavier']].forEach(([sel,t])=>{const cv=s.querySelector(sel);if(!cv)return;
+    const b=document.createElement('button');b.type='button';b.className='btn sm ghost gp-clav';b.dataset.act='gpClavier';b.dataset.c=sel;b.style.alignSelf='flex-start';b.innerHTML=icon('fa-keyboard')+t;
+    const eff=cv.parentNode.querySelector('button[data-act=sigEff],button[data-act=gpIniEff]');(eff||cv).insertAdjacentElement('afterend',b)})
+}catch(e){}};
+document.addEventListener('click',e=>{const b=e.target.closest('[data-act="gpClavier"]');if(!b)return;e.stopPropagation();
+  const s=document.querySelector('.sheet'),cv=s.querySelector(b.dataset.c),nom=((s.querySelector('#sigNom')||{}).value||'').trim();
+  if(!nom){toast('Écrivez d\'abord votre nom complet');const n=s.querySelector('#sigNom');if(n){n.scrollIntoView({block:'center'});n.focus()}return}
+  const txt=b.dataset.c==='#iniC'?nom.split(/\s+/).map(w=>w[0]).join('').toUpperCase().slice(0,4):nom;
+  const x=cv.getContext('2d');x.clearRect(0,0,cv.width,cv.height);x.fillStyle='#2c221e';x.textBaseline='middle';
+  let px=Math.round(cv.height*.6);x.font='italic '+px+'px "Segoe Script","Brush Script MT","Snell Roundhand",cursive';while(x.measureText(txt).width>cv.width-30&&px>14){px-=2;x.font='italic '+px+'px "Segoe Script","Brush Script MT","Snell Roundhand",cursive'}
+  x.fillText(txt,15,cv.height/2);cv._vide=false;
+  if(b.dataset.c==='#iniC')s.querySelector('input.dch[data-k=initiales]').value=cv.toDataURL('image/png');toast('Ajouté : vous pouvez effacer et recommencer')},true);
