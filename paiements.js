@@ -72,7 +72,7 @@ document.addEventListener('click',async e=>{const b=e.target.closest('[data-act^
   if(a==='pvOk'){const c=S.clients.find(x=>x.id===b.dataset.id),d=(CDECL[c.id]||[]).find(x=>x.id===b.dataset.r);if(!c||!d)return;b.disabled=true;
     const p={id:uid(),date:d.date,montant:+d.montant,mode:d.mode,no:pvProchainNo(),recuAuto:true};(c.paie=c.paie||[]).push(p);(c.docs=c.docs||{})['Reçus de paiement']=true;
     await saveClient(c.id);const {error}=await sb.from('fam_versements_declares').update({statut:'valide'}).eq('id',d.id);if(error){toast(error.message);return}
-    await sb.from('fam_messages').insert({famille_id:c.id,de_doula:true,type:'document',texte:recuTexte(c,p,c.paie.length)});try{notifierFamille(c.id,'recu')}catch(x){}
+    await deposerRecu(c,p,c.paie.length,false);try{notifierFamille(c.id,'recu')}catch(x){}
     try{await sb.rpc('fam_echeances_run',{p_famille:c.id})}catch(x){}
     await chargerClientDetail(c.id);render();toast('Validé : reçu envoyé à la famille');return}
   if(a==='pvNo'){const c=S.clients.find(x=>x.id===b.dataset.id);const {error}=await sb.from('fam_versements_declares').update({statut:'refuse'}).eq('id',b.dataset.r);if(error){toast(error.message);return}
@@ -84,7 +84,7 @@ document.addEventListener('click',async e=>{const b=e.target.closest('[data-act^
     sheet('Modifier le versement','<label class="f">Date<input id="peD" type="date" value="'+pvEsc(p.date)+'"></label><label class="f">Montant ($)<input id="peM" type="number" step="0.01" value="'+pvEsc(p.montant)+'"></label><label class="f">Mode<select id="peMode">'+['Stripe','Carte','Virement Interac','Autre'].map(o=>'<option'+(o===p.mode?' selected':'')+'>'+o+'</option>').join('')+'</select></label><label class="f">No de reçu<input id="peNo" value="'+pvEsc(p.no)+'"></label><label class="check"><input type="checkbox" id="peRecu"><span>Renvoyer un reçu corrigé à la famille</span></label><button class="btn" data-act="paieEditSave" data-id="'+c.id+'" data-r="'+p.id+'">'+icon('fa-check')+'Enregistrer</button>');return}
   if(a==='paieEditSave'){const c=S.clients.find(x=>x.id===b.dataset.id),i=(c.paie||[]).findIndex(x=>x.id===b.dataset.r);if(i<0)return;const m=parseFloat($('#peM').value);if(!(m>0)){toast('Entrez le montant');return}
     Object.assign(c.paie[i],{date:$('#peD').value||c.paie[i].date,montant:m,mode:$('#peMode').value,no:($('#peNo').value||'').trim()||c.paie[i].no});const renvoi=$('#peRecu').checked;
-    await saveClient(c.id);if(renvoi){await sb.from('fam_messages').insert({famille_id:c.id,de_doula:true,type:'document',texte:'REÇU CORRIGÉ\n'+recuTexte(c,c.paie[i],i+1)});try{notifierFamille(c.id,'recu')}catch(x){}}
+    await saveClient(c.id);if(renvoi){await deposerRecu(c,c.paie[i],i+1,true);try{notifierFamille(c.id,'recu')}catch(x){}}
     try{await sb.rpc('fam_echeances_run',{p_famille:c.id})}catch(x){}
     await chargerClientDetail(c.id);close();render();toast(renvoi?'Modifié : reçu corrigé envoyé':'Versement modifié');return}
   }catch(err){console.error(err);toast('Une erreur est survenue. Réessayez.')}},true);

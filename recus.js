@@ -4,5 +4,5 @@ function recuTexte(c,p,k){const I=infoDoula(),D=S.doula||{};const solde=cPrice(c
   return 'REÇU no '+no+'\n'+(I.ent||'')+(I.nom&&I.nom!==I.ent?' · '+I.nom:'')+(D.region?' · '+D.region:'')+'\n'+[I.tel,I.courriel].filter(Boolean).join(' · ')+'\n\nDate : '+fmtD(parseD(p.date))+'\nReçu de : '+cName(c)+(c.partenaire?' et '+c.partenaire:'')+'\nDescription : forfait '+(c.forfait||'')+', versement '+k+' de '+(c.paie||[]).length+'\nMontant : '+money(p.montant)+'\nPaiement : '+(p.mode||'')+'\nSolde restant : '+money(Math.max(0,solde))+'\nNo de TVH : '+(D.tvh||'non inscrite')}
 document.addEventListener('click',e=>{const b=e.target.closest('[data-act="paieSave"]');if(!b)return;
   setTimeout(async()=>{try{const c=(S.clients||[]).find(x=>x.id===S.openClient);if(!c||!(c.paie||[]).length)return;const k=c.paie.length,p=c.paie[k-1];if(p.recuAuto)return;p.recuAuto=true;
-    const {error}=await sb.from('fam_messages').insert({famille_id:c.id,de_doula:true,type:'document',texte:recuTexte(c,p,k)});
-    if(!error){notifierFamille(c.id,'recu');toast('Reçu envoyé automatiquement dans l\'appli de la famille');if(typeof chargerClientDetail==='function')chargerClientDetail(c.id)}}catch(x){}},120)},false);
+    const ok=await deposerRecu(c,p,k,false);
+    if(ok){notifierFamille(c.id,'recu');toast('Reçu envoyé automatiquement dans l\'appli de la famille');if(typeof chargerClientDetail==='function')chargerClientDetail(c.id)}}catch(x){}},120)},false);
