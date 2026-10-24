@@ -3,10 +3,18 @@ const _odGP=ouvrirDoc;ouvrirDoc=async function(id){await _odGP(id);try{
   const sh_=document.querySelector('.sheet');if(!sh_||S.role!=='parent')return;const fid=sh_.querySelector('.fid');
   const cible=sh_.querySelector('#sigNom,input.dch,select.dch,textarea.dch');if(!fid||!cible||sh_.querySelector('.gp-ban'))return;
   const ban=document.createElement('div');ban.className='banner gold gp-ban';ban.style.cssText='position:sticky;top:0;z-index:5;margin-bottom:8px';
-  ban.innerHTML=icon('fa-pen-to-square')+'<div class="small"><b>À remplir et signer.</b> Les champs et la signature se trouvent dans le document, jusqu\'à la dernière page.</div><button class="btn sm" data-act="gpAller">Aller aux champs</button>';
+  ban.innerHTML=icon('fa-pen-to-square')+'<div class="small"><b>À remplir et signer.</b> Les champs et la signature se trouvent dans le document, jusqu\'à la dernière page.</div><button class="btn sm" data-act="gpAller">Prochaine étape</button>';
   fid.parentNode.insertBefore(ban,fid)}catch(e){}};
 document.addEventListener('click',e=>{const b=e.target.closest('[data-act="gpAller"]');if(!b)return;e.stopPropagation();
-  const s=document.querySelector('.sheet');const c=s&&s.querySelector('input.dch:not([type=hidden]),select.dch,#sigNom');if(c){c.scrollIntoView({behavior:'smooth',block:'center'});try{c.focus({preventScroll:true})}catch(x){}}},true);
+  const s=document.querySelector('.sheet');if(!s)return;const vide=el=>!el.value||!String(el.value).trim();let c=null,msg='';
+  const f=s.querySelector('input.dch[data-k=forfait_choisi]');
+  if(f&&!f.value){c=s.querySelector('.gp-case');msg='Touchez le forfait choisi'}
+  if(!c){const l=[...s.querySelectorAll('input.dch:not([type=hidden]),select.dch,textarea.dch')].find(el=>el.type==='checkbox'?false:vide(el));if(l){c=l;msg='Champ à remplir'}}
+  const ini=s.querySelector('input.dch[data-k=initiales]');
+  if(!c&&ini&&!ini.value){c=s.querySelector('#iniC');msg='Vos initiales au doigt'}
+  if(!c){const n=s.querySelector('#sigNom');if(n){c=(n.value&&s.querySelector('#sigC'))?s.querySelector('#sigC'):n;msg='Votre signature'}}
+  if(!c){toast('Tout est rempli : cochez « J\'ai lu » puis envoyez');const ok=s.querySelector('#sigOk');if(ok)ok.scrollIntoView({behavior:'smooth',block:'center'});return}
+  c.scrollIntoView({behavior:'smooth',block:'center'});toast(msg);try{if(c.focus&&c.tagName!=='CANVAS')c.focus({preventScroll:true})}catch(x){}},true);
 
 /* Listes à cocher : la famille peut ajouter ses propres éléments (valise, préparer ma naissance) */
 function gpPerso(cle){const P=(S.parent=S.parent||{});P.perso=P.perso||{};return (P.perso[cle]=P.perso[cle]||[])}
