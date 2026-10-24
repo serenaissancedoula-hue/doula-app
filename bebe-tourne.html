@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Mon bébé en 3D · Sérénaissance</title>
+<link rel="stylesheet" href="style.css?v=114">
+<style>
+body{margin:0}
+.b3-page{max-width:560px;margin:0 auto;padding:18px max(16px,env(safe-area-inset-right,0px)) 40px max(16px,env(safe-area-inset-left,0px));display:flex;flex-direction:column;gap:14px}
+.b3-test{font-size:.78rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--accent)}
+.b3-scene{position:relative;width:100%;aspect-ratio:1/1;max-height:66vh;border-radius:26px;overflow:hidden;background:radial-gradient(circle at 50% 42%,#5a2632,#200b11 75%)}
+.b3-scene canvas{display:block;width:100%;height:100%;touch-action:none;cursor:grab}
+.b3-aide{position:absolute;left:0;right:0;top:12px;text-align:center;font-size:.75rem;color:#f3dde2;opacity:.8;pointer-events:none}
+.b3-charge{position:absolute;inset:0;display:grid;place-items:center;color:#f3dde2;font-weight:600;pointer-events:none}
+.b3-vues{position:absolute;left:8px;right:8px;bottom:10px;display:flex;gap:6px;justify-content:center;flex-wrap:wrap}
+.b3-vues button{border:0;border-radius:99px;padding:6px 12px;font:600 .75rem var(--f-body);background:rgba(255,240,242,.16);color:#fbe9ec;backdrop-filter:blur(6px);cursor:pointer}
+.b3-vues button[aria-pressed="true"]{background:var(--accent);color:#fff}
+.b3-nav{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.b3-nav button{width:44px;height:44px;border-radius:50%;border:1px solid var(--line);background:var(--card);color:var(--ink);font-size:1.4rem;cursor:pointer}
+.b3-nav button:disabled{opacity:.35}
+.b3-sem{text-align:center}.b3-sem h1{font-size:1.7rem}
+.b3-sem .pill{display:inline-block;margin-top:4px;font-size:.75rem;font-weight:700;color:var(--sage,#6f8f7a);background:var(--soft);border-radius:99px;padding:2px 10px}
+.b3-taille{margin:0;text-align:center;font-weight:600}
+.b3-bloc{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:12px 16px}
+.b3-bloc b{color:var(--accent)}.b3-bloc p{margin:4px 0 0}
+.b3-date{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.b3-date input{flex:1;min-width:0;padding:10px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--ink);font:inherit}
+.b3-date button{border:0;border-radius:12px;padding:10px 14px;background:var(--accent);color:#fff;font-weight:700}
+.b3-note{font-size:.78rem;color:var(--muted);margin:0}
+</style>
+</head>
+<body>
+<main class="b3-page">
+  <span class="b3-test">Page de test · bébé en 3D</span>
+  <div class="b3-scene" id="b3Scene">
+    <div class="b3-aide">Glissez pour tourner · pincez pour zoomer</div>
+    <div class="b3-charge" id="b3Charge">Chargement de bébé…</div>
+    <div class="b3-vues" role="group" aria-label="Angle de vue">
+      <button data-v="face" aria-pressed="true">Face</button><button data-v="trois">3/4</button><button data-v="profil">Profil</button><button data-v="dos">Dos</button><button id="b3Tourner" aria-pressed="true">Tourner</button>
+    </div>
+  </div>
+  <div class="b3-nav"><button id="b3Prev" aria-label="Semaine précédente">‹</button>
+    <div class="b3-sem"><h1 id="b3Titre">Semaine 20</h1><span class="pill" id="b3Pill" hidden>Cette semaine</span></div>
+    <button id="b3Next" aria-label="Semaine suivante">›</button></div>
+  <div id="b3Texte" style="display:flex;flex-direction:column;gap:10px"></div>
+  <label for="b3Dpa" style="font-weight:700">Date prévue d'accouchement (pour l'essai)</label>
+  <div class="b3-date"><input type="date" id="b3Dpa"><button id="b3Ok">Mettre à jour</button></div>
+  <p class="b3-note">Bébé créé à partir d'illustrations Adobe Firefly, mises en relief. Chaque bébé grandit à son rythme. Information générale : votre équipe de soins reste votre référence.</p>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script src="bebe-donnees.js?v=114"></script>
+<script src="bebe-3d.js?v=114"></script>
+<script>
+const $=id=>document.getElementById(id),DAY=864e5,pad=w=>String(w).padStart(2,'0');
+/* ---- scène ---- */
+const scene3=$('b3Scene'),renderer=new THREE.WebGLRenderer({antialias:true,alpha:true});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.outputEncoding=THREE.sRGBEncoding;
+renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.1;
+scene3.prepend(renderer.domElement);
+const scene=new THREE.Scene(),camera=new THREE.PerspectiveCamera(32,1,.05,50);camera.position.set(0,0,4.4);
+const ctl=new THREE.OrbitControls(camera,renderer.domElement);ctl.enableDamping=true;ctl.enablePan=false;ctl.minDistance=2.4;ctl.maxDistance=8;
+ctl.autoRotate=!matchMedia('(prefers-reduced-motion: reduce)').matches;ctl.autoRotateSpeed=1.6;
+scene.add(new THREE.HemisphereLight(0xfff3ee,0x5a2a35,.9));
+const k1=new THREE.DirectionalLight(0xfff1e6,1.0);k1.position.set(2,3,4);scene.add(k1);
+const k2=new THREE.DirectionalLight(0xffb3c2,.7);k2.position.set(-3,1,-3);scene.add(k2);
+const k3=new THREE.DirectionalLight(0xffe0d6,.35);k3.position.set(0,-3,2);scene.add(k3);
+let bebe=null;const cache={};
+
+/* ---- construit le bébé en relief à partir de la photo ---- */
+function chargerImg(src){return new Promise((ok,ko)=>{const i=new Image();i.onload=()=>ok(i);i.onerror=ko;i.src=src})}
+async function construire(w){
+  if(cache[w])return cache[w];
+  const L=new THREE.TextureLoader(),[rel,tex,dos]=await Promise.all([chargerImg('img/bebe3d/relief-'+pad(w)+'.png?v=1'),L.loadAsync('img/bebe3d/bebe-'+pad(w)+'.webp?v=1'),L.loadAsync('img/bebe3d/dos-'+pad(w)+'.webp?v=1')]);
+  tex.encoding=dos.encoding=THREE.sRGBEncoding;tex.anisotropy=4;
+  const c=document.createElement('canvas');c.width=rel.width;c.height=rel.height;const cx=c.getContext('2d');cx.drawImage(rel,0,0);
+  const D=cx.getImageData(0,0,c.width,c.height).data,RW=c.width,RH=c.height;
+  const G=w<5?120:170,N=G+1;
+  const px=(u,v,ch)=>{const x=Math.min(RW-1,Math.round(u*(RW-1))),y=Math.min(RH-1,Math.round(v*(RH-1)));return D[(y*RW+x)*4+ch]/255};
+  const dans=new Uint8Array(N*N),pos=[],uv=[],col=[],fi=new Int32Array(N*N).fill(-1),bi=new Int32Array(N*N).fill(-1);
+  const plat=w<5; // ovule et premières cellules : plus rond
+  for(let j=0;j<N;j++)for(let i=0;i<N;i++){const u=i/G,v=j/G,m=px(u,v,2);if(m<=.5)continue;
+    const d=px(u,v,0),f=px(u,v,1),edge=Math.min(1,f*3.2);
+    const zf=plat?.55*f:(.2*f+.42*d*edge),zb=plat?-.55*f:-(.3*f+.1*d*edge);
+    const x=(u-.5)*2,y=(.5-v)*2,k=j*N+i;dans[k]=1;
+    fi[k]=pos.length/3;pos.push(x,y,zf);uv.push(u,1-v);col.push(1,1,1);
+    bi[k]=pos.length/3;pos.push(x,y,zb);uv.push(u,1-v);col.push(1,1,1)}
+  const idx=[],idxB=[],cell=(i,j)=>i>=0&&j>=0&&i<G&&j<G&&dans[j*N+i]&&dans[j*N+i+1]&&dans[(j+1)*N+i]&&dans[(j+1)*N+i+1];
+  for(let j=0;j<G;j++)for(let i=0;i<G;i++){if(!cell(i,j))continue;
+    const a=j*N+i,b=a+1,c2=a+N,d2=c2+1;
+    idx.push(fi[a],fi[c2],fi[b],fi[b],fi[c2],fi[d2]);   // devant
+    idxB.push(bi[a],bi[b],bi[c2],bi[b],bi[d2],bi[c2]);   // dos
+    const bord=(p,q)=>idxB.push(fi[p],fi[q],bi[q],fi[p],bi[q],bi[p]); // côtés
+    if(!cell(i,j-1))bord(b,a);if(!cell(i,j+1))bord(c2,d2);if(!cell(i-1,j))bord(a,c2);if(!cell(i+1,j))bord(d2,b)}
+  const g=new THREE.BufferGeometry();g.setIndex(idx.concat(idxB));g.addGroup(0,idx.length,0);g.addGroup(idx.length,idxB.length,1);
+  g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));g.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));
+  g.setAttribute('color',new THREE.Float32BufferAttribute(col,3));g.computeVertexNormals();
+  const reg={vertexColors:true,roughness:.5,metalness:0,side:THREE.DoubleSide,emissive:new THREE.Color(0x3a1418),emissiveIntensity:.35};
+  const m=new THREE.Mesh(g,[new THREE.MeshStandardMaterial(Object.assign({map:tex},reg)),new THREE.MeshStandardMaterial(Object.assign({map:dos},reg))]);m.scale.setScalar(1.05);
+  return cache[w]=m}
+async function montrer(w){$('b3Charge').hidden=false;
+  try{const m=await construire(w);if(bebe)scene.remove(bebe);bebe=m;scene.add(m);pop=0}catch(e){$('b3Charge').textContent='Impossible de charger bébé. Vérifiez votre connexion.';return}
+  $('b3Charge').hidden=true;[w-1,w+1].forEach(k=>{if(k>=0&&k<=42)setTimeout(()=>construire(k).catch(()=>{}),400)})}
+/* vues */
+const VUES={face:[0,0,4.4],trois:[2.9,.6,3.3],profil:[4.4,.3,0],dos:[0,.3,-4.4]};let anim=null;
+const vb=[...document.querySelectorAll('[data-v]')];
+vb.forEach(b=>b.onclick=()=>{vb.forEach(x=>x.setAttribute('aria-pressed',x===b));anim={a:camera.position.clone(),b:new THREE.Vector3(...VUES[b.dataset.v]),t:0};tourner(false)});
+function tourner(on){ctl.autoRotate=on;$('b3Tourner').setAttribute('aria-pressed',on)}
+$('b3Tourner').onclick=()=>tourner(!ctl.autoRotate);
+ctl.addEventListener('start',()=>{tourner(false);anim=null;vb.forEach(x=>x.setAttribute('aria-pressed','false'))});
+function taille(){const r=scene3.getBoundingClientRect();renderer.setSize(r.width,r.height,false);camera.aspect=r.width/r.height;camera.updateProjectionMatrix()}
+new ResizeObserver(taille).observe(scene3);taille();
+let pop=1,last=performance.now();
+(function boucle(t){const dt=Math.min((t-last)/1000,.05);last=t;
+  if(anim){anim.t=Math.min(1,anim.t+dt/.7);const e=1-Math.pow(1-anim.t,3),d=THREE.MathUtils.lerp(anim.a.length(),anim.b.length(),e);
+    camera.position.copy(anim.a.clone().lerp(anim.b,e).normalize().multiplyScalar(d));if(anim.t>=1)anim=null}
+  if(bebe&&pop<1){pop=Math.min(1,pop+dt/.45);bebe.scale.setScalar(1.05*(.86+.14*(1-Math.pow(1-pop,3))))}
+  ctl.update();renderer.render(scene,camera);requestAnimationFrame(boucle)})(last);
+
+/* ---- semaines ---- */
+let dpa=null;try{dpa=localStorage.getItem('sere-b3-dpa')}catch(e){}
+if(!dpa)dpa=new Date(Date.now()+140*DAY).toISOString().slice(0,10);
+$('b3Dpa').value=dpa;
+function semaineActuelle(){const lmp=new Date(new Date(dpa+'T00:00:00').getTime()-280*DAY);return Math.max(0,Math.min(42,Math.floor((Date.now()-lmp)/DAY/7)))}
+let actu=semaineActuelle(),w=actu;
+function afficher(){$('b3Titre').textContent='Semaine '+w;$('b3Pill').hidden=(w!==actu);
+  $('b3Prev').disabled=w<=0;$('b3Next').disabled=w>=42;$('b3Texte').innerHTML=bebe3dTexte(w);montrer(w)}
+$('b3Prev').onclick=()=>{if(w>0){w--;afficher()}};$('b3Next').onclick=()=>{if(w<42){w++;afficher()}};
+$('b3Ok').onclick=()=>{const v=$('b3Dpa').value;if(!v)return;dpa=v;try{localStorage.setItem('sere-b3-dpa',v)}catch(e){}actu=semaineActuelle();w=actu;afficher()};
+afficher();
+</script>
+</body>
+</html>
