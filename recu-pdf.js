@@ -3,14 +3,14 @@
 const hexc=(P,h)=>P.rgb(parseInt(h.slice(1,3),16)/255,parseInt(h.slice(3,5),16)/255,parseInt(h.slice(5,7),16)/255);
 const mnt=n=>(Math.round((+n||0)*100)/100).toLocaleString('fr-CA',{minimumFractionDigits:2,maximumFractionDigits:2}).replace(/ | /g,' ')+' $';
 async function recuPdf(c,p,k,corrige){await chargerScript('lib/pdf-lib.min.js');const P=window.PDFLib,I=infoDoula(),D=S.doula||{};
-  if(!LOGO_BYTES){try{const r=await fetch('img/logo-icone.png');LOGO_BYTES=new Uint8Array(await r.arrayBuffer())}catch(e){}}
+  if(!LOGO_BYTES&&!window.SANS_LOGO){try{const r=await fetch('img/logo-icone.png');LOGO_BYTES=new Uint8Array(await r.arrayBuffer())}catch(e){}}
   let acc=(getComputedStyle(document.documentElement).getPropertyValue('--accent')||'').trim();if(!/^#[0-9a-f]{6}$/i.test(acc))acc='#b5644d';
   const pdf=await P.PDFDocument.create();pdf.setTitle('Reçu '+(p.no||''));pdf.setCreator('Sérénaissance');
   const F=await pdf.embedFont(P.StandardFonts.Helvetica),FB=await pdf.embedFont(P.StandardFonts.HelveticaBold),TI=await pdf.embedFont(P.StandardFonts.TimesRomanItalic);
   const W=612,H=792,M=54,pg=pdf.addPage([W,H]),A=hexc(P,acc),encre=hexc(P,'#2c221e'),gris=hexc(P,'#7a6a60'),filet=hexc(P,'#e6d9d0'),clair=hexc(P,'#f7f1ec'),blanc=P.rgb(1,1,1);
   const T=(t,x,y,s,f,col)=>pg.drawText(pdfTxt(t),{x,y,size:s,font:f,color:col||encre}),TR=(t,xr,y,s,f,col)=>T(t,xr-f.widthOfTextAtSize(pdfTxt(t),s),y,s,f,col);
   pg.drawRectangle({x:0,y:H-8,width:W,height:8,color:A});
-  let logo=null;try{logo=await pdf.embedPng(LOGO_BYTES)}catch(e){try{logo=await pdf.embedJpg(LOGO_BYTES)}catch(x){}}
+  let logo=null;if(!window.SANS_LOGO){try{logo=await pdf.embedPng(LOGO_BYTES)}catch(e){try{logo=await pdf.embedJpg(LOGO_BYTES)}catch(x){}}}
   let x0=M;if(logo){const lh=52,lw=Math.min(120,lh*logo.width/logo.height),lh2=lw/(logo.width/logo.height);pg.drawImage(logo,{x:M,y:H-40-lh2,width:lw,height:lh2});x0=M+lw+12}
   T(I.ent||I.nom||'Sérénaissance',x0,H-58,19,TI,A);
   let y=H-74;[I.nom&&I.nom!==I.ent?I.nom:'',[D.adresse,D.region].filter(Boolean).join(', '),[I.tel,I.courriel].filter(Boolean).join(' · ')].filter(Boolean).forEach(l=>{T(l,x0,y,9,F,gris);y-=12});
@@ -28,7 +28,6 @@ async function recuPdf(c,p,k,corrige){await chargerScript('lib/pdf-lib.min.js');
   T('TVH',M,y-40,8,FB,gris);T(D.tvh?'No de TVH : '+D.tvh:'Non inscrite à la TVH (aucune taxe perçue)',M,y-54,10,F);
   y-=120;T('Merci de votre confiance 🌿'.replace(' 🌿',''),M,y,13,TI,A);y-=16;T('Ce reçu confirme la réception du paiement ci-dessus. Conservez-le pour vos dossiers.',M,y,9,F,gris);
   pg.drawLine({start:{x:M,y:50},end:{x:W-M,y:50},thickness:.5,color:filet});T([I.ent,I.nom,I.tel,I.courriel].filter(Boolean).filter((v,i,a)=>a.indexOf(v)===i).join(' · '),M,36,8,F,gris);
-  if(window.MARQUE_ON){try{if(!window.ACAD_BYTES)window.ACAD_BYTES=new Uint8Array(await (await fetch('img/logo-icone.png')).arrayBuffer());const ac=await pdf.embedPng(window.ACAD_BYTES),ah=15,aw=ah*ac.width/ac.height,tx="Créé avec l'appli de l'Académie Sérénaissance";pg.drawImage(ac,{x:W-M-aw,y:20,width:aw,height:ah});TR(tx,W-M-aw-4,25,6.5,F,gris)}catch(e){}}
   return await pdf.save()}
 function b64(u8){let s='';for(let i=0;i<u8.length;i+=0x8000)s+=String.fromCharCode.apply(null,u8.subarray(i,i+0x8000));return btoa(s)}
 window.recuPdf=recuPdf;

@@ -15,8 +15,7 @@ async function construirePDF(liste){const {PDFDocument,StandardFonts,rgb}=window
   const F=await pdf.embedFont(StandardFonts.Helvetica),FB=await pdf.embedFont(StandardFonts.HelveticaBold),T=await pdf.embedFont(StandardFonts.TimesRoman),TI=await pdf.embedFont(StandardFonts.TimesRomanItalic);
   const W=612,H=792,M=54,L=W-2*M;const hex=h=>rgb(parseInt(h.slice(1,3),16)/255,parseInt(h.slice(3,5),16)/255,parseInt(h.slice(5,7),16)/255);
   const brun=hex('#3d312b'),encre=hex('#2c221e'),terra=hex((()=>{const v=window.MARQUE_ON?getComputedStyle(document.documentElement).getPropertyValue('--accent').trim():'';return /^#[0-9a-f]{6}$/i.test(v)?v:'#b5644d'})()),gris=hex('#8a7a70'),filet=hex('#e6d2c6'),ligne=hex('#d9a08a'),sauge=hex('#7f9a78');
-  const I=infoDoula();let logo=null;if(LOGO_BYTES)try{logo=await pdf.embedPng(LOGO_BYTES)}catch(e){}
-  let acad=null;if(window.MARQUE_ON){try{if(!window.ACAD_BYTES)window.ACAD_BYTES=new Uint8Array(await (await fetch('img/logo-icone.png')).arrayBuffer());acad=await pdf.embedPng(window.ACAD_BYTES)}catch(e){}}
+  const I=infoDoula();let logo=null;if(LOGO_BYTES&&!window.SANS_LOGO)try{logo=await pdf.embedPng(LOGO_BYTES)}catch(e){}
   const espace=(t,x,y,s,f,c,sp)=>{let xx=x;for(const ch of pdfTxt(t)){pg.drawText(ch,{x:xx,y,size:s,font:f,color:c});xx+=f.widthOfTextAtSize(ch,s)+sp}return xx};
   const largEsp=(t,s,f,sp)=>[...pdfTxt(t)].reduce((a,ch)=>a+f.widthOfTextAtSize(ch,s)+sp,0);
   const coupe=(t,f,s,w)=>{const out=[];String(t).split(/\n/).forEach(par=>{let l='';par.split(' ').forEach(m=>{const e=l?l+' '+m:m;if(f.widthOfTextAtSize(e,s)<=w)l=e;else{if(l)out.push(l);l=m;while(f.widthOfTextAtSize(l,s)>w){let k=l.length;while(k>1&&f.widthOfTextAtSize(l.slice(0,k),s)>w)k--;out.push(l.slice(0,k));l=l.slice(k)}}});out.push(l)});return out};
@@ -29,8 +28,7 @@ async function construirePDF(liste){const {PDFDocument,StandardFonts,rgb}=window
     pg.drawLine({start:{x:M,y:H-72},end:{x:W-M,y:H-72},thickness:.6,color:filet});
     y=H-126;
     const pied=pdfTxt([I.ent,I.nom,I.tel,I.courriel].filter(Boolean).join(' · '));pg.drawLine({start:{x:M,y:50},end:{x:W-M,y:50},thickness:.5,color:filet});
-    pg.drawText(pied,{x:M,y:38,size:7,font:F,color:gris});
-    if(acad){const ah=15,aw=ah*acad.width/acad.height,tx="Modèle de l'Académie Sérénaissance",tw=F.widthOfTextAtSize(pdfTxt(tx),6.5);pg.drawImage(acad,{x:W-M-aw,y:30,width:aw,height:ah});pg.drawText(pdfTxt(tx),{x:W-M-aw-4-tw,y:35,size:6.5,font:F,color:gris})}};
+    pg.drawText(pied,{x:M,y:38,size:7,font:F,color:gris});};
   const place=h=>{if(y-h<66)nouvellePage(pages[pages.length-1].di)};
   const para=(t,o={})=>{const f=o.f||F,s=o.s||9.5,lh=s*1.5;coupe(pdfTxt(t),f,s,o.w||L).forEach(l=>{place(lh);y-=lh;pg.drawText(l,{x:o.x||M,y:y+3,size:s,font:f,color:o.c||brun})});y-=(o.apres??3)};
   const section=t=>{y-=10;place(30);y-=12;espace(String(t).toUpperCase(),M,y,8,FB,terra,1.3);y-=7;pg.drawLine({start:{x:M,y},end:{x:W-M,y},thickness:.5,color:filet});y-=6};
