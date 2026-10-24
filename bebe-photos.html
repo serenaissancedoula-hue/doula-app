@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Mon bébé semaine par semaine · Sérénaissance</title>
+<link rel="stylesheet" href="style.css?v=114">
+<style>
+body{margin:0}
+.b3-page{max-width:560px;margin:0 auto;padding:18px max(16px,env(safe-area-inset-right,0px)) 40px max(16px,env(safe-area-inset-left,0px));display:flex;flex-direction:column;gap:14px}
+.b3-test{font-size:.78rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--accent)}
+.b3-photo{position:relative;width:100%;aspect-ratio:1/1;border-radius:26px;overflow:hidden;background:#140c0f;touch-action:pan-y}
+.b3-photo img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:opacity .35s ease}
+.b3-photo .aide{position:absolute;left:0;right:0;bottom:10px;text-align:center;font-size:.75rem;color:#f3dde2;opacity:.8;pointer-events:none}
+.b3-nav{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.b3-nav button{width:44px;height:44px;border-radius:50%;border:1px solid var(--line);background:var(--card);color:var(--ink);font-size:1.4rem;cursor:pointer}
+.b3-nav button:disabled{opacity:.35}
+.b3-sem{text-align:center}.b3-sem h1{font-size:1.7rem}
+.b3-sem .pill{display:inline-block;margin-top:4px;font-size:.75rem;font-weight:700;color:var(--sage,#6f8f7a);background:var(--soft);border-radius:99px;padding:2px 10px}
+.b3-taille{margin:0;text-align:center;font-weight:600}
+.b3-bloc{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:12px 16px}
+.b3-bloc b{color:var(--accent)}.b3-bloc p{margin:4px 0 0}
+.b3-date{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.b3-date input{flex:1;min-width:0;padding:10px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--ink);font:inherit}
+.b3-date button{border:0;border-radius:12px;padding:10px 14px;background:var(--accent);color:#fff;font-weight:700}
+.b3-note{font-size:.78rem;color:var(--muted);margin:0}
+@media (prefers-reduced-motion:reduce){.b3-photo img{transition:none}}
+</style>
+</head>
+<body>
+<main class="b3-page">
+  <span class="b3-test">Page de test · bébé semaine par semaine</span>
+  <div class="b3-photo" id="b3Photo"><img id="b3Img" alt=""><span class="aide">Glissez le doigt pour changer de semaine</span></div>
+  <div class="b3-nav"><button id="b3Prev" aria-label="Semaine précédente">‹</button>
+    <div class="b3-sem"><h1 id="b3Titre">Semaine 20</h1><span class="pill" id="b3Pill" hidden>Cette semaine</span></div>
+    <button id="b3Next" aria-label="Semaine suivante">›</button></div>
+  <div id="b3Texte" style="display:flex;flex-direction:column;gap:10px"></div>
+  <label for="b3Dpa" style="font-weight:700">Date prévue d'accouchement (pour l'essai)</label>
+  <div class="b3-date"><input type="date" id="b3Dpa"><button id="b3Ok">Mettre à jour</button></div>
+  <p class="b3-note">Illustrations créées avec Adobe Firefly. Chaque bébé grandit à son rythme. Information générale : votre équipe de soins reste votre référence.</p>
+</main>
+<script src="bebe-donnees.js?v=114"></script>
+<script src="bebe-3d.js?v=114"></script>
+<script>
+const $=id=>document.getElementById(id),DAY=864e5;
+const img=w=>'img/bebe/semaine-'+String(w).padStart(2,'0')+'.jpg?v=1';
+let dpa=null;try{dpa=localStorage.getItem('sere-b3-dpa')}catch(e){}
+if(!dpa)dpa=new Date(Date.now()+140*DAY).toISOString().slice(0,10);
+$('b3Dpa').value=dpa;
+function semaineActuelle(){const lmp=new Date(new Date(dpa+'T00:00:00').getTime()-280*DAY);return Math.max(0,Math.min(42,Math.floor((Date.now()-lmp)/DAY/7)))}
+let actu=semaineActuelle(),w=actu;
+function afficher(){
+  const I=$('b3Img');I.style.opacity=0;const src=img(w);
+  const n=new Image();n.onload=()=>{I.src=src;I.alt='Bébé à '+w+' semaine'+(w>1?'s':'');I.style.opacity=1};n.src=src;
+  $('b3Titre').textContent='Semaine '+w;$('b3Pill').hidden=(w!==actu);
+  $('b3Prev').disabled=w<=0;$('b3Next').disabled=w>=42;$('b3Texte').innerHTML=bebe3dTexte(w);
+  [w-1,w+1].forEach(k=>{if(k>=0&&k<=42)new Image().src=img(k)})}
+$('b3Prev').onclick=()=>{if(w>0){w--;afficher()}};$('b3Next').onclick=()=>{if(w<42){w++;afficher()}};
+let x0=null;$('b3Photo').addEventListener('touchstart',e=>{x0=e.touches[0].clientX},{passive:true});
+$('b3Photo').addEventListener('touchend',e=>{if(x0===null)return;const dx=e.changedTouches[0].clientX-x0;x0=null;
+  if(dx<-40&&w<42){w++;afficher()}else if(dx>40&&w>0){w--;afficher()}});
+$('b3Ok').onclick=()=>{const v=$('b3Dpa').value;if(!v)return;dpa=v;try{localStorage.setItem('sere-b3-dpa',v)}catch(e){}actu=semaineActuelle();w=actu;afficher()};
+afficher();
+</script>
+</body>
+</html>
