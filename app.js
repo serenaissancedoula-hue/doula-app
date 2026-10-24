@@ -59,10 +59,13 @@ async function saveDoula(){if(!ME_DOULA)return false;const D=S.doula;const parts
   if(error||!data||!data.length){toast('Pas enregistré : '+((error&&error.message)||'la base a refusé la modification. Écrivez-nous.'));return false}
   ME_DOULA.modeles=mod;return true}
 
+/* ajoute une famille, ou la jumelle si la maman a déjà son propre espace (rien n'est effacé) */
+async function ajouterFamille(o){const {data:r,error}=await sb.rpc('fam_ajouter_ou_jumeler',{p:o});if(error)throw error;const {data:f,error:e2}=await sb.from('fam_familles').select('*').eq('id',r.id).single();if(e2)throw e2;return {f,jumelee:!!r.jumelee}}
+
 /* ================== CHARGEMENT ================== */
 async function chargerParent(){const id=MOI.familles[0];
   const {data:f}=await sb.from('fam_familles').select('*').eq('id',id).single();FAM=f;
-  const {data:d}=await sb.from('fam_doulas').select('id,prenom,nom,telephone,courriel,remplacante_nom,remplacante_tel,photo,entreprise,modeles').eq('id',f.doula_id).maybeSingle();DOULA=d;appliquerForfaits((d&&d.modeles)||{forfaits:[]});
+  let d=null;if(f.doula_id){const r=await sb.from('fam_doulas').select('id,prenom,nom,telephone,courriel,remplacante_nom,remplacante_tel,photo,entreprise,modeles').eq('id',f.doula_id).maybeSingle();d=r.data}DOULA=d;appliquerForfaits((d&&d.modeles)||{forfaits:[]});
   S.parent=deepMerge(blankParent(),f.parent_data||{});
   if(!S.parent.prenom&&f.prenom)S.parent.prenom=f.prenom;if(!S.parent.partenaire&&f.partenaire)S.parent.partenaire=f.partenaire;
   if(!S.parent.lieu&&f.lieu)S.parent.lieu=f.lieu;if(!S.parent.prof&&f.professionnel)S.parent.prof=f.professionnel;
@@ -88,7 +91,7 @@ async function chargerClientDetail(id){const [m,d,mo,j]=await Promise.all([sb.fr
 function ecranConnexion(msg){$('#tabs').innerHTML='';$('#gear').hidden=true;const v=S.vueCx||'connexion',P=ESPACE==='parent';
   let h='<div class="card" style="max-width:480px;margin:0 auto;width:100%"><div class="hero"><div class="stack" style="gap:6px"><span class="script">Bienvenue</span><h1>'+(P?'Espace Famille':'Espace Doula')+'</h1><p class="sub" style="font-family:var(--f-display);font-style:italic;color:var(--accent)">'+(P?'Votre grossesse, votre bébé et votre doula, au même endroit':'Vos familles, vos rendez-vous et vos documents')+'</p></div><div class="blob"><img src="'+(P?'parents.jpg':'doula.jpg')+'" alt=""></div></div>'+(msg?'<div class="banner acc">'+icon('fa-circle-info')+'<div class="small">'+msg+'</div></div>':'');
   if(v==='connexion'){h+='<form id="fLogin" class="stack"><label class="f">Courriel<input type="email" id="lCourriel" autocomplete="username" required></label><label class="f">Mot de passe<input type="password" id="lMdp" autocomplete="current-password"></label><button class="btn" type="submit">'+icon('fa-right-to-bracket')+'Me connecter</button></form><hr><p class="small"><b>Première fois, ou mot de passe oublié ?</b> Entrez votre courriel ci-dessus, puis touchez ce bouton. Vous recevez un lien pour entrer et choisir votre mot de passe.</p><button class="btn ghost" data-act="lienConnexion">'+icon('fa-envelope')+'Recevoir un lien par courriel</button>';
-    h+=P?'<p class="xs muted"><b>Pas encore de compte ?</b> C\'est votre doula qui vous inscrit. Vous recevez alors un courriel pour finaliser votre inscription.</p><p class="xs muted">Vous êtes doula ? <a href="'+URL_DOULA+'">Ouvrir l\'Espace Doula</a></p>':'<hr><p class="small"><b>Nouvelle doula ?</b></p>'+(inscriptionsFermees()?'<div class="banner acc">'+icon('fa-lock')+'<div class="small">'+MSG_COMPLET()+'</div></div>':'<button class="btn sm ghost" data-act="vueCx" data-v="doula">'+icon('fa-user-plus')+'Créer mon Espace Doula</button>')+'<p class="xs muted">Vous êtes un parent ? <a href="'+URL_PARENTS+'">Ouvrir l\'Espace Famille</a></p>'}
+    h+=P?'<p class="xs muted"><b>Pas encore de compte ?</b> Votre doula peut vous inscrire, ou vous pouvez créer le vôtre gratuitement.</p><p class="xs muted">Vous êtes doula ? <a href="'+URL_DOULA+'">Ouvrir l\'Espace Doula</a></p>':'<hr><p class="small"><b>Nouvelle doula ?</b></p>'+(inscriptionsFermees()?'<div class="banner acc">'+icon('fa-lock')+'<div class="small">'+MSG_COMPLET()+'</div></div>':'<button class="btn sm ghost" data-act="vueCx" data-v="doula">'+icon('fa-user-plus')+'Créer mon Espace Doula</button>')+'<p class="xs muted">Vous êtes un parent ? <a href="'+URL_PARENTS+'">Ouvrir l\'Espace Famille</a></p>'}
   else if(inscriptionsFermees())h+='<div class="stack"><div class="banner acc">'+icon('fa-lock')+'<div class="small">'+MSG_COMPLET()+'</div></div><button class="btn sm ghost" data-act="vueCx" data-v="connexion">'+icon('fa-arrow-left')+'J\'ai déjà un compte</button></div>';
   else h+='<div class="stack">'+noteTarif()+'<p class="small">Créez votre Espace Doula : dossiers de vos familles, rendez-vous avec rappels, contrats signés dans l\'appli, messages, outils de la trousse Sérénaissance. Chaque maman que vous inscrivez reçoit son propre espace, dans l\'appli Famille.</p><div class="grid2 resp"><label class="f">Prénom<input type="text" id="sPrenom" autocomplete="given-name"></label><label class="f">Nom<input type="text" id="sNom" autocomplete="family-name"></label></div><label class="f">Courriel<input type="email" id="sCourriel" autocomplete="email"></label><button class="btn" data-act="inscriptionDoula">'+icon('fa-paper-plane')+'Recevoir mon lien d\'inscription</button><p class="xs muted">Vous recevez un courriel pour confirmer votre adresse. Vous choisissez ensuite votre mot de passe : c\'est la seule fois que vous passez par un lien.</p><button class="btn sm ghost" data-act="vueCx" data-v="connexion">'+icon('fa-arrow-left')+'J\'ai déjà un compte</button></div>';
   $('#app').innerHTML=h+'</div>'+pied();
@@ -108,7 +111,9 @@ async function demarrer(){
   $('#app').innerHTML='<p class="small muted" style="text-align:center;padding:40px">Chargement de votre espace…</p>';
   const {data,error}=await sb.rpc('fam_moi');if(error){ecranConnexion('Une erreur est survenue : '+esc(error.message));return}MOI=data;try{if(MOI&&MOI.admin&&String(MOI.courriel||(MOI.doula&&MOI.doula.courriel)||'').toLowerCase()!==OWNER_EMAIL)MOI.admin=false}catch(e){}
   marquerActivite();
-  const peutDoula=!!MOI.doula,peutParent=(MOI.familles||[]).length>0;
+  const peutDoula=!!MOI.doula;let peutParent=(MOI.familles||[]).length>0;
+  /* une maman sans doula obtient son propre espace (grossesse et bébé); sa doula pourra la rejoindre plus tard */
+  if(ESPACE==='parent'&&!peutParent&&!peutDoula){try{const r1=await sb.rpc('fam_creer_mon_espace',{p_prenom:(S.meta&&S.meta.prenom)||null});if(!r1.error){const r2=await sb.rpc('fam_moi');if(r2.data){MOI=r2.data;peutParent=(MOI.familles||[]).length>0}}}catch(e){}}
   const sansMdp=!S.mdpOk&&!(S.meta&&S.meta.mdp);
   if(ESPACE==='parent'&&!peutParent){ecranAutreEspace(peutDoula);return}
   if(ESPACE==='doula'&&!peutDoula){if(peutParent){ecranAutreEspace(false);return}ecranNouvelleDoula();return}
@@ -383,10 +388,10 @@ document.addEventListener('click',async e=>{const b=e.target.closest('[data-act]
   case 'saveClient':{const o=S.tmp;if(!o||!String(o.prenom||'').trim()){toast('Entrez le prénom');return}if(!/^\S+@\S+\.\S+$/.test(String(o.courriel||'').trim())){toast('Entrez un courriel valide');return}if(!o.dpa&&o.ddr)o.dpa=iso(addD(parseD(o.ddr),280));
     if(id){const c=S.clients.find(x=>x.id===id);Object.assign(c,o);c.nom=[c.prenom,c.nomFamille].filter(Boolean).join(' ');close();await saveClient(id);toast('Dossier enregistré');break}
     const inv=$('#k_inviter')&&$('#k_inviter').checked;
-    const {data:f,error}=await sb.from('fam_familles').insert({doula_id:ME_DOULA.id,courriel:o.courriel.trim().toLowerCase(),prenom:o.prenom.trim(),nom:o.nomFamille||null,telephone:o.tel||null,partenaire:o.partenaire||null,dpa:o.dpa||null,lieu:o.lieu||null,professionnel:o.prof||null,forfait:o.forfait||null}).select('*').single();
+    let f,error,jumelee=false;try{const r=await ajouterFamille({courriel:o.courriel.trim().toLowerCase(),prenom:o.prenom.trim(),nom:o.nomFamille||null,telephone:o.tel||null,partenaire:o.partenaire||null,dpa:o.dpa||null,lieu:o.lieu||null,professionnel:o.prof||null,forfait:o.forfait||null});f=r.f;jumelee=r.jumelee}catch(e){error=e}
     if(error){toast('Pas enregistré : '+error.message);return}
     const dos={};for(const k in o)if(!ALIAS.includes(k)&&!['ddr'].includes(k))dos[k]=o[k];dos.parcours={contact:iso(new Date())};dos.docs={};dos.rdv=[];dos.comms=[];dos.paie=[];
-    await sb.from('fam_dossiers').insert({famille_id:f.id,data:dos});S.clients.unshift(buildClient(f,dos));S.openClient=f.id;S.ctab='resume';close();render();toast('Famille ajoutée');if(inv)inviteSheet(f.id);return}
+    await sb.from('fam_dossiers').insert({famille_id:f.id,data:dos});S.clients.unshift(buildClient(f,dos));S.openClient=f.id;S.ctab='resume';close();render();toast(jumelee?'Cette maman avait déjà son espace : vous êtes jumelées, rien n\'a été effacé':'Famille ajoutée');if(inv)inviteSheet(f.id);return}
   case 'inviter':inviteSheet(id);return;
   case 'statut':{const c=C();c.statut=v;await saveClient(c.id);await chargerDoula();toast(v==='active'?'Dossier réactivé':'Dossier archivé : conservé au moins un an');break}
   case 'clientOpen':S.openClient=id;S.dtab='clientes';S.ctab=v||'resume';scrollTo(0,0);render();await chargerClientDetail(id);break;

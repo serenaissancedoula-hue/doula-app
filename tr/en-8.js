@@ -425,5 +425,20 @@ window.TR_EN=Object.assign(window.TR_EN||{},{
 "Sombre":"Dark",
 "Suit votre téléphone":"Follows your phone",
 "Fond clair":"Light background",
-"Fond sombre, plus doux le soir":"Dark background, gentler in the evening"
+"Fond sombre, plus doux le soir":"Dark background, gentler in the evening",
+"Mon compte":"My account",
+"Me déconnecter":"Log out",
+"Supprimer mon compte":"Delete my account",
+"Supprimer définitivement":"Delete permanently",
+"Annuler":"Cancel",
+"Pas encore de doula":"No doula yet",
+"Trouver ma doula":"Find my doula",
+"Votre doula vous a ajoutée 🤝":"Your doula added you 🤝",
+"Merci":"Thank you",
+"Retour à mon espace":"Back to my space",
+"Au revoir":"Goodbye",
+"Votre compte est supprimé":"Your account has been deleted",
+"Pour confirmer, écrivez SUPPRIMER":"To confirm, type SUPPRIMER",
+"Créer mon compte":"Create my account",
+"Pas de doula ? Vous pouvez quand même vous inscrire.":"No doula? You can still sign up."
 });
