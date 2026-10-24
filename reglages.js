@@ -64,7 +64,7 @@
     } else if (nom === 'clochette') { note(a, t, 1760, 0, 0.22, 'sine', vol * 0.9); note(a, t, 2637, 0, 0.14, 'sine', vol * 0.35); }
   }
   function tap(forcer) {
-    var d = lire(); if (!forcer && (!d.son || d.touches === false)) return;
+    var d = lire(); if (!forcer && d.touches === false) return;
     var nom = d.sonTouche || 'goutte'; if (nom === 'aucun') return;
     var now = Date.now(); if (now - dernierTap < 60) return; dernierTap = now;
     var a = ctx(false); if (!a) return;
@@ -141,9 +141,6 @@
       '<div class="rg-actions" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:6px;"><button type="button" class="btn rg-activer" hidden>' + L('Activer les notifications', 'Turn on notifications') + '</button></div>' +
       '<div class="rg-reglages" style="display:flex;flex-direction:column;gap:12px;margin-top:8px;">' +
         '<label class="rg-ligne"><span><strong>' + L('Son', 'Sound') + '</strong><small>' + L('Un petit carillon à chaque notification', 'A little chime with each notification') + '</small></span><input type="checkbox" class="rg-son" role="switch"' + (d.son ? ' checked' : '') + '></label>' +
-        '<label class="rg-ligne"><span><strong>' + L('Sons des touches', 'Tap sounds') + '</strong><small>' + L('Quand on touche un bouton', 'When you tap a button') + '</small></span><input type="checkbox" class="rg-tch" role="switch"' + (d.touches === false ? '' : ' checked') + '></label>' +
-        '<label class="rg-ligne"><span><strong>' + L('Choix du son des touches', 'Tap sound choice') + '</strong><small>' + L('Touchez pour écouter', 'Change to listen') + '</small></span>' + '<select class="rg-stch" style="max-width:150px">' + SONS_TOUCHE.map(function (x) { return '<option value="' + x[0] + '"' + (((d.sonTouche || 'goutte') === x[0]) ? ' selected' : '') + '>' + L(x[1], x[2]) + '</option>'; }).join('') + '</select>' + '</label>' +
-        '<label class="rg-ligne"><span><strong>' + L('Son d\'un nouveau message', 'New message sound') + '</strong><small>' + L('Choisissez celui que vous préférez', 'Pick the one you like') + '</small></span>' + '<select class="rg-smsg" style="max-width:150px">' + SONS_MSG.map(function (x) { return '<option value="' + x[0] + '"' + (((d.sonMsg || 'carillon') === x[0]) ? ' selected' : '') + '>' + L(x[1], x[2]) + '</option>'; }).join('') + '</select>' + '</label>' +
         '<label class="rg-ligne"><span><strong>Vibration</strong><small>' + L('Quand le téléphone le permet', 'When the phone supports it') + '</small></span><input type="checkbox" class="rg-vib" role="switch"' + (d.vibration ? ' checked' : '') + '></label>' +
         '<label class="rg-ligne rg-vol"><span><strong>' + L('Volume dans l\'appli', 'In-app volume') + '</strong><small>' + L('Quand l\'appli est ouverte', 'While the app is open') + '</small></span><input type="range" class="rg-volume" min="0" max="100" step="5" value="' + (d.volume == null ? 70 : d.volume) + '"></label>' +
         '<p style="font-size:.78rem;color:var(--doux,#7a685e);">' + L('Appli fermée : le volume suit celui de ton téléphone. ', 'When the app is closed, the volume follows your phone. ') + (IOS ? L('Sur iPhone, tu peux aussi choisir le style d\'alerte dans Réglages → Notifications.', 'On iPhone, you can also choose the alert style in Settings → Notifications.') : '') + '</p>' +
@@ -165,9 +162,6 @@
       abonnementActuel().then(function (ab) { if (ab && Notification.permission === 'granted') enregistrer(ab); });
     }
     q('.rg-son').addEventListener('change', function () { sauver({ son: this.checked }); if (this.checked) sonner(); });
-    q('.rg-tch').addEventListener('change', function () { sauver({ touches: this.checked }); if (this.checked) { dernierTap = 0; tap(true); } });
-    q('.rg-stch').addEventListener('change', function () { sauver({ sonTouche: this.value }); dernierTap = 0; tap(true); });
-    q('.rg-smsg').addEventListener('change', function () { sauver({ sonMsg: this.value }); sonner(true, this.value); });
     q('.rg-vib').addEventListener('change', function () { sauver({ vibration: this.checked }); if (this.checked && navigator.vibrate) navigator.vibrate(150); });
     q('.rg-volume').addEventListener('change', function () { sauver({ volume: +this.value }); sonner(true); });
     q('.rg-activer').addEventListener('click', function () {
@@ -202,5 +196,5 @@
     etat();
   }
 
-  window.Reglages = { monter: monter, sonner: sonner, lire: lire, tap: tap };
+  window.Reglages = { monter: monter, sonner: sonner, lire: lire, tap: tap, regler: function (ch) { var x = lire(); for (var k in ch) x[k] = ch[k]; ecrire(x); }, listes: { touche: SONS_TOUCHE, msg: SONS_MSG } };
 })();

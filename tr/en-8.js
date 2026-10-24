@@ -410,5 +410,20 @@ window.TR_EN=Object.assign(window.TR_EN||{},{
 "Sons des touches":"Tap sounds",
 "Un petit « tic » doux quand on touche un bouton":"A soft tick when you tap a button",
 "Information générale. Elle ne remplace pas l’avis d’un professionnel. Urgence : 911 · Info-Santé : 811.":"General information. It does not replace professional advice. Emergency: 911 · Info-Santé: 811.",
-"Lignes : 3e, 15e, ":"Lines: 3rd, 15th, "
+"Lignes : 3e, 15e, ":"Lines: 3rd, 15th, ",
+"Sons de l’appli":"App sounds",
+"Son quand on touche un bouton":"Sound when you tap a button",
+"Désactivez-le pour un appli silencieux":"Turn it off for a silent app",
+"Choix du son des touches":"Tap sound choice",
+"Son d’un nouveau message":"New message sound",
+"Écoutez en changeant":"Listen as you change",
+"Volume":"Volume",
+"Touches et messages":"Taps and messages",
+"Mode clair ou sombre":"Light or dark mode",
+"Auto":"Auto",
+"Clair":"Light",
+"Sombre":"Dark",
+"Suit votre téléphone":"Follows your phone",
+"Fond clair":"Light background",
+"Fond sombre, plus doux le soir":"Dark background, gentler in the evening"
 });
