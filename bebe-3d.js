@@ -37,7 +37,7 @@ function bebe3dChoix(w){const S=_b3.stades;let i=0;for(let k=0;k<S.length;k++)if
   if(nxt&&w<nxt.sem){const t=(w-cur.sem)/(nxt.sem-cur.sem);f=1+.18*Math.max(0,Math.min(1,t))} // il grossit un peu chaque semaine
   else if(!nxt&&w>cur.sem)f=1+.03*Math.min(4,w-cur.sem);
   if(w<cur.sem)f=Math.max(.75,1-.06*(cur.sem-w));
-  return{i,f}}
+  return{i,f:1}} // bébé reste fixe : il change seulement quand on passe à un autre stade
 function bebe3dMontrer(w){_b3.w=w;const api=_b3.api;if(!api||!_b3.stades.length)return;
   const {i,f}=bebe3dChoix(w),S=_b3.stades;
   const echelle=()=>{const s=S[i];if(!s.base)return;const m=s.base.slice();for(const k of[0,1,2,4,5,6,8,9,10])m[k]*=f;api.setMatrix(s.id,m)};
