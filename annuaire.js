@@ -6,14 +6,8 @@ const A={liste:null,q:'',dem:[],charge:false};
 const STAT={nouvelle:['Envoyée','line'],vue:['Vue','line'],acceptee:['Acceptée','acc'],declinee:['Non disponible','line']};
 let DEMANDES=[];
 
-const VILLES={'Nouveau-Brunswick':[['Campbellton',48.0,-66.67],['Atholville',48.07,-66.7],['Dalhousie',48.06,-66.37],['Balmoral',47.98,-66.43],['Belledune',47.9,-65.84],['Bathurst',47.62,-65.65],['Caraquet',47.79,-64.95],['Shippagan',47.74,-64.71],['Tracadie',47.51,-64.91],['Miramichi',47.03,-65.5],['Edmundston',47.37,-68.33],['Grand-Sault',47.03,-67.74],['Saint-Quentin',47.51,-67.4],['Kedgwick',47.65,-67.34],['Moncton',46.09,-64.78],['Dieppe',46.08,-64.69],['Riverview',46.06,-64.8],['Shediac',46.22,-64.54],['Bouctouche',46.47,-64.74],['Richibucto',46.68,-64.87],['Sackville',45.9,-64.37],['Fredericton',45.96,-66.64],['Oromocto',45.85,-66.48],['Saint-Jean',45.27,-66.06],['Sussex',45.72,-65.51]],
-'Québec':[['Pointe-à-la-Croix',48.01,-66.63],['Matapédia',48.0,-66.98],['Amqui',48.46,-67.43],['Mont-Joli',48.58,-68.19],['Matane',48.85,-67.53],['Rimouski',48.45,-68.52],['Rivière-du-Loup',47.84,-69.54],['Carleton-sur-Mer',48.1,-66.13],['Maria',48.17,-66.0],['New Richmond',48.17,-65.86],['Bonaventure',48.05,-65.49],['Chandler',48.35,-64.68],['Gaspé',48.83,-64.49],['Sainte-Anne-des-Monts',49.12,-66.49],['Québec',46.81,-71.21],['Lévis',46.8,-71.18],['Trois-Rivières',46.35,-72.55],['Sherbrooke',45.4,-71.9],['Montréal',45.5,-73.57],['Laval',45.6,-73.71],['Longueuil',45.53,-73.52],['Gatineau',45.48,-75.7]],
-'Nouvelle-Écosse':[['Halifax',44.65,-63.57],['Sydney',46.14,-60.19],['Truro',45.37,-63.28],['Amherst',45.83,-64.21],['Yarmouth',43.84,-66.12]],
-'Île-du-Prince-Édouard':[['Charlottetown',46.24,-63.13],['Summerside',46.4,-63.79]],
-'Terre-Neuve-et-Labrador':[['St. John\'s',47.56,-52.71]],
-'Ontario':[['Ottawa',45.42,-75.7],['Toronto',43.65,-79.38],['Sudbury',46.49,-81.0]]};
-const TOUTES_C=Object.values(VILLES).flat();const TOUTES=TOUTES_C.map(x=>x[0]);
-const coord=n=>{const t=TOUTES_C.find(x=>norm(x[0])===norm(n));return t?{lat:t[1],lng:t[2],nom:t[0]}:null};
+const TOUTES_C=window.VILLES_CA||[];const TOUTES=TOUTES_C.map(x=>x[0]);
+const coord=n=>{const q=norm(n);if(!q)return null;const t=TOUTES_C.find(x=>norm(x[0])===q)||TOUTES_C.find(x=>norm(x[3])===q);return t?{lat:t[1],lng:t[2],nom:t[0]}:null};
 const dist=(a,b)=>{const R=6371,r=x=>x*Math.PI/180,dl=r(b.lat-a.lat),dn=r(b.lng-a.lng),h=Math.sin(dl/2)**2+Math.cos(r(a.lat))*Math.cos(r(b.lat))*Math.sin(dn/2)**2;return 2*R*Math.asin(Math.sqrt(h))};
 const LIEN_ANNUAIRE='https://buy.stripe.com/14AaEQg9Wfby1G40V4ffy0s';
 const CHAMPS=['entreprise','photo','region','zones','bio','langues','certification','ville_base','rayon_km','lat','lng','site_web','dispo_mois'];
@@ -24,12 +18,10 @@ const payee=()=>exemptee()||(payeJusque()&&payeJusque()>new Date());
 const fr=d=>new Date(d).toLocaleDateString('fr-CA',{day:'numeric',month:'long',year:'numeric'});
 let PEND=[],TOUS=[];
 let SEL=null;const selInit=()=>{if(SEL===null)SEL=String(brouillon().zones||'').split(',').map(x=>x.trim()).filter(Boolean)};
-function villesHtml(){selInit();const extra=SEL.filter(v=>!TOUTES.includes(v));
-  const chip=v=>'<button type="button" class="pill '+(SEL.includes(v)?'acc':'line')+'" style="cursor:pointer;border:0;font:inherit" data-act="anVille" data-v="'+esc(v)+'">'+(SEL.includes(v)?icon('fa-check')+' ':'')+esc(v)+'</button>';
-  return (SEL.length?'<p class="xs muted" style="margin:0 0 6px">'+SEL.length+' ville'+(SEL.length>1?'s':'')+' choisie'+(SEL.length>1?'s':'')+'</p>':'')
-   +Object.entries(VILLES).map(([pr,L],i)=>'<details class="acc"'+(i===0||L.some(v=>SEL.includes(v[0]))?' open':'')+'><summary>'+esc(pr)+'<i class="fa-solid fa-chevron-down chev"></i></summary><div class="body"><div class="row" style="gap:6px;flex-wrap:wrap">'+L.map(v=>chip(v[0])).join('')+'</div></div></details>').join('')
-   +(extra.length?'<div class="row" style="gap:6px;flex-wrap:wrap;margin-top:8px">'+extra.map(chip).join('')+'</div>':'')
-   +'<div class="row" style="gap:8px;margin-top:8px"><input type="text" id="pfAutre" placeholder="Une autre ville ?" style="flex:1"><button type="button" class="btn sm ghost" data-act="anAjoutVille">Ajouter</button></div>'}
+function villesHtml(){selInit();
+  const chip=v=>'<button type="button" class="pill acc" style="cursor:pointer;border:0;font:inherit" data-act="anVille" data-v="'+esc(v)+'">'+esc(v)+' '+icon('fa-xmark')+'</button>';
+  return (SEL.length?'<div class="row" style="gap:6px;flex-wrap:wrap">'+SEL.map(chip).join('')+'</div>':'<p class="xs muted" style="margin:0">Aucune ville ajoutée.</p>')
+   +'<div class="row" style="gap:8px;margin-top:8px"><input type="text" id="pfAutre" list="pfVillesDL" placeholder="Tapez une ville…" style="flex:1"><button type="button" class="btn sm ghost" data-act="anAjoutVille">Ajouter</button></div>'}
 /* ---------- carte publique d'une doula (même rendu pour les familles et l'aperçu de la doula) ---------- */
 const MOIS=['janv.','févr.','mars','avril','mai','juin','juil.','août','sept.','oct.','nov.','déc.'];
 const moisLib=k=>{const [y,m]=k.split('-');return MOIS[+m-1]+' '+y};
@@ -63,7 +55,7 @@ async function chargerAnnuaire(){
   A.liste=r.data||[];A.dem=(m&&m.data)||[];A.charge=true}
 function filtrer(){const q=norm(A.q);if(!q)return A.liste;const c=coord(A.q);
   if(c){const L=[];A.liste.forEach(d=>{let k=null;if(d.lat!=null&&d.rayon_km){const x=dist(c,{lat:d.lat,lng:d.lng});if(x<=d.rayon_km)k=Math.round(x)}
-    const inZ=norm(d.zones).split(',').some(z=>z.trim()===norm(c.nom));if(k!==null||inZ){L.push(Object.assign({},d,{_km:k===null?0:k}))}});return L.sort((a,b)=>a._km-b._km)}
+    const inZ=norm(d.zones).split(',').some(z=>z.trim()===norm(c.nom)||z.trim()===norm(c.nom.replace(/ \(\w+\)$/,'')));if(k!==null||inZ){L.push(Object.assign({},d,{_km:k===null?0:k}))}});return L.sort((a,b)=>a._km-b._km)}
   return A.liste.filter(d=>norm([d.region,d.zones,d.ville_base,d.prenom,d.entreprise].join(' ')).includes(q))}
 function listeHtml(){const L=filtrer();
   if(!L.length)return '<div class="card tint"><p class="small" style="margin:0">'+(A.q?'Aucune doula inscrite dans ce secteur pour le moment. Essayez une ville voisine ou votre région.':'Aucune doula n\'est encore inscrite dans l\'annuaire. Revenez bientôt !')+'</p></div>';
@@ -134,7 +126,7 @@ function profilHtml(){const D0=ME_DOULA||{},D=Object.assign({},brouillon(),{id:D
    +'<div class="card"><label class="check"><input type="checkbox" id="pfOn" '+(D.annuaire?'checked':'')+'><span><b>Apparaître dans l\'annuaire « Trouver ma doula »</b><br><span class="xs muted">Optionnel. Inscription annuelle de 25 $ et approbation de votre profil par Sérénaissance. Seuls votre prénom, l\'initiale de votre nom, votre photo et le texte ci-dessous sont visibles. Votre courriel et votre téléphone ne le sont jamais : c\'est vous qui décidez de répondre.</span></span></label>'
    +'<label class="check" style="margin-top:8px"><input type="checkbox" id="pfAcc" '+(D.accepte_nouvelles===false?'':'checked')+'><span>J\'accepte de nouvelles familles en ce moment</span></label>'
    +'<div class="stack" style="margin-top:12px"><label class="f">Ma région<input type="text" id="pfRegion" value="'+esc(D.region||'')+'" placeholder="Ex. Restigouche (N.-B.)"></label>'
-   +'<div class="grid2 resp"><label class="f">Ma ville de départ<select id="pfBase"><option value="">— Choisir —</option>'+TOUTES.map(v=>'<option'+(v===D.ville_base?' selected':'')+'>'+esc(v)+'</option>').join('')+'</select></label><label class="f">Je me déplace jusqu\'à<select id="pfRayon">'+[10,25,40,50,75,100,150,200].map(k=>'<option value="'+k+'"'+(+D.rayon_km===k?' selected':'')+'>'+k+' km</option>').join('')+'</select></label></div><div><span class="small"><b>Autres villes précises que je dessers (facultatif)</b></span><div id="pfVilles" class="stack" style="gap:6px;margin-top:6px">'+villesHtml()+'</div></div>'
+   +'<div class="grid2 resp"><label class="f">Ma ville de départ<input type="text" id="pfBase" list="pfVillesDL" value="'+esc(D.ville_base||'')+'" placeholder="Tapez votre ville…" autocomplete="off"></label><datalist id="pfVillesDL">'+TOUTES.map(v=>'<option value="'+esc(v)+'">').join('')+'</datalist><label class="f">Je me déplace jusqu\'à<select id="pfRayon">'+[10,25,40,50,75,100,150,200].map(k=>'<option value="'+k+'"'+(+D.rayon_km===k?' selected':'')+'>'+k+' km</option>').join('')+'</select></label></div><div><span class="small"><b>Autres villes que je dessers (facultatif)</b></span><p class="xs muted" style="margin:2px 0 6px">Votre rayon couvre déjà les villes autour de votre ville de départ. Ajoutez ici une ville plus loin.</p><div id="pfVilles" class="stack" style="gap:6px;margin-top:6px">'+villesHtml()+'</div></div>'
    +'<div class="grid2 resp"><label class="f">Langues<input type="text" id="pfLangues" value="'+esc(D.langues||'')+'" placeholder="Français, anglais"></label><label class="f">Formation / certification<input type="text" id="pfCert" value="'+esc(D.certification||'')+'" placeholder="Ex. Académie Sérénaissance"></label></div>'
    +'<label class="f">Mon site web<input type="text" id="pfSite" value="'+esc(D.site_web||'')+'" placeholder="academiesere.ca"></label><div><span class="small"><b>Mes disponibilités pour accoucher</b></span><p class="xs muted" style="margin:2px 0 6px">Touchez les mois de date prévue pour lesquels vous prenez encore des familles.</p><div id="pfMois" class="row" style="gap:6px;flex-wrap:wrap">'+moisHtml()+'</div></div><label class="f">Ma présentation (jusqu\'à 2000 caractères)<textarea id="pfBio" rows="12" maxlength="2000" placeholder="Qui êtes-vous ? Comment accompagnez-vous les familles ?">'+esc(D.bio||'')+'</textarea></label>'
    +'<p class="xs muted">Ajoutez une belle photo de vous dans Paramètres : elle s\'affiche ici.</p>'
@@ -210,7 +202,7 @@ document.addEventListener('click',async e=>{const b=e.target.closest('[data-act]
     b.disabled=true;const {data,error}=await sb.functions.invoke('fam-contact',{body:{doula:id,nom:nom,tel:document.getElementById('deTel').value.trim(),ville:document.getElementById('deVille').value.trim(),dpa:document.getElementById('deDpa').value||null,message:document.getElementById('deMsg').value.trim()}});
     if(error||!data||!data.ok){b.disabled=false;toast((data&&data.erreur)||(error&&error.message)||'Pas envoyé, réessayez');return}
     close();toast('Demande envoyée ! La doula vous répondra bientôt.');await chargerAnnuaire();const el=document.getElementById('anDem');if(el)el.innerHTML=demandesHtml();return}
-  case 'anSauverProfil':{const g=k=>(document.getElementById(k)||{}).value||'';const base=g('pfBase')||null;
+  case 'anSauverProfil':{const g=k=>(document.getElementById(k)||{}).value||'';let base=(g('pfBase')||'').trim()||null;if(base){const cb=coord(base);if(!cb){toast('Choisissez votre ville dans la liste qui apparaît en tapant (la plus proche de chez vous)');return}base=cb.nom}
     const c={entreprise:ME_DOULA.entreprise||null,photo:ME_DOULA.photo||null,region:g('pfRegion').trim()||null,zones:(SEL&&SEL.length?SEL.join(', '):null),bio:g('pfBio').trim()||null,langues:g('pfLangues').trim()||null,certification:g('pfCert').trim()||null,ville_base:base,rayon_km:base?+g('pfRayon'):null,lat:(coord(base)||{}).lat??null,lng:(coord(base)||{}).lng??null,site_web:g('pfSite').trim()||null,dispo_mois:(MSEL&&MSEL.length?MSEL.join(','):null)};
     let aut=brouillon().autorisation||null;
     if(!aut){const cases=[...document.querySelectorAll('.pfAut')],sig=(document.getElementById('pfSig')||{}).value||'';
