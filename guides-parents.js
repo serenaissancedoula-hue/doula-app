@@ -110,3 +110,15 @@ const _dvGP2=docVue;docVue=function(d,doula){let h=_dvGP2(d,doula);
     if(edit){b.innerHTML='<input type="text" class="dch" data-k="'+k+'" placeholder="'+esc(lab.replace(/\s*\(.*$/,'').trim()||'À remplir')+'" maxlength="160">';ch=true}
     else if(R[k]){b.textContent=R[k];ch=true}});
   return ch?t.innerHTML:h};
+
+/* Paramètres : chaque section est repliée (flèche) ; une fois enregistré, la page se rafraîchit et la section se referme */
+const _pPGP=pParametres;pParametres=function(){const h=_pPGP.apply(this,arguments);try{
+  const t=document.createElement('div');t.innerHTML=h;let nb=0;
+  [...t.children].forEach(c=>{if(!c.classList.contains('card')||c.classList.contains('flat'))return;
+    const e=c.firstElementChild;if(!e||!e.classList.contains('eyebrow'))return;
+    const det=document.createElement('details');det.className='acc';det.dataset.sec=e.textContent.trim();
+    const sm=document.createElement('summary');sm.innerHTML=esc(e.textContent.trim())+'<i class="fa-solid fa-chevron-down chev"></i>';
+    e.remove();const body=document.createElement('div');body.className='body';while(c.firstChild)body.appendChild(c.firstChild);
+    det.append(sm,body);c.replaceWith(det);nb++});
+  return nb?t.innerHTML:h}catch(e){return h}};
+document.addEventListener('click',e=>{const b=e.target.closest('details.acc[data-sec] [data-act]');if(!b||!/^(save|sauver|changer|forf|ff)/i.test(b.dataset.act||''))return;const d=b.closest('details.acc');setTimeout(()=>{try{d.open=false}catch(x){}},500)},false);
