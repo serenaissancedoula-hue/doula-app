@@ -39,6 +39,6 @@ function pad(type){const s=document.querySelector('.sheet');if(!s)return;const c
 document.addEventListener('click',e=>{const b=e.target.closest('[data-act="padOpen"]');if(!b)return;e.stopPropagation();e.preventDefault();pad(b.dataset.t)},true);
 /* effacer depuis les anciens boutons : garde les aperçus à jour */
 document.addEventListener('click',e=>{if(e.target.closest('[data-act="sigEff"],[data-act="gpIniEff"]'))setTimeout(()=>{const s=document.querySelector('.sheet');if(s)previews(s)},50)});
-const _ls=lireSig;lireSig=function(){const r=_ls.apply(this,arguments);try{if(r){const c=document.querySelector('.sheet #iniD');if(c&&!c._vide)r.initiales=c.toDataURL('image/png')}}catch(e){}return r};
+const _ls=lireSig;lireSig=function(){const r=_ls.apply(this,arguments);try{if(r){const c=document.querySelector('.sheet #iniD');if(c&&!c._vide)r.initiales=c.toDataURL('image/png')}const ch={};document.querySelectorAll('.sheet .dchd').forEach(el=>{if(el.value.trim())ch[el.dataset.k]=el.value.trim()});if(Object.keys(ch).length)r.champs=ch}catch(e){}return r};
 const _dv=docVue;docVue=function(d,doula){let h=_dv.apply(this,arguments);try{const I=d&&d.signature_doula&&d.signature_doula.initiales;if(I&&/^data:image\/png;base64,[A-Za-z0-9+\/=]+$/.test(I))h=h.replace(/Doula _{3,}/g,'Doula <img src="'+I+'" alt="initiales" style="height:22px;vertical-align:middle">')}catch(e){}return h};
 })();
