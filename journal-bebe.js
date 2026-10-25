@@ -42,16 +42,17 @@ pJournal=function(){const st=stage();if(st.k!=='pp')return _pJ.apply(this,argume
   const tab=JB_TABS.find(t=>t[0]===S.jbTab)||JB_TABS[0],types=tab[3],L=S.logs.filter(l=>types.includes(l.type));
   const B=new Date(st.birth),N=new Date();let mo=(N.getFullYear()-B.getFullYear())*12+N.getMonth()-B.getMonth();if(N.getDate()<B.getDate())mo--;mo=Math.max(0,mo);
   const pl=(x,u,us)=>x+' '+(x>1?us:u);
-  const titre=d===0?esc(n)+' est arrivé(e) aujourd\'hui 🩷':d<90?esc(n)+' a '+pl(d,'jour','jours'):mo<24?esc(n)+' a '+mo+' mois':esc(n)+' a '+pl(Math.floor(mo/12),'an','ans')+(mo%12?' et '+mo%12+' mois':'');
+  const sx=((S.parent.naissance||{}).sexe||''),ae=/^f/i.test(sx)?'arrivée':/^g/i.test(sx)?'arrivé':'arrivé(e)';const titre=d===0?esc(n)+' est '+ae+' aujourd\'hui 🩷':d<90?esc(n)+' a '+pl(d,'jour','jours'):mo<24?esc(n)+' a '+mo+' mois':esc(n)+' a '+pl(Math.floor(mo/12),'an','ans')+(mo%12?' et '+mo%12+' mois':'');
   const sous=d<7?'':d<90?pl(s,'semaine','semaines')+(j?' et '+pl(j,'jour','jours'):''):pl(d,'jour','jours')+' de vie';
   let h='<div class="sh jb-tete">'+(sous?'<span class="eyebrow acc">'+sous+'</span>':'')+'<h1>'+titre+'</h1><p class="sub">Repas, couches, sommeil et croissance</p></div>';
   h+='<div class="jb-tabs" role="tablist">'+JB_TABS.map(t=>'<button role="tab" aria-selected="'+(t===tab)+'" data-jb="'+t[0]+'">'+icon(t[1])+'<span>'+t[2]+'</span></button>').join('')+'</div>';
   h+=typeof timerCard==='function'?timerCard():'';
   const aj=tab[0]==='resume'?[]:types;
   if(aj.length)h+='<div class="jb-ajout">'+aj.map(t=>'<button class="btn" data-act="'+JB_AJOUT[t][0]+'">'+icon('fa-plus')+JB_AJOUT[t][1]+'</button>').join('')+'</div>';
-  h+='<div class="card"><div class="jb-stats">'+jbStats(tab[0],L)+'</div></div>';
+  const crW=tab[0]==='croissance'&&window.bbCroissance;
+  if(!crW)h+='<div class="card"><div class="jb-stats">'+jbStats(tab[0],L)+'</div></div>';
   if(tab[0]==='couches'&&d<=10&&typeof firstWeek==='function')h+=firstWeek(st.birth);
-  if(tab[0]==='croissance'){h+=typeof weightCard==='function'?weightCard(st):'';h+=window.bbCroissance?window.bbCroissance(st):''}
+  if(tab[0]==='croissance'){if(crW){h+=window.bbCroissance(st).replace(/<button class="btn sm" data-act="poids">[\s\S]*?<\/button>/,'');if(d<=14)h+='<p class="xs muted" style="margin:-4px 4px 14px">Une perte jusqu\'à 7 à 10 % les premiers jours est fréquente; la plupart des bébés reprennent leur poids de naissance vers 10 à 14 jours.</p>'}else h+=typeof weightCard==='function'?weightCard(st):''}
   else h+='<div class="card"><div class="row between"><span class="eyebrow acc">7 derniers jours</span><span class="xs muted">'+(tab[0]==='resume'?'<i class="jb-pt" style="background:var(--accent)"></i>boires <i class="jb-pt" style="background:var(--sage)"></i>couches <i class="jb-pt" style="background:#8aa0c8"></i>sommeil':'')+'</span></div>'+jbLigne(L)+'</div>';
   if(tab[0]==='resume'&&typeof weekChart==='function')h+=weekChart();
   if(tab[0]==='maman')h+=avant;

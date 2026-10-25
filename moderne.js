@@ -15,7 +15,7 @@ const _r=render;render=function(){const x=_r.apply(this,arguments);try{
   /* Journal bébé : le titre dit l'âge de bébé (« Nolan a 3 jours ») et passe en premier */
   if(app&&S.role==='parent'&&!S.vue&&S.tab==='journal'){try{const st=stage(),sh=[...app.querySelectorAll(':scope>.sh')].find(x=>/mon journal/i.test(x.textContent));
     if(st.k==='pp'&&sh){const n=((S.parent.naissance||{}).prenomBebe||'').trim()||'Bébé',d=Math.max(0,st.day|0),s=Math.floor(d/7),j=d%7;
-      const h=sh.querySelector('h1');if(h)h.textContent=d===0?n+' est arrivé(e) aujourd\'hui 🩷':n+' a '+d+' jour'+(d>1?'s':'');
+      const h=sh.querySelector('h1');if(h)h.textContent=d===0?n+' est '+(/^f/i.test((S.parent.naissance||{}).sexe||'')?'arrivée':/^g/i.test((S.parent.naissance||{}).sexe||'')?'arrivé':'arrivé(e)')+' aujourd\'hui 🩷':n+' a '+d+' jour'+(d>1?'s':'');
       let e=sh.querySelector('.b3j-age');if(d>=7){if(!e){e=document.createElement('span');e.className='eyebrow acc b3j-age';sh.prepend(e)}e.textContent=s+' semaine'+(s>1?'s':'')+(j?' et '+j+' jour'+(j>1?'s':''):'')}
       if(app.firstElementChild!==sh)app.prepend(sh)}}catch(e){}}
   /* Journal bébé a son propre onglet : plus besoin du choix « Mon suivi / Mon journal » */
