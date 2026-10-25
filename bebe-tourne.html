@@ -76,7 +76,7 @@ const scene=new THREE.Scene(),camera=new THREE.PerspectiveCamera(32,1,.05,50);ca
 const ctl=new THREE.OrbitControls(camera,renderer.domElement);ctl.enableDamping=true;ctl.enablePan=false;ctl.minDistance=2.4;ctl.maxDistance=8;
 ctl.autoRotate=!matchMedia('(prefers-reduced-motion: reduce)').matches;ctl.autoRotateSpeed=1.6;
 scene.add(new THREE.HemisphereLight(0xfff3ee,0x5a2a35,.9));
-const k1=new THREE.DirectionalLight(0xfff1e6,1.0);k1.position.set(2,3,4);scene.add(k1);
+const k1=new THREE.DirectionalLight(0xfff1e6,.85);k1.position.set(2,3,4);scene.add(k1);
 const k2=new THREE.DirectionalLight(0xffb3c2,.7);k2.position.set(-3,1,-3);scene.add(k2);
 const k3=new THREE.DirectionalLight(0xffe0d6,.35);k3.position.set(0,-3,2);scene.add(k3);
 let bebe=null;const cache={};
@@ -91,7 +91,8 @@ function modelePour(w){if(w<9)return null;let m=null;for(const k of MODELES)if(k
 function teinter(o){const c=PEAUX[peau][1];o.traverse(n=>{if(n.isMesh)(Array.isArray(n.material)?n.material:[n.material]).forEach(m=>{if(!m.userData.c0)m.userData.c0=m.color.clone();m.color.copy(m.userData.c0).multiply(new THREE.Color(c[0],c[1],c[2]))})})}
 const gl=new THREE.GLTFLoader();
 function chargerModele(k){return new Promise((ok,ko)=>gl.load('img/bebe3d/modeles/semaine-'+pad(k)+'.glb?v=6',g=>{
-  const o=g.scene; // modèle Meshy d'origine, matériaux tels quels
+  const o=g.scene; // modèle Meshy d'origine ; seulement l'aspect de la peau : mat et doux, pas métallique
+  o.traverse(n=>{if(n.isMesh){const m=n.material;m.metalness=0;m.metalnessMap=null;m.roughnessMap=null;m.roughness=.82;m.needsUpdate=true}});
   const box=new THREE.Box3().setFromObject(o),sz=box.getSize(new THREE.Vector3()),c=box.getCenter(new THREE.Vector3());
   const piv=new THREE.Group();o.position.sub(c);piv.add(o);piv.userData.base=2.1/Math.max(sz.x,sz.y,sz.z);piv.scale.setScalar(piv.userData.base);ok(piv)},undefined,ko))}
 async function construire(w){
