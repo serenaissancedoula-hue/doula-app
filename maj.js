@@ -3,7 +3,7 @@
    Si une nouvelle version existe, elle se met à jour toute seule (une fois par session),
    sinon un bandeau propose « Mettre à jour ». Le bouton de Paramètres force la mise à jour.
    À chaque publication : changer APP_VERSION ici ET dans version.json, et le ?v= des scripts dans index.html et parents/index.html (sinon le téléphone garde les anciens fichiers). */
-const APP_VERSION='2026.10.25-167';
+const APP_VERSION='2026.10.25-168';
 async function versionEnLigne(){try{const r=await fetch('version.json?t='+Date.now(),{cache:'no-store'});if(!r.ok)return null;return await r.json()}catch(e){return null}}
 async function majForcer(){try{toast('Mise à jour en cours…')}catch(e){}
   try{sessionStorage.setItem('sere-maj-ok','1')}catch(e){}
