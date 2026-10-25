@@ -113,3 +113,44 @@ document.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e.tar
   '#bebePE .bebe-zone.photo img{object-fit:contain;-webkit-mask-image:radial-gradient(circle,#000 55%,transparent 72%);mask-image:radial-gradient(circle,#000 55%,transparent 72%)}'+
   '@media (prefers-reduced-motion:reduce){.b3c-alt span{animation:none}.b3c-alt span+span{display:none}}';
   document.head.appendChild(st)})();
+/* Plein écran : bébé en très grand qu'on tourne au doigt, poids et longueur à gauche, semaines à droite,
+   et dessous une carte « ce que bébé fait cette semaine ». */
+const B3F_MOMENTS=[[5,'Tout commence','Le cœur, le cerveau et la moelle épinière se mettent en place. Bébé a la taille d\'une graine.'],
+  [7,'Son cœur bat','Le petit cœur bat déjà très vite, environ deux fois plus vite que le vôtre.'],
+  [12,'Premiers tressaillements','Bébé s\'étire et fait de petits sursauts. Vous ne le sentez pas encore.'],
+  [17,'Des culbutes','Il bouge bras et jambes, porte les mains à son visage et fait des culbutes dans le liquide.'],
+  [22,'Il vous entend','Votre cœur, votre respiration, puis votre voix : il commence à entendre le monde à travers vous.'],
+  [24,'Premiers coups de pied','Les petits papillons deviennent de vrais petits coups. Posez la main sur votre ventre.'],
+  [27,'Le hoquet','Il avale du liquide et a parfois le hoquet : de petites secousses régulières, tout à fait normales.'],
+  [31,'Ses yeux s\'ouvrent','Il ouvre les yeux et perçoit la lumière à travers votre ventre. Il dort et s\'éveille par cycles.'],
+  [36,'Il prend des forces','Il prend du poids pour bien se garder au chaud. Ses mouvements deviennent des roulades et des poussées.'],
+  [42,'Prêt à vous rencontrer','Bébé est bien tassé. Il doit bouger chaque jour autant qu\'avant : au moindre doute, appelez.']];
+function b3fMoment(w){return B3F_MOMENTS.find(m=>w<=m[0])||B3F_MOMENTS[B3F_MOMENTS.length-1]}
+const _ouvrirBebePE3D=ouvrirBebePE;
+ouvrirBebePE=function(){_ouvrirBebePE3D();const d=document.getElementById('bebePE');if(!d)return;
+  const st=stage();if(st.k!=='preg')return;const w=Math.max(4,Math.min(42,st.g.w)),f=fruit(w),b=bpm(w),mo=b3fMoment(w);
+  const poids=f[2]?(f[2]>=1000?['≈ '+cm((f[2]/1000).toFixed(1)),'kg']:['≈ '+f[2],'grammes']):['< 1','gramme'];
+  d.classList.add('b3f');
+  d.innerHTML='<div class="b3f-scene">'+svgBebe(w,'bebeZonePE')+
+    '<div class="b3f-chiffres"><div><b>'+poids[0]+'</b> '+poids[1]+'<span>Poids</span></div><div><b>≈ '+cm(f[1])+'</b> cm<span>Longueur</span></div></div>'+
+    '<div class="b3f-sem"><b>'+w+'</b><span>semaine'+(w>1?'s':'')+'</span></div>'+
+    '<span class="b3f-aide">Glissez le doigt pour tourner bébé</span></div>'+
+    '<button class="pe-fermer b3f-fermer" data-act="bebePEFermer" aria-label="Fermer">'+icon('fa-xmark')+'</button>'+
+    '<div class="b3f-carte"><div class="b3f-titre"><h2>'+esc(mo[1])+'</h2>'+(b?'<button class="b3f-son" data-act="bebePESon" aria-label="Couper ou remettre le son du cœur">'+icon(S.sonCoeur?'fa-volume-high':'fa-volume-xmark')+'</button>':'')+'</div>'+
+    '<p>'+esc(mo[2])+'</p>'+(b?'<p class="b3f-note">Son du cœur : une illustration, pas le vrai cœur de votre bébé.</p>':'')+'</div>';
+  b3cSurveiller()};
+(function(){const st=document.createElement('style');st.textContent=
+  '#bebePE.b3f{display:block;padding:0;overflow:hidden;background:radial-gradient(ellipse at 50% 38%,#6b3238 0%,#3a1a20 45%,#1b0d11 100%)!important}'+
+  '.b3f-scene{position:absolute;left:0;right:0;top:0;bottom:var(--b3f-h,190px)}'+
+  '#bebePE.b3f .bebe-zone.photo{position:absolute;inset:0;width:100%!important;height:100%!important;max-width:none!important;aspect-ratio:auto!important;margin:0}'+
+  '.b3f-chiffres{position:absolute;left:18px;bottom:18px;display:flex;flex-direction:column;gap:10px;pointer-events:none;color:#fff7f2;text-shadow:0 1px 10px rgba(0,0,0,.45)}'+
+  '.b3f-chiffres div{font-size:.9rem}.b3f-chiffres b{font-size:1.55rem;font-variant-numeric:tabular-nums}.b3f-chiffres span{display:block;font-size:.75rem;opacity:.8;margin-top:-2px}'+
+  '.b3f-sem{position:absolute;right:18px;bottom:18px;text-align:right;pointer-events:none;color:#fff7f2;text-shadow:0 1px 10px rgba(0,0,0,.45)}'+
+  '.b3f-sem b{display:block;font-family:var(--f-display);font-size:3.4rem;line-height:1}.b3f-sem span{font-size:1rem}'+
+  '.b3f-aide{position:absolute;left:0;right:0;top:calc(env(safe-area-inset-top,0px) + 22px);text-align:center;font-size:.75rem;color:#f3dde2;opacity:.7;pointer-events:none}'+
+  '#bebePE .b3f-fermer{position:absolute;top:calc(env(safe-area-inset-top,0px) + 12px);right:14px;z-index:5}'+
+  '.b3f-carte{position:absolute;left:0;right:0;bottom:0;min-height:var(--b3f-h,190px);box-sizing:border-box;background:var(--card,#fff);color:var(--ink);border-radius:26px 26px 0 0;padding:20px 20px calc(18px + env(safe-area-inset-bottom,0px));box-shadow:0 -10px 30px rgba(0,0,0,.25)}'+
+  '.b3f-titre{display:flex;align-items:center;justify-content:space-between;gap:12px}.b3f-titre h2{margin:0;font-size:1.45rem}'+
+  '.b3f-son{flex:none;width:46px;height:40px;border-radius:12px;border:0;background:var(--accent);color:#fff;font-size:1.05rem;cursor:pointer}'+
+  '.b3f-carte p{margin:8px 0 0;color:var(--muted);line-height:1.45}.b3f-carte .b3f-note{font-size:.72rem;margin-top:10px}';
+  document.head.appendChild(st)})();
