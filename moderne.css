@@ -1,0 +1,72 @@
+/* Sérénaissance — look moderne de l'Espace Famille : doux et épuré (beaucoup d'air, fonds crème, coins arrondis,
+   peu de bordures) avec les couleurs terracotta et sauge de Sérénaissance. Chargé seulement dans parents/. */
+:root{--bg:#faf5f0;--card:#ffffff;--soft:#f6ede6;--soft2:#f0e5dc;--line:#ece1d7;
+  --shadow:0 1px 2px rgba(70,45,30,.04),0 10px 28px rgba(70,45,30,.07);--r:24px}
+html,body{background:var(--bg)}
+body{font-size:15.5px}
+main{padding-bottom:140px!important;padding-top:14px!important}
+
+/* en-tête : léger, translucide */
+.top{background:color-mix(in srgb,var(--bg) 82%,transparent)!important;backdrop-filter:saturate(1.4) blur(14px);-webkit-backdrop-filter:saturate(1.4) blur(14px)}
+.top::after{height:1px!important;background:var(--line)!important;opacity:.7}
+.top img{height:38px!important}
+.espace-t{font-size:.66rem!important;letter-spacing:.16em!important}
+
+/* titres */
+h1{font-size:1.9rem;letter-spacing:-.01em}
+h2{font-size:1.3rem}
+.sh .script{font-size:2.2rem}
+.eyebrow{font-size:.68rem!important;letter-spacing:.1em!important;font-weight:700!important}
+
+/* cartes : sans bordure, ombre très douce, grands coins */
+.card{border:0!important;border-radius:var(--r)!important;box-shadow:var(--shadow)!important;padding:18px!important;gap:12px!important;background:var(--card)}
+.card.tint{background:linear-gradient(135deg,var(--soft),var(--card))}
+.card.dash{box-shadow:none!important;background:var(--soft)}
+#app>.card,#app>.quick,#app>.btn,#app>details{margin-bottom:14px}
+.li{border-bottom:1px solid color-mix(in srgb,var(--line) 70%,transparent)!important}
+.li:last-child{border-bottom:0!important}
+.li .ic{border-radius:14px!important;background:var(--soft)!important;color:var(--accent)!important}
+
+/* boutons : plus doux */
+.btn{border-radius:16px!important;padding:12px 18px!important;font-weight:600!important;box-shadow:none!important;letter-spacing:.01em}
+.btn:active{transform:scale(.98)}
+.btn.sm{border-radius:12px!important;padding:8px 13px!important}
+.btn.ghost{background:var(--soft)!important;border-color:transparent!important;color:var(--ink)!important}
+.btn.danger{border-radius:12px!important}
+.icon-btn{border-radius:12px!important}
+
+/* champs : remplis, sans bordure */
+.f input,.f select,.f textarea,input[type=text],input[type=email],input[type=tel],input[type=number],input[type=date],input[type=time],input[type=password],select,textarea{
+  background:var(--soft)!important;border:1.5px solid transparent!important;border-radius:14px!important}
+.f input:focus,.f select:focus,.f textarea:focus,input:focus,select:focus,textarea:focus{background:var(--card)!important;border-color:var(--accent)!important;outline:none}
+.pill{border-radius:10px!important;padding:4px 10px!important}
+.banner{border-radius:18px!important}
+
+/* raccourcis : petites tuiles */
+.quick{gap:10px!important}
+.qbtn{border:0!important;background:var(--card)!important;box-shadow:var(--shadow);border-radius:20px!important;padding:14px 6px 12px!important;font-weight:600!important}
+.qbtn i,.qbtn svg{width:42px;height:42px;display:grid!important;place-items:center;border-radius:14px;background:var(--soft);color:var(--accent);font-size:1.1rem!important}
+
+/* barre du bas : flottante et arrondie */
+.tabs{left:10px!important;right:10px!important;bottom:calc(10px + env(safe-area-inset-bottom,0px))!important;padding:6px!important;border:0!important;border-radius:26px!important;
+  background:color-mix(in srgb,var(--card) 90%,transparent)!important;backdrop-filter:saturate(1.4) blur(16px);-webkit-backdrop-filter:saturate(1.4) blur(16px);box-shadow:0 10px 34px rgba(70,45,30,.16)!important}
+.tabs-in{max-width:620px!important}
+.tabs button{padding:7px 0 6px!important;font-size:.6rem!important;font-weight:600!important;gap:3px!important;border-radius:18px}
+.tabs button i,.tabs button svg{font-size:1.05rem!important;width:44px;height:28px;display:grid!important;place-items:center;border-radius:14px;transition:background .2s}
+.tabs button.on i,.tabs button.on svg{background:color-mix(in srgb,var(--accent) 14%,transparent)}
+.tabs button.on{color:var(--accent)!important}
+
+/* bulle de chat : ronde, au-dessus de la barre */
+#chatFab{bottom:calc(92px + env(safe-area-inset-bottom,0px))!important;width:54px;height:54px;padding:0!important;justify-content:center;border:0!important;background:var(--accent)!important;color:#fff!important;box-shadow:0 8px 22px rgba(168,87,67,.35)!important}
+#chatFab span{display:none!important}
+#chatFab i{font-size:1.25rem}
+#chatFab b{position:absolute;top:-3px;right:-3px;background:#fff!important;color:var(--accent)!important;box-shadow:0 2px 6px rgba(0,0,0,.15)}
+#chatPan{bottom:calc(156px + env(safe-area-inset-bottom,0px))!important}
+body.connecte #langBtn{display:none!important}
+
+/* accueil : la grande carte de bébé en haut, l'image déborde jusqu'aux bords de la carte */
+.b3h-carte{padding:10px!important}
+.b3h-carte .b3h{border-radius:20px}
+.card.mot{background:linear-gradient(135deg,var(--card),var(--soft))}
+[data-theme=dark] .card{box-shadow:none!important}
+[data-theme=dark] .tabs{box-shadow:0 10px 34px rgba(0,0,0,.45)!important}
