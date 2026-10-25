@@ -95,7 +95,7 @@ const MODELES=[9, 10, 12, 13, 14, 15, 16, 17, 18, 21, 22, 23, 25, 26, 27, 28, 30
 const PEAUX=[['Naturelle',[1,1,1],'#e8a693'],['Claire',[1.06,1.02,1],'#f2c4b2'],['Dorée',[.92,.78,.62],'#c98c66'],['Mate',[.74,.56,.43],'#9d6a4c'],['Foncée',[.5,.35,.26],'#5e3b2a']];
 let peau=0;try{peau=+(localStorage.getItem('sere-b3-peau')||0)}catch(e){}
 function modelePour(w){return MODELES.includes(w)?w:null} // chaque semaine garde sa propre image : bébé 3D s'il existe, sinon sa photo en relief
-function teinter(o){const c=PEAUX[peau][1];o.traverse(n=>{if(n.isMesh)(Array.isArray(n.material)?n.material:[n.material]).forEach(m=>{if(!m.userData.c0)m.userData.c0=m.color.clone();m.color.copy(m.userData.c0).multiply(new THREE.Color(c[0],c[1],c[2]))})})}
+function teinter(o){if(o.userData&&o.userData.photo)return;const c=PEAUX[peau][1];o.traverse(n=>{if(n.isMesh)(Array.isArray(n.material)?n.material:[n.material]).forEach(m=>{if(!m.userData.c0)m.userData.c0=m.color.clone();m.color.copy(m.userData.c0).multiply(new THREE.Color(c[0],c[1],c[2]))})})}
 const gl=new THREE.GLTFLoader();
 function chargerModele(k){return new Promise((ok,ko)=>gl.load('img/bebe3d/modeles/semaine-'+pad(k)+'.glb?v=8',g=>{
   const o=g.scene; // modèle Meshy d'origine ; seulement l'aspect de la peau : mat et doux, pas métallique
@@ -112,6 +112,10 @@ async function construire(w){
   if(cache[w])return cache[w];
   const k=modelePour(w);
   if(k!==null){if(!cache['m'+k])cache['m'+k]=await chargerModele(k);const m=cache['m'+k];teinter(m);return cache[w]=m}
+  // semaines sans bébé 3D : la photo elle-même, nette, détourée (pas de relief déformé)
+  const tx=await new THREE.TextureLoader().loadAsync('img/bebe3d/bebe-'+pad(w)+'.webp?v=1');tx.encoding=THREE.sRGBEncoding;tx.anisotropy=8;
+  const ph=new THREE.Mesh(new THREE.PlaneGeometry(2.2,2.2),new THREE.MeshBasicMaterial({map:tx,transparent:true,alphaTest:.02,side:THREE.DoubleSide,toneMapped:false}));
+  ph.userData.base=1;ph.userData.photo=true;return cache[w]=ph
   const L=new THREE.TextureLoader(),[rel,tex,dos]=await Promise.all([chargerImg('img/bebe3d/relief-'+pad(w)+'.png?v=2'),L.loadAsync('img/bebe3d/bebe-'+pad(w)+'.webp?v=1'),L.loadAsync('img/bebe3d/dos-'+pad(w)+'.webp?v=1')]);
   tex.encoding=dos.encoding=THREE.sRGBEncoding;tex.anisotropy=4;
   const c=document.createElement('canvas');c.width=rel.width;c.height=rel.height;const cx=c.getContext('2d');cx.drawImage(rel,0,0);
