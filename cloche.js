@@ -6,7 +6,8 @@ let ADMIN_N=0;
 function items(){const L=[];
   try{const proche=r=>r.statut!=='annule'&&r.statut!=='demande'&&new Date(r.debut)>Date.now()&&new Date(r.debut)-Date.now()<=24*3600e3;
     const quand=r=>{const d=new Date(r.debut);return (d.toDateString()===new Date().toDateString()?'aujourd\'hui':'demain')+' à '+String(d.getHours()).padStart(2,'0')+'h'+String(d.getMinutes()).padStart(2,'0')};
-    if(S.role==='parent')RDV.filter(proche).forEach(r=>L.push(['fa-bell','Rappel : '+r.type+' '+quand(r),'tab','madoula']));
+    if(S.role==='parent'){RDV.filter(proche).forEach(r=>L.push(['fa-bell','Rappel : '+r.type+' '+quand(r),'tab','madoula','rdv']));
+      RDV.filter(r=>r.statut==='propose'&&new Date(r.debut)>Date.now()).forEach(r=>L.push(['fa-calendar-days','Nouvelle date proposée · '+r.type+' · à accepter ou refuser','tab','madoula','rdv']))}
     else CRDV.filter(proche).forEach(r=>{const c=(S.clients||[]).find(x=>x.id===r.famille_id);L.push(['fa-bell','Rappel : '+r.type+' '+quand(r)+' · '+(c?(c.nom||c.prenom||'une famille'):'une famille'),'client',r.famille_id,'rdvs'])})}catch(e){}
   try{if(S.role==='parent'){/* les messages s'affichent seulement dans la bulle de chat (en bas à droite), pas dans la cloche */
       const d=DOCS.filter(x=>x.statut==='a_remplir').length;if(d)L.push(['fa-file-signature',d+' document'+(d>1?'s':'')+' à remplir','tab','madoula'])}
@@ -26,7 +27,7 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-act]');
   if(b&&b.dataset.act==='cloche'){e.stopPropagation();const o=document.getElementById('panCloche');if(o){o.remove();return}adminN();panneau();return}
   if(b&&b.dataset.act==='clocheGo'){const p=document.getElementById('panCloche'),x=p._L[+b.dataset.i];p.remove();
     if(x[2]==='client'){S.vue=null;S.dtab='clientes';S.dsub='';S.openClient=x[3];S.ctab=x[4]||'messages';chargerClientDetail(x[3]).then(render)}
-    else if(x[2]==='tab'){S.vue=null;S.tab=x[3];S.sub='';render()}
+    else if(x[2]==='tab'){S.vue=null;S.tab=x[3];S.sub='';if(x[4])S.seg=x[4];render()}
     else if(x[2]==='dgo'){const [t,s]=x[3].split('|');S.vue=null;S.dtab=t;S.dsub=s;S.openClient=null;render()}
     scrollTo(0,0);return}
   if(!e.target.closest('#panCloche'))document.getElementById('panCloche')?.remove()},true);

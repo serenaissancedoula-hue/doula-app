@@ -6,7 +6,7 @@ function majBoutonChat(){try{let b=document.getElementById('chatFab');
   const n=chatNonLus();if(!b){b=document.createElement('button');b.id='chatFab';b.setAttribute('data-act','chatOuvrir');document.body.appendChild(b)}
   b.innerHTML='<i class="fa-solid fa-comments"></i><span>Chat</span>'+(n?'<b>'+n+'</b>':'')}catch(e){}}
 const _rChat=render;render=function(){const r=_rChat.apply(this,arguments);majBoutonChat();return r};
-document.addEventListener('click',e=>{const b=e.target.closest('[data-act="chatOuvrir"]');if(!b)return;e.stopPropagation();if(S.role==='doula'){chatListe();return}S.vue=null;S.tab='madoula';S.seg='messages';render();
+document.addEventListener('click',e=>{const b=e.target.closest('[data-act="chatOuvrir"]');if(!b)return;e.stopPropagation();if(typeof chatBulleBasculer==='function'){chatBulleBasculer();return}if(S.role==='doula'){chatListe();return}S.vue=null;S.tab='madoula';S.seg='messages';render();
   setTimeout(()=>{const t=document.getElementById('msgTxt');if(t){t.scrollIntoView({block:'center'});try{t.focus({preventScroll:true})}catch(x){}}},120)},true);
 /* temps réel : un nouveau message apparaît tout de suite, sans effacer ce que la personne est en train d'écrire */
 let _chatT=null;

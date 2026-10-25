@@ -5,7 +5,7 @@ let cur=new Date(),sel=new Date();cur.setDate(1);
 const K=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
 function evts(){const E={},add=(d,e)=>{if(!d||isNaN(d))return;(E[K(d)]=E[K(d)]||[]).push(e)};
   const nom=id=>{const c=(S.clients||[]).find(x=>x.id===id);return c?cName(c):'Famille'};
-  (CRDV||[]).filter(r=>r.statut!=='annule').forEach(r=>{const d=new Date(r.debut);add(d,{t:'rdv',txt:(r.statut==='demande'?'Demande · ':'')+(r.type||'Rendez-vous')+' · '+nom(r.famille_id),h:d.toLocaleTimeString('fr-CA',{hour:'2-digit',minute:'2-digit'}),fam:r.famille_id})});
+  (CRDV||[]).filter(r=>r.statut!=='annule').forEach(r=>{const d=new Date(r.debut);add(d,{t:'rdv',txt:(r.statut==='demande'?'Demande · ':r.statut==='propose'?'Date proposée · ':'')+(r.type||'Rendez-vous')+' · '+nom(r.famille_id),h:d.toLocaleTimeString('fr-CA',{hour:'2-digit',minute:'2-digit'}),fam:r.famille_id})});
   (S.clients||[]).forEach(c=>{const dp=parseD(c.dpa),nb=parseD(c.naiss);
     if(dp&&!nb){add(dp,{t:'dpa',txt:'Date prévue · '+cName(c),fam:c.id});for(let i=-14;i<=14;i++)if(i)add(addD(dp,i),{t:'garde',txt:'En garde · '+cName(c),fam:c.id})}
     if(nb)add(nb,{t:'nais',txt:'Naissance · '+cName(c),fam:c.id});

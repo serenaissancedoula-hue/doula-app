@@ -8,12 +8,12 @@ let cur=new Date(),sel=new Date();cur.setDate(1);
 const cle=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
 const hh=d=>d.toLocaleTimeString('fr-CA',{hour:'2-digit',minute:'2-digit'});
 function evenements(){const E={};const add=(d,e)=>{if(!d||isNaN(d))return;(E[cle(d)]=E[cle(d)]||[]).push(e)};
-  try{if(S.role==='parent'){(RDV||[]).forEach(r=>{const d=new Date(r.debut);add(d,{t:'rdv',txt:(r.statut==='demande'?'Demande · ':'')+(r.type||'Rendez-vous'),h:hh(d)})});
+  try{if(S.role==='parent'){(RDV||[]).forEach(r=>{const d=new Date(r.debut);add(d,{t:'rdv',txt:(r.statut==='demande'?'Demande · ':r.statut==='propose'?'Date proposée · ':'')+(r.type||'Rendez-vous'),h:hh(d)})});
       ((S.parent&&S.parent.rdvsMed)||[]).forEach(r=>{const d=parseD(r.date);add(d,{t:'rdv',txt:(r.type||'Rendez-vous médical')+(r.pro?' · '+r.pro:''),h:r.heure||'',mid:r.id})});
       (window.vacPrevus?window.vacPrevus():[]).forEach(v=>add(v.d,{t:'rdv',txt:v.txt,h:''}));const dp=(()=>{try{return preg(S.parent).dpa}catch(e){return null}})();if(dp)add(dp,{t:'dpa',txt:'Date prévue de l\'accouchement'});
       const nb=parseD(S.parent&&S.parent.naissance&&S.parent.naissance.date);if(nb)add(nb,{t:'nais',txt:'Naissance'})}
     else{const nom=id=>{const c=(S.clients||[]).find(x=>x.id===id);return c?cName(c):'Famille'};
-      (CRDV||[]).forEach(r=>{const d=new Date(r.debut);add(d,{t:'rdv',txt:(r.statut==='demande'?'Demande · ':'')+(r.type||'Rendez-vous')+' · '+nom(r.famille_id),h:hh(d),fam:r.famille_id})});
+      (CRDV||[]).forEach(r=>{const d=new Date(r.debut);add(d,{t:'rdv',txt:(r.statut==='demande'?'Demande · ':r.statut==='propose'?'Date proposée · ':'')+(r.type||'Rendez-vous')+' · '+nom(r.famille_id),h:hh(d),fam:r.famille_id})});
       (S.clients||[]).forEach(c=>{const dp=parseD(c.dpa),nb=parseD(c.naiss);
         if(dp&&!nb){add(dp,{t:'dpa',txt:'Date prévue · '+cName(c),fam:c.id});for(let i=-14;i<=14;i++)if(i)add(addD(dp,i),{t:'garde',txt:'En garde · '+cName(c),fam:c.id,sec:1})}
         if(nb)add(nb,{t:'nais',txt:'Naissance · '+cName(c),fam:c.id});
