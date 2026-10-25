@@ -12,7 +12,11 @@ const _r=render;render=function(){const x=_r.apply(this,arguments);try{
     if(vac){const seg=app.querySelector(':scope>.seg');if(seg){if(seg.nextElementSibling!==vac)seg.after(vac)}else if(app.firstElementChild!==vac)app.prepend(vac)}}
   /* Accueil : bébé tout en haut (grossesse et après la naissance), puis les raccourcis */
   if(S.role==='parent'&&!S.vue&&(S.tab||'accueil')==='accueil'){const bc=app&&(app.querySelector(':scope>.b3h-carte')||app.querySelector(':scope>.bebe-carte'));
-    if(bc){const sh=app.querySelector(':scope>.sh');if(sh)sh.remove();if(app.firstElementChild!==bc)app.prepend(bc);const q=app.querySelector(':scope>.quick');if(q&&bc.nextElementSibling!==q)bc.after(q)}}}catch(e){}return x};
+    if(bc){const sh=app.querySelector(':scope>.sh');if(sh)sh.remove();if(app.firstElementChild!==bc)app.prepend(bc);const q=app.querySelector(':scope>.quick');if(q&&bc.nextElementSibling!==q)bc.after(q);
+      /* au-dessus de bébé : d'abord le mot du jour, puis la prochaine rencontre */
+      const rdv=[...app.querySelectorAll(':scope>.card')].find(c=>{const e=c.querySelector('.eyebrow');return e&&/^(prochain rendez-vous|rendez-vous demandé|nouvelle date proposée)/i.test(e.textContent.trim())});
+      const mot=app.querySelector(':scope>.card.mot');
+      if(rdv)app.insertBefore(rdv,bc);if(mot)app.insertBefore(mot,rdv||bc)}}}catch(e){}return x};
 if(typeof pParametres==='function'){const _pp=pParametres;pParametres=function(){let h=_pp.apply(this,arguments);if(S.role!=='parent')return h;
   const en=window.LANG==='en';return h+'<div class="card"><span class="eyebrow acc">'+(en?'Language':'Langue')+'</span><button class="btn ghost" data-mod-lang="1">'+(en?'Passer en français':'Switch to English')+'</button></div>'}}
 document.addEventListener('click',e=>{if(e.target.closest('[data-mod-lang]')){const b=document.getElementById('langBtn');if(b)b.click()}});
