@@ -197,8 +197,8 @@ coeurDemarrer=function(b){coeurArreter();
   const sortie=C.createGain();sortie.gain.value=0;sortie.gain.linearRampToValueAtTime(.85,C.currentTime+.8);
   const lp=C.createBiquadFilter();lp.type='lowpass';lp.frequency.value=1100;lp.connect(sortie).connect(C.destination);
   B3S={C,id:null};const etat=B3S;
-  fetch('img/son/coeur-bebe.mp3',{cache:'force-cache'}).then(r=>{if(!r.ok)throw 0;return r.arrayBuffer()}).then(a=>C.decodeAudioData(a)).then(buf=>{
-    if(B3S!==etat)return;const s=C.createBufferSource();s.buffer=buf;s.loop=true;s.playbackRate.value=(b||140)/140;s.connect(lp);s.start();etat.src=s})
+  fetch('img/son/coeur-bebe.mp3?v=1',{cache:'force-cache'}).then(r=>{if(!r.ok)throw 0;return r.arrayBuffer()}).then(a=>C.decodeAudioData(a)).then(buf=>{
+    if(B3S!==etat)return;const s=C.createBufferSource();s.buffer=buf;s.loop=true;s.playbackRate.value=Math.min(1.3,Math.max(.75,(b||136)/136));s.connect(sortie);s.start();etat.src=s})
   .catch(()=>{if(B3S!==etat)return;
     const len=C.sampleRate*3,nb=C.createBuffer(1,len,C.sampleRate),d=nb.getChannelData(0);for(let i=0;i<len;i++)d[i]=Math.random()*2-1;
     /* léger souffle continu, très bas */
