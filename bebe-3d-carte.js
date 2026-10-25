@@ -187,40 +187,26 @@ ouvrirBebePE=function(){_ouvrirBebePE3D();const d=document.getElementById('bebeP
   '.b3f-points{display:flex;justify-content:center;gap:6px;margin-top:12px}.b3f-points i{width:7px;height:7px;border-radius:50%;background:var(--line)}.b3f-points i.on{background:var(--accent)}'+
   '.b3f-ic{flex:none;width:34px;height:34px;border-radius:50%;background:var(--soft);color:var(--accent);display:grid;place-items:center;font-size:.95rem}.b3f-carte .b3f-note{font-size:.72rem;margin-top:10px}';
   document.head.appendChild(st)})();
-/* Son de bébé, comme entendu dans le ventre : tout est étouffé par le liquide amniotique.
-   Un souffle doux et ondulant (le liquide, la circulation de maman), le cœur de maman, lent et grave, au loin,
-   et le cœur de bébé, rapide, en petits « wouch » feutrés. Rien de métallique ni de sec. */
+/* Son du cœur de bébé, comme au doppler : un « wouch-wouch » doux et galopant, sous un léger souffle de liquide.
+   Si un enregistrement est fourni (img/son/coeur-bebe.mp3), c'est lui qui joue, au rythme de la semaine. */
 let B3S=null;
 coeurDemarrer=function(b){coeurArreter();
   try{if(navigator.audioSession)navigator.audioSession.type='playback'}catch(e){}
   const C=new (window.AudioContext||window.webkitAudioContext)();try{C.resume()}catch(e){}
-  const sortie=C.createGain();sortie.gain.value=0;sortie.gain.linearRampToValueAtTime(.9,C.currentTime+1.2);
-  const eau=C.createBiquadFilter();eau.type='lowpass';eau.frequency.value=900;eau.Q.value=.5; // tout passe « sous l'eau »
-  const comp=C.createDynamicsCompressor();comp.threshold.value=-20;comp.ratio.value=4;
-  eau.connect(sortie).connect(comp).connect(C.destination);
-  /* petite réverbération liquide : échos courts, de plus en plus sourds */
-  const dl=C.createDelay(.2),fb=C.createGain(),lpE=C.createBiquadFilter();dl.delayTime.value=.045;fb.gain.value=.35;lpE.type='lowpass';lpE.frequency.value=600;
-  dl.connect(lpE).connect(fb).connect(dl);lpE.connect(eau);
-  const bus=C.createGain();bus.connect(eau);bus.connect(dl);
-  /* bruit brun (grave, doux) */
-  const len=C.sampleRate*4,nb=C.createBuffer(1,len,C.sampleRate),d=nb.getChannelData(0);let l=0;
-  for(let i=0;i<len;i++){l=(l+.02*(Math.random()*2-1))/1.02;d[i]=l*3.2}
-  /* souffle du liquide qui ondule lentement */
-  const amb=C.createBufferSource();amb.buffer=nb;amb.loop=true;const lpA=C.createBiquadFilter();lpA.type='lowpass';lpA.frequency.value=380;
-  const gA=C.createGain();gA.gain.value=.22;const lfo=C.createOscillator(),lg=C.createGain();lfo.frequency.value=.13;lg.gain.value=.08;lfo.connect(lg).connect(gA.gain);
-  const lfo2=C.createOscillator(),lg2=C.createGain();lfo2.frequency.value=.05;lg2.gain.value=120;lfo2.connect(lg2).connect(lpA.frequency);
-  amb.connect(lpA).connect(gA).connect(bus);amb.start();lfo.start();lfo2.start();
-  /* un battement : souffle filtré qui glisse vers le grave (effet doppler feutré) */
-  const wouch=(at,fort,f0,f1,dur)=>{const s=C.createBufferSource();s.buffer=nb;const bp=C.createBiquadFilter();bp.type='bandpass';bp.Q.value=1.4;
-    bp.frequency.setValueAtTime(f0,at);bp.frequency.exponentialRampToValueAtTime(f1,at+dur);
-    const g=C.createGain();g.gain.setValueAtTime(.0001,at);g.gain.exponentialRampToValueAtTime(fort,at+.035);g.gain.exponentialRampToValueAtTime(.0001,at+dur);
-    s.connect(bp).connect(g).connect(bus);s.start(at,Math.random()*3,dur+.05)};
-  const sourd=(at,fort)=>{const o=C.createOscillator(),g=C.createGain();o.type='sine';o.frequency.setValueAtTime(70,at);o.frequency.exponentialRampToValueAtTime(42,at+.16);
-    g.gain.setValueAtTime(.0001,at);g.gain.exponentialRampToValueAtTime(fort,at+.03);g.gain.exponentialRampToValueAtTime(.0001,at+.3);o.connect(g).connect(bus);o.start(at);o.stop(at+.32)};
-  const perB=60/(b||140),perM=60/72;let tB=C.currentTime+.4,tM=C.currentTime+.6;
-  const prog=()=>{const fin=C.currentTime+.8;
-    while(tB<fin){const j=(Math.random()-.5)*.01;wouch(tB+j,1.6,560,230,.16);wouch(tB+j+perB*.34,.9,470,210,.13);tB+=perB}
-    while(tM<fin){sourd(tM,.55);wouch(tM,.35,260,120,.22);sourd(tM+.28,.3);tM+=perM}};
-  prog();const id=setInterval(()=>{try{if(C.state==='suspended')C.resume()}catch(e){}prog()},200);
-  B3S={C,id}};
+  const sortie=C.createGain();sortie.gain.value=0;sortie.gain.linearRampToValueAtTime(.85,C.currentTime+.8);
+  const lp=C.createBiquadFilter();lp.type='lowpass';lp.frequency.value=1100;lp.connect(sortie).connect(C.destination);
+  B3S={C,id:null};const etat=B3S;
+  fetch('img/son/coeur-bebe.mp3',{cache:'force-cache'}).then(r=>{if(!r.ok)throw 0;return r.arrayBuffer()}).then(a=>C.decodeAudioData(a)).then(buf=>{
+    if(B3S!==etat)return;const s=C.createBufferSource();s.buffer=buf;s.loop=true;s.playbackRate.value=(b||140)/140;s.connect(lp);s.start();etat.src=s})
+  .catch(()=>{if(B3S!==etat)return;
+    const len=C.sampleRate*3,nb=C.createBuffer(1,len,C.sampleRate),d=nb.getChannelData(0);for(let i=0;i<len;i++)d[i]=Math.random()*2-1;
+    /* léger souffle continu, très bas */
+    const amb=C.createBufferSource();amb.buffer=nb;amb.loop=true;const f=C.createBiquadFilter();f.type='lowpass';f.frequency.value=450;const g=C.createGain();g.gain.value=.05;amb.connect(f).connect(g).connect(lp);amb.start();
+    const wouch=(at,fort,dur)=>{const s=C.createBufferSource();s.buffer=nb;const bp=C.createBiquadFilter();bp.type='bandpass';bp.Q.value=.9;
+      bp.frequency.setValueAtTime(420,at);bp.frequency.linearRampToValueAtTime(300,at+dur);
+      const e=C.createGain();e.gain.setValueAtTime(.0001,at);e.gain.exponentialRampToValueAtTime(fort,at+.03);e.gain.exponentialRampToValueAtTime(.0001,at+dur);
+      s.connect(bp).connect(e).connect(lp);s.start(at,Math.random()*2,dur+.05)};
+    const per=60/(b||140);let t=C.currentTime+.3;
+    const prog=()=>{while(t<C.currentTime+.8){wouch(t,1.2,.13);wouch(t+per*.38,.7,.11);t+=per}};
+    prog();etat.id=setInterval(()=>{try{if(C.state==='suspended')C.resume()}catch(e){}prog()},200)})};
 coeurArreter=function(){if(!B3S)return;const {C,id}=B3S;B3S=null;clearInterval(id);try{C.close()}catch(e){}};
