@@ -53,8 +53,8 @@ function cbDessiner(garderTexte){let p=document.getElementById('chatPan');if(!CB
     (enListe?cbListeFamilles():'<div class="cb-fil" id="cbFil">'+cbFil()+'</div><div class="cb-bas"><label class="cb-ic cb-pj" aria-label="Joindre une photo ou un fichier">'+icon('fa-paperclip')+'<input type="file" id="cbFichier" accept="image/*,application/pdf,.doc,.docx,.txt" hidden></label><textarea id="cbTxt" rows="1" placeholder="Votre message…"></textarea><button class="cb-env" data-cb="envoyer" aria-label="Envoyer">'+icon('fa-paper-plane')+'</button></div>');
   const t=p.querySelector('textarea');if(t){t.value=brouillon;if(foc)try{t.focus({preventScroll:true})}catch(e){}}
   const f=document.getElementById('cbFil');if(f)f.scrollTop=f.scrollHeight;cbLus();cbRemplirPJ().then(()=>{const f2=document.getElementById('cbFil');if(f2)f2.scrollTop=f2.scrollHeight})}
-function cbLus(){try{if(!CB.ouvert)return;if(S.role==='parent'){if(MSGS.some(m=>m.de_doula&&!m.lu)){sb.rpc('fam_marquer_lus',{p_famille:FAM.id});MSGS.forEach(m=>{if(m.de_doula)m.lu=true})}}
-  else if(CB.fid&&NONLUS[CB.fid]){sb.rpc('fam_marquer_lus',{p_famille:CB.fid});NONLUS[CB.fid]=0}
+function cbLus(){try{if(!CB.ouvert)return;if(S.role==='parent'){if(MSGS.some(m=>m.de_doula&&!m.lu)){sb.rpc('fam_marquer_lus',{p_famille:FAM.id}).then(()=>{},()=>{});MSGS.forEach(m=>{if(m.de_doula)m.lu=true})}}
+  else if(CB.fid&&NONLUS[CB.fid]){sb.rpc('fam_marquer_lus',{p_famille:CB.fid}).then(()=>{},()=>{});NONLUS[CB.fid]=0}
   if(typeof majBoutonChat==='function')majBoutonChat()}catch(e){}}
 async function cbOuvrirFamille(id){CB.fid=id;cbDessiner();try{await chargerClientDetail(id)}catch(e){}if(CB.fid===id)cbDessiner();
   setTimeout(()=>{const t=document.getElementById('cbTxt');if(t)try{t.focus({preventScroll:true})}catch(e){}},80)}
@@ -107,7 +107,7 @@ if(typeof filMessages==='function'){filMessages=function(L,doula){const fid=doul
 async function cbEffacer(fid,b){if(b.dataset.c!=='1'){b.dataset.c='1';b.innerHTML=icon('fa-trash')+' Confirmer : effacer';return}
   b.disabled=true;await cbChargerEff();const eff=Object.assign({},CB_EFF,{[fid]:new Date().toISOString()});
   const {error}=await sb.auth.updateUser({data:{chat_efface:eff}});if(error){b.disabled=false;toast('Pas effacé : '+(error.message||'erreur'));return}
-  CB_EFF=eff;try{sb.rpc('fam_marquer_lus',{p_famille:fid});if(S.role==='parent')MSGS.forEach(m=>{if(m.de_doula)m.lu=true});else NONLUS[fid]=0}catch(e){}
+  CB_EFF=eff;try{sb.rpc('fam_marquer_lus',{p_famille:fid}).then(()=>{},()=>{});if(S.role==='parent')MSGS.forEach(m=>{if(m.de_doula)m.lu=true});else NONLUS[fid]=0}catch(e){}
   render();toast(S.role==='parent'?'Conversation effacée de votre appli. Votre doula garde sa copie.':'Conversation effacée de votre appli. La famille garde sa copie.')}
 document.addEventListener('click',e=>{const b=e.target.closest('[data-cb-eff]');if(!b)return;e.stopPropagation();cbEffacer(b.dataset.cbEff,b)},true);
 if(typeof pParametres==='function'){const _ppCB=pParametres;pParametres=function(){let h=_ppCB.apply(this,arguments);try{

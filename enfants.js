@@ -18,12 +18,26 @@ if(window.ESPACE==='parent'){
       '<label class="f">Sexe<select id="en_s"><option value="">—</option>'+['Fille','Garçon'].map(x=>'<option'+(e.sexe===x?' selected':'')+'>'+x+'</option>').join('')+'</select></label>'+
       '<label class="f">Notes pour la doula (allergies, santé, naissance, particularités)<textarea id="en_n" style="min-height:70px">'+esc(e.notes||'')+'</textarea></label>'+
       '<button class="btn" data-en-save="'+(i!=null?i:'')+'">Enregistrer</button>'+(i!=null?'<button class="btn ghost" data-en-del="'+i+'" style="margin-top:8px">Retirer</button>':''))}
+  /* développement des enfants de moins de 5 ans : on choisit l'enfant en haut de Suivi */
+  const moisDe=d=>{const B=new Date(d+'T12:00'),N=new Date();let m=(N.getFullYear()-B.getFullYear())*12+N.getMonth()-B.getMonth();if(N.getDate()<B.getDate())m--;return m};
+  const petits=()=>liste(S.parent).map((e,i)=>({e,i})).filter(x=>x.e.date&&moisDe(x.e.date)>=0&&moisDe(x.e.date)<60);
+  if(typeof pSuivi==='function'){const _ps=pSuivi;pSuivi=function(){if(S.sub!=='devE')return _ps.apply(this,arguments);const x=petits().find(y=>y.i===S.devEnfant);if(!x){S.sub='';return _ps.apply(this,arguments)}
+    const B=new Date(x.e.date+'T00:00');B.setHours(0,0,0,0);const day=Math.floor((Date.now()-B)/864e5),st0=stage,n0=S.parent.naissance;let h='';
+    try{stage=()=>({k:'pp',day,birth:B});S.parent.naissance=Object.assign({},n0||{},{date:x.e.date,prenomBebe:nomE(x.e),sexe:x.e.sexe||'',nb:1});S.sub='';h=_ps.apply(this,arguments)}finally{stage=st0;S.parent.naissance=n0;S.sub='devE'}
+    const t=document.createElement('template');t.innerHTML=h;[...t.content.children].forEach(c=>{const e=((c.querySelector('.eyebrow')||{}).textContent||'');if(/vaccins de bébé/i.test(e)||c.classList.contains('dm-tuile'))c.remove()});
+    return [...t.content.childNodes].map(n=>n.outerHTML||n.textContent||'').join('')}}
+  const _rS=render;render=function(){const x=_rS.apply(this,arguments);try{if(S.role!=='parent'||S.vue||S.tab!=='suivi'||(S.sub&&S.sub!=='devE'))return x;const P=petits();if(!P.length)return x;
+      let bb='';try{if(window.pfSuivis&&window.pfSuivis().includes('bebe'))bb=((S.parent.naissance||{}).prenomBebe||'Bébé')}catch(e){}
+      const sel=S.sub==='devE'?S.devEnfant:-1,app=document.getElementById('app'),t=document.createElement('template');
+      t.innerHTML='<div class="en-dev"><span class="eyebrow acc">Suivre le développement de</span><div class="en-chips">'+(bb||!P.length?'<button class="chip'+(sel===-1?' on':'')+'" data-en-dev="-1">'+esc(bb||'Mon suivi')+'</button>':'<button class="chip'+(sel===-1?' on':'')+'" data-en-dev="-1">Mon suivi</button>')+P.map(y=>'<button class="chip'+(sel===y.i?' on':'')+'" data-en-dev="'+y.i+'">'+esc(nomE(y.e))+' · '+age(y.e.date)+'</button>').join('')+'</div></div>';
+      const sw=app.querySelector(':scope>.pf-sw');if(sw)sw.after(t.content);else app.prepend(t.content)}catch(e){}return x};
   if(typeof pParametres==='function'){const _pp=pParametres;pParametres=function(){const h=_pp.apply(this,arguments);if(S.role!=='parent')return h;return h+carte()}}
   /* une tuile « Doulas près de moi » dans Ma doula */
   const _r=render;render=function(){const x=_r.apply(this,arguments);try{if(S.role==='parent'&&S.tab==='madoula'&&!S.vue){const g=document.querySelector('#app .md-grille');if(g&&!g.querySelector('[data-en-reg]')){const t=document.createElement('template');
       t.innerHTML='<button class="md-carre" data-en-reg="1"><span class="md-ic" data-dk="1" data-dt="1" style="background:#e3ecd9">'+icon('fa-location-dot')+'</span><b>Doulas près de moi</b><small>Le registre des doulas de votre région</small></button>';g.append(t.content)}}}catch(e){}return x};
   document.addEventListener('click',e=>{let b;
     if(e.target.closest('[data-en-reg]')){e.stopPropagation();e.preventDefault();S.vueCx='annuaire';S.retourEspace=true;try{ecranChercheuse(false)}catch(x){toast('Registre indisponible')}return}
+    if(b=e.target.closest('[data-en-dev]')){e.stopPropagation();const v=+b.dataset.enDev;S.devSel=null;if(v<0){S.sub='';S.devEnfant=null}else{S.sub='devE';S.devEnfant=v}scrollTo(0,0);render();return}
     if(e.target.closest('[data-en-add]')){e.stopPropagation();fiche(null);return}
     if(b=e.target.closest('[data-en-edit]')){e.stopPropagation();fiche(+b.dataset.enEdit);return}
     if(b=e.target.closest('[data-en-save]')){e.stopPropagation();const p=$('#en_p').value.trim();if(!p){toast('Entrez le prénom');return}
@@ -38,5 +52,5 @@ if(window.ESPACE!=='parent'&&typeof cSuivi==='function'){const _cs=cSuivi;cSuivi
     return h+'<div class="card"><span class="eyebrow acc">La famille</span>'+(suivis.length?'<p class="small" style="margin:4px 0 8px">'+suivis.join(' · ')+'</p>':'')+
       (L.length?'<div class="list">'+L.map(e=>'<div class="li"><div class="ic">'+(e.sexe==='Fille'?'👧':e.sexe==='Garçon'?'👦':'🧒')+'</div><div class="tx"><b>'+esc(nomE(e))+(e.date?' · '+age(e.date):'')+'</b><span>'+(e.date?'Né'+(e.sexe==='Fille'?'e':'')+' le '+fdt(e.date):'')+(e.notes?' · '+esc(e.notes):'')+'</span></div></div>').join('')+'</div>':'')+
       '<p class="xs muted">Informations inscrites par la famille dans son espace.</p></div>'}catch(e){return h}}}
-(function(){const st=document.createElement('style');st.textContent='.en-set .li .tx span{white-space:normal}';document.head.appendChild(st)})();
+(function(){const st=document.createElement('style');st.textContent='.en-set .li .tx span{white-space:normal}.en-dev{margin:0 0 14px}.en-chips{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding:6px 0 2px}.en-chips::-webkit-scrollbar{display:none}.en-chips .chip{flex:none}';document.head.appendChild(st)})();
 })();
