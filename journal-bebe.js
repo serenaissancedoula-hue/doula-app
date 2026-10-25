@@ -51,7 +51,7 @@ pJournal=function(){const st=stage();if(st.k!=='pp')return _pJ.apply(this,argume
   if(aj.length)h+='<div class="jb-ajout">'+aj.map(t=>'<button class="btn" data-act="'+JB_AJOUT[t][0]+'">'+icon('fa-plus')+JB_AJOUT[t][1]+'</button>').join('')+'</div>';
   h+='<div class="card"><div class="jb-stats">'+jbStats(tab[0],L)+'</div></div>';
   if(tab[0]==='couches'&&d<=10&&typeof firstWeek==='function')h+=firstWeek(st.birth);
-  if(tab[0]==='croissance'){h+=typeof weightCard==='function'?weightCard(st):'';h+='<button class="btn ghost" data-act="tab" data-v="suivi" style="width:100%;margin-bottom:14px">'+icon('fa-chart-line')+'Voir la courbe de poids (Suivi)</button>'}
+  if(tab[0]==='croissance'){h+=typeof weightCard==='function'?weightCard(st):'';h+=window.bbCroissance?window.bbCroissance(st):''}
   else h+='<div class="card"><div class="row between"><span class="eyebrow acc">7 derniers jours</span><span class="xs muted">'+(tab[0]==='resume'?'<i class="jb-pt" style="background:var(--accent)"></i>boires <i class="jb-pt" style="background:var(--sage)"></i>couches <i class="jb-pt" style="background:#8aa0c8"></i>sommeil':'')+'</span></div>'+jbLigne(L)+'</div>';
   if(tab[0]==='resume'&&typeof weekChart==='function')h+=weekChart();
   if(tab[0]==='maman')h+=avant;
