@@ -107,7 +107,7 @@ document.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e.tar
   '.b3h-info{background:var(--soft);border-radius:20px;padding:14px 16px;display:flex;flex-direction:column;gap:6px}'+
   '.b3h-ligne{display:flex;align-items:center;justify-content:space-between;gap:10px}'+
   '.b3h-mod{border:0;background:none;color:var(--accent);font-weight:700;font-size:.85rem;padding:4px 0;cursor:pointer}'+
-  '.b3h-carte .bb2-haut{grid-template-columns:1fr}.b3h-carte>.prog:empty{display:none}'+
+  '.b3h-carte .bb2-haut{display:none!important}.b3h-carte>.prog:empty{display:none}'+
   '.b3c-alt{display:grid;font-family:var(--f-display);font-size:1.2rem;line-height:1.25;color:var(--ink)}.b3c-alt span{grid-area:1/1;animation:b3cAlt 8s ease-in-out infinite}.b3c-alt span+span{animation-delay:-4s}'+
   '@keyframes b3cAlt{0%,42%{opacity:1}50%,92%{opacity:0}100%{opacity:1}}'+
   '#bebePE{background:radial-gradient(ellipse at 50% 45%,#f1d6c2 0%,#d6a88f 55%,#a9786a 100%)!important;color:#2b1b17!important}'+
