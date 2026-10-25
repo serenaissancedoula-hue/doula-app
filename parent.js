@@ -124,8 +124,10 @@ function kickCard(){if(!S.mvtOuvert&&!S.kick)return '';
   return '<div class="card" style="border-color:var(--accent)"><div class="row between"><span class="eyebrow acc">Mouvements de bébé</span><span class="small muted">Aujourd\'hui : '+L.length+'</span></div>'+
    '<p class="small muted" style="margin:0">Chaque fois que vous sentez bébé bouger, touchez le bouton : l\'heure est notée.</p>'+
    '<button class="btn" data-act="kickAdd">'+icon('fa-hand-holding-heart')+'Bébé a bougé</button>'+
+   (()=>{const n2=L.filter(l=>l.t>=Date.now()-7200e3).length;return '<div class="row" style="gap:14px;align-items:center"><span class="timer">'+Math.min(n2,99)+'</span><span class="small muted">dans les 2 dernières heures<br>Repère : 6 mouvements en 2 heures</span></div>'+
+     (n2>=6?'<div class="banner sage">'+icon('fa-check')+'<div>6 mouvements ou plus en 2 heures : le repère est atteint.</div></div>':'')})()+
    (L.length?'<div class="list">'+L.map(l=>'<div class="li"><div class="tx"><b>'+fmtT(l.t)+'</b><span>Bébé a bougé</span></div><button class="icon-btn" data-act="delLog" data-id="'+l.id+'" aria-label="Supprimer">'+icon('fa-trash')+'</button></div>').join('')+'</div>':'')+
-   '<p class="xs muted">Si bébé bouge moins que d\'habitude ou si vous avez un doute, appelez votre lieu de naissance ou votre professionnel sans attendre.</p>'+
+   '<p class="xs muted"><b>Moins de 6 mouvements en 2 heures,</b> bébé qui bouge moins que d\'habitude ou un doute : appelez votre lieu de naissance ou votre professionnel sans attendre.</p>'+
    '<button class="btn ghost" data-act="kickStop">Fermer</button></div>'}
 function contrList(){return S.logs.filter(l=>l.type==='contraction').sort((a,b)=>a.t-b.t)}
 function contrStats(){const L=contrList().filter(l=>l.t>Date.now()-3600e3);if(L.length<2)return null;const iv=[];for(let i=1;i<L.length;i++)iv.push((L[i].t-L[i-1].t)/1000);return {n:L.length,ai:iv.reduce((a,b)=>a+b,0)/iv.length,ad:L.reduce((a,b)=>a+b.sec,0)/L.length,span:(L[L.length-1].t-L[0].t)/60000}}
