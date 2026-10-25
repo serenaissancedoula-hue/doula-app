@@ -1,7 +1,8 @@
 Série d'images de bébé (Adobe Firefly, 25 oct. 2026), même style pour toute la grossesse.
 Semaine affichée (semaines d'aménorrhée) -> image :
   4        stade-03 (blastocyste)
-  5 à 6    pas encore d'image : le dessin de l'appli s'affiche (ajouter stade-04a.jpg plus tard)
+  5        stade-04a
+  6        stade-04b
   7 à 8    stade-04
   9 à 11   stade-05
   12 à 15  stade-06

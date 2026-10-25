@@ -1,9 +1,9 @@
 /* Sérénaissance — « Mon bébé » côté parents : vraie image réaliste du stade de la grossesse (série Adobe Firefly,
    même style du début à la fin). L'image change toute seule avec la semaine calculée à partir de la date prévue.
-   Les semaines sans image gardent le dessin animé de bebe-rendu.js. Voir img/bebe-serie/LISEZ-MOI.txt. */
+   Si une image manque, le dessin animé de bebe-rendu.js s'affiche. Voir img/bebe-serie/LISEZ-MOI.txt. */
 const BEBE_SERIE_V=1;
 /* [dernière semaine couverte, fichier] — en semaines d'aménorrhée (comme le reste de l'appli). null = dessin. */
-const BEBE_SERIE=[[4,'stade-03'],[6,null],[8,'stade-04'],[11,'stade-05'],[15,'stade-06'],[21,'stade-07'],[27,'stade-08'],[35,'stade-09'],[42,'stade-10']];
+const BEBE_SERIE=[[4,'stade-03'],[5,'stade-04a'],[6,'stade-04b'],[8,'stade-04'],[11,'stade-05'],[15,'stade-06'],[21,'stade-07'],[27,'stade-08'],[35,'stade-09'],[42,'stade-10']];
 function bebeSerieImage(w){const e=BEBE_SERIE.find(x=>w<=x[0]);return e&&e[1]?'img/bebe-serie/'+e[1]+'.jpg?v='+BEBE_SERIE_V:null}
 const _svgBebeDessin=svgBebe;
 function bebeSerieSecours(img,w,id){const z=img.closest('.bebe-zone');if(z)z.outerHTML=_svgBebeDessin(w,id)}
