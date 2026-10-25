@@ -66,22 +66,46 @@ new MutationObserver(b3cSurveiller).observe(document.body,{childList:true,subtre
   '@media (prefers-reduced-motion:reduce){.b3c-toile{transition:none}}';
   document.head.appendChild(st)})();
 b3cSurveiller();
-/* En-tête de la carte : la semaine actuelle alterne avec le temps qui reste ; sur bébé, le nombre de jours de grossesse. */
+/* Accueil « Mon bébé » : grande carte avec bébé en 3D, salutation et jour de grossesse,
+   puis la carte des semaines (semaine actuelle qui alterne avec le temps restant, trimestre, date prévue, progression). */
+const B3H_MOIS=['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
 const _carteBebe3D=carteBebe;
 carteBebe=function(g){let h=_carteBebe3D(g);
-  const w=g.w,d=g.d||0,reste=Math.max(0,g.left||0),rs=Math.floor(reste/7),rj=reste%7;
-  const pr=(S.parent&&S.parent.prenom||'').trim(),sj=(n,m)=>n+' '+m+(n>1?'s':'');
-  const duree=(s,j)=>(s?sj(s,'semaine'):'')+(s&&j?' et ':'')+(j?sj(j,'jour'):'');
-  const actu=(pr?'Bonjour '+esc(pr)+', vous':'Vous')+' êtes à '+(duree(w,d)||'0 jour');
-  const fin=reste>0?'Encore '+duree(rs,rj)+' avant la date prévue':'Votre date prévue est arrivée';
-  h=h.replace(/<b class="bb2-sem">[\s\S]*?<\/b>/,'<b class="bb2-sem b3c-alt" aria-label="'+actu+', '+fin+'"><span>'+actu+'</span><span aria-hidden="true">'+fin+'</span></b>');
-  const jours=Math.max(0,g.gaDays|0);
-  h=h.replace('<div class="bb2-img" aria-label="Touchez pour voir bébé en grand">','<div class="bb2-img" aria-label="Touchez pour voir bébé en grand"><span class="b3c-jours"><b>'+jours+'</b> jour'+(jours>1?'s':'')+'</span>');
-  return h};
+  const w=Math.max(4,Math.min(42,g.w)),d=g.d||0,reste=Math.max(0,g.left||0),rs=Math.floor(reste/7),rj=reste%7,jours=Math.max(0,g.gaDays|0);
+  const pr=(S.parent&&S.parent.prenom||'').trim(),sj=(n,m)=>n+' '+m+(n>1?'s':''),duree=(s,j)=>(s?sj(s,'semaine'):'')+(s&&j?' et ':'')+(j?sj(j,'jour'):'');
+  const actu='Vous êtes à '+(duree(g.w,d)||'0 jour'),fin=reste>0?'Encore '+duree(rs,rj):'Votre date prévue est arrivée';
+  const tri=jours<98?'1er trimestre':jours<196?'2e trimestre':'3e trimestre',x=g.dpa instanceof Date?g.dpa:null;
+  const dp=x?'Date prévue le '+x.getDate()+(x.getDate()===1?'er':'')+' '+B3H_MOIS[x.getMonth()]:'';
+  const pct=Math.min(100,Math.max(0,jours/280*100));
+  const hero='<div class="b3h" role="button" tabindex="0" aria-label="Voir bébé en plein écran et le tourner">'+
+    '<div class="b3h-bebe">'+svgBebe(w)+'</div>'+
+    '<div class="b3h-salut"><span>Bonjour'+(pr?',':'')+'</span>'+(pr?'<b>'+esc(pr)+'</b>':'')+'</div>'+
+    '<div class="b3h-bas"><span class="b3h-jour">Jour <b>'+jours+'</b></span><span class="b3h-btn">'+icon('fa-expand')+' Voir en grand</span></div></div>';
+  const info='<div class="b3h-info"><b class="b3c-alt" aria-label="'+actu+'. '+fin+'"><span>'+actu+'</span><span aria-hidden="true">'+fin+'</span></b>'+
+    '<div class="b3h-ligne"><span class="xs muted">'+tri+(dp?' · '+dp:'')+'</span><button class="b3h-mod" data-act="params">Modifier</button></div>'+
+    '<div class="prog b3h-prog"><i style="width:'+pct+'%"></i></div></div><div class="prog"></div>';
+  h=h.replace(/<div class="bb2-tete">[\s\S]*?<\/div>(?=<div class="bb2-haut">)/,'');
+  h=h.replace(/<div class="bb2-img"[\s\S]*?<\/span><\/div>/,'');
+  h=h.replace(/<div class="prog"><i style="width:[^"]*"><\/i><\/div>/,'');
+  return h.replace('<div class="card bebe-carte bb2">','<div class="card bebe-carte bb2 b3h-carte">'+hero+info)};
+document.addEventListener('click',e=>{const z=e.target.closest('.b3h');if(z&&!e.target.closest('[data-act]')&&!document.getElementById('bebePE')&&typeof ouvrirBebePE==='function')ouvrirBebePE()});
+document.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e.target.classList&&e.target.classList.contains('b3h')){e.preventDefault();ouvrirBebePE()}});
 (function(){const st=document.createElement('style');st.textContent=
-  '.b3c-alt{display:grid;font-size:1.3rem;line-height:1.25}.b3c-alt span{grid-area:1/1;animation:b3cAlt 8s ease-in-out infinite}.b3c-alt span+span{animation-delay:-4s}'+
+  '.b3h{position:relative;width:100%;aspect-ratio:1/1.08;border-radius:26px;overflow:hidden;cursor:pointer;color:#fff7f2;'+
+    'background:radial-gradient(ellipse at 60% 45%,#6b3238 0%,#3a1a20 48%,#1b0d11 100%);box-shadow:0 14px 34px rgba(80,30,25,.22)}'+
+  '.b3h-bebe{position:absolute;inset:0}.b3h .bebe-zone{position:absolute;inset:0;max-width:none!important;width:100%;height:100%;aspect-ratio:auto;margin:0;filter:none}'+
+  '.b3h .bebe-zone.photo .photo-rond{border-radius:0;background:transparent;box-shadow:none}'+
+  '.b3h .bebe-zone.photo img{object-fit:contain;padding:12% 6% 14%;box-sizing:border-box;-webkit-mask-image:radial-gradient(circle,#000 55%,transparent 72%);mask-image:radial-gradient(circle,#000 55%,transparent 72%)}'+
+  '.b3h-salut{position:absolute;left:18px;top:16px;display:flex;flex-direction:column;pointer-events:none;text-shadow:0 1px 8px rgba(0,0,0,.35)}'+
+  '.b3h-salut span{font-size:.95rem;opacity:.85}.b3h-salut b{font-family:var(--f-display);font-size:1.7rem;line-height:1.1}'+
+  '.b3h-bas{position:absolute;left:14px;right:14px;bottom:14px;display:flex;align-items:center;justify-content:space-between;gap:10px;pointer-events:none}'+
+  '.b3h-jour{font-family:var(--f-display);font-size:1.15rem;text-shadow:0 1px 8px rgba(0,0,0,.4)}.b3h-jour b{font-size:1.9rem;margin-left:4px}'+
+  '.b3h-btn{display:inline-flex;align-items:center;gap:7px;padding:8px 14px;border-radius:99px;background:rgba(255,244,238,.16);border:1px solid rgba(255,235,228,.35);font-weight:700;font-size:.85rem;backdrop-filter:blur(6px)}'+
+  '.b3h-info{background:var(--soft);border-radius:20px;padding:14px 16px;display:flex;flex-direction:column;gap:6px}'+
+  '.b3h-ligne{display:flex;align-items:center;justify-content:space-between;gap:10px}'+
+  '.b3h-mod{border:0;background:none;color:var(--accent);font-weight:700;font-size:.85rem;padding:4px 0;cursor:pointer}'+
+  '.b3h-carte .bb2-haut{grid-template-columns:1fr}.b3h-carte>.prog:empty{display:none}'+
+  '.b3c-alt{display:grid;font-family:var(--f-display);font-size:1.2rem;line-height:1.25;color:var(--ink)}.b3c-alt span{grid-area:1/1;animation:b3cAlt 8s ease-in-out infinite}.b3c-alt span+span{animation-delay:-4s}'+
   '@keyframes b3cAlt{0%,42%{opacity:1}50%,92%{opacity:0}100%{opacity:1}}'+
-  '.b3c-jours{position:absolute;left:10px;top:10px;z-index:3;pointer-events:none;background:rgba(18,13,16,.55);color:#fff;border-radius:99px;padding:3px 10px;font-size:.78rem;font-variant-numeric:tabular-nums;backdrop-filter:blur(4px)}'+
-  '.b3c-jours b{font-size:.95rem}'+
   '@media (prefers-reduced-motion:reduce){.b3c-alt span{animation:none}.b3c-alt span+span{display:none}}';
   document.head.appendChild(st)})();
