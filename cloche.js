@@ -1,4 +1,4 @@
-/* Sérénaissance — cloche de notifications en haut (messages, rendez-vous, documents) ; Paramètres est dans la barre du bas. */
+/* Sérénaissance — cloche de notifications en haut (rendez-vous, documents ; les messages vont dans la bulle de chat) ; Paramètres est dans la barre du bas. */
 (function(){
 const g=document.getElementById('gear');if(!g)return;
 g.setAttribute('data-act','cloche');g.setAttribute('aria-label','Notifications');g.innerHTML='<i class="fa-solid fa-bell"></i><span class="badge" id="clocheN" hidden style="top:-3px;left:auto;right:-3px"></span>';g.style.position='relative';
@@ -8,10 +8,9 @@ function items(){const L=[];
     const quand=r=>{const d=new Date(r.debut);return (d.toDateString()===new Date().toDateString()?'aujourd\'hui':'demain')+' à '+String(d.getHours()).padStart(2,'0')+'h'+String(d.getMinutes()).padStart(2,'0')};
     if(S.role==='parent')RDV.filter(proche).forEach(r=>L.push(['fa-bell','Rappel : '+r.type+' '+quand(r),'tab','madoula']));
     else CRDV.filter(proche).forEach(r=>{const c=(S.clients||[]).find(x=>x.id===r.famille_id);L.push(['fa-bell','Rappel : '+r.type+' '+quand(r)+' · '+(c?(c.nom||c.prenom||'une famille'):'une famille'),'client',r.famille_id])})}catch(e){}
-  try{if(S.role==='parent'){const m=MSGS.filter(x=>x.de_doula&&!x.lu).length;if(m)L.push(['fa-comments','Message de votre doula'+(m>1?' ('+m+')':''),'tab','madoula']);
+  try{if(S.role==='parent'){/* les messages s'affichent seulement dans la bulle de chat (en bas à droite), pas dans la cloche */
       const d=DOCS.filter(x=>x.statut==='a_remplir').length;if(d)L.push(['fa-file-signature',d+' document'+(d>1?'s':'')+' à remplir','tab','madoula'])}
     else{const nom=id=>{const c=(S.clients||[]).find(x=>x.id===id);return c?(c.nom||c.prenom||'une famille'):'une famille'};
-      Object.entries(NONLUS).filter(e=>e[1]).forEach(e=>L.push(['fa-comments','Nouveau message · '+nom(e[0]),'client',e[0]]));
       CRDV.filter(r=>r.statut==='demande'&&new Date(r.debut)>Date.now()).forEach(r=>L.push(['fa-calendar-plus','Demande de rendez-vous · '+nom(r.famille_id),'client',r.famille_id]));
       Object.values(CDOCS).flat().filter(d=>d.statut==='a_signer_doula').forEach(d=>L.push(['fa-signature','Document à signer · '+nom(d.famille_id),'client',d.famille_id]));
       if(typeof SUP_NONLUS!=='undefined'&&SUP_NONLUS&&!(MOI&&MOI.admin))L.push(['fa-headset','Réponse de Sérénaissance','dgo','outils|support']);
