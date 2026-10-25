@@ -3,8 +3,11 @@
 (function(){
 /* Barre du bas : « Journal bébé » à la place de « Préparer » (Préparer reste accessible depuis Infos et l'accueil) */
 try{const k=PTABS2.findIndex(x=>x[0]==='preparer');if(k>=0)PTABS2.splice(k,1,['journal','fa-baby','Journal bébé'])}catch(e){}
-if(typeof pInfos==='function'){const _pi=pInfos;pInfos=function(){const h=_pi.apply(this,arguments);if(S.sub)return h;
-  return '<button class="tile" data-act="tab" data-v="preparer" style="width:100%;margin-bottom:14px"><span class="ti">'+icon('fa-clipboard-list')+'</span><b>Préparer ma naissance</b><span>Plan de naissance, valise, partenaire, 40 jours</span></button>'+h}}
+/* plus d'onglet « Infos » (doublon) : les fiches restent accessibles depuis les liens de l'accueil */
+try{const k=PTABS2.findIndex(x=>x[0]==='infos');if(k>=0)PTABS2.splice(k,1)}catch(e){}
+/* « Préparer ma naissance » : en haut de Suivi pendant la grossesse */
+if(typeof pSuivi==='function'){const _ps=pSuivi;pSuivi=function(){const h=_ps.apply(this,arguments);try{if(S.sub||stage().k!=='preg')return h}catch(e){return h}
+  return '<button class="tile mod-prep" data-act="tab" data-v="preparer" style="width:100%;margin-bottom:14px"><span class="ti">'+icon('fa-clipboard-list')+'</span><b>Préparer ma naissance</b><span>Plan de naissance, valise, partenaire, 40 jours</span></button>'+h}}
 const _r=render;render=function(){const x=_r.apply(this,arguments);try{
   if(S.tab==='journal'){const sv=document.querySelector('#tabs [data-v=suivi]');if(sv)sv.classList.remove('on')}
   document.body.classList.toggle('connecte',!!(typeof MOI!=='undefined'&&MOI&&S.role));
@@ -20,6 +23,7 @@ const _r=render;render=function(){const x=_r.apply(this,arguments);try{
   /* Suivi : le calendrier en premier, juste sous « Mon suivi / Mon journal » */
   if(S.role==='parent'&&!S.vue&&S.tab==='suivi'&&app){const cal=[...app.querySelectorAll(':scope>.card')].find(c=>{const e=c.querySelector('.eyebrow');return e&&/^mon calendrier$/i.test(e.textContent.trim())});
     if(cal){const seg=app.querySelector(':scope>.seg');if(seg){if(seg.nextElementSibling!==cal)seg.after(cal)}else if(app.firstElementChild!==cal)app.prepend(cal)}
+    const prep=app.querySelector(':scope>.mod-prep');if(prep&&cal&&cal.nextElementSibling!==prep)cal.after(prep);
     /* les vaccins de bébé tout en haut, avant le calendrier */
     const vac=[...app.querySelectorAll(':scope>.card')].find(c=>{const e=c.querySelector('.eyebrow');return e&&/^vaccins de bébé$/i.test(e.textContent.trim())});
     if(vac){const seg=app.querySelector(':scope>.seg');if(seg){if(seg.nextElementSibling!==vac)seg.after(vac)}else if(app.firstElementChild!==vac)app.prepend(vac)}}
