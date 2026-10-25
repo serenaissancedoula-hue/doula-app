@@ -28,7 +28,9 @@
     try {
       var AC = window.AudioContext || window.webkitAudioContext; if (!AC) return null;
       if (!audio) audio = new AC();
-      try { if (navigator.audioSession) navigator.audioSession.type = carillon ? 'playback' : 'ambient'; } catch (e) {}
+      /* le cœur de bébé joue : on ne repasse pas en mode « discret », sinon iOS coupe son son */
+      var coeur = false; try { coeur = !!((typeof B3S !== 'undefined' && B3S) || (typeof AUD !== 'undefined' && AUD)); } catch (e) {}
+      try { if (navigator.audioSession) navigator.audioSession.type = (carillon || coeur) ? 'playback' : 'ambient'; } catch (e) {}
       if (audio.state !== 'running') audio.resume();
       return audio;
     } catch (e) { return null; }
