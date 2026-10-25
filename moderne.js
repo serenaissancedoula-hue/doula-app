@@ -1,9 +1,16 @@
 /* Sérénaissance — Espace Famille moderne : bébé en premier sur l'accueil, puis les raccourcis ;
    la langue passe dans Paramètres (plus de bouton flottant une fois connectée). */
 (function(){
+/* Barre du bas : « Journal bébé » à la place de « Préparer » (Préparer reste accessible depuis Infos et l'accueil) */
+try{const k=PTABS2.findIndex(x=>x[0]==='preparer');if(k>=0)PTABS2.splice(k,1,['journal','fa-baby','Journal bébé'])}catch(e){}
+if(typeof pInfos==='function'){const _pi=pInfos;pInfos=function(){const h=_pi.apply(this,arguments);if(S.sub)return h;
+  return '<button class="tile" data-act="tab" data-v="preparer" style="width:100%;margin-bottom:14px"><span class="ti">'+icon('fa-clipboard-list')+'</span><b>Préparer ma naissance</b><span>Plan de naissance, valise, partenaire, 40 jours</span></button>'+h}}
 const _r=render;render=function(){const x=_r.apply(this,arguments);try{
+  if(S.tab==='journal'){const sv=document.querySelector('#tabs [data-v=suivi]');if(sv)sv.classList.remove('on')}
   document.body.classList.toggle('connecte',!!(typeof MOI!=='undefined'&&MOI&&S.role));
   const app=document.getElementById('app');
+  /* Journal bébé a son propre onglet : plus besoin du choix « Mon suivi / Mon journal » */
+  if(app&&S.role==='parent'&&(S.tab==='suivi'||S.tab==='journal')){const sg=[...app.querySelectorAll(':scope>.seg')].find(x=>x.querySelector('[data-act=spv]'));if(sg)sg.remove()}
   /* Suivi : le calendrier en premier, juste sous « Mon suivi / Mon journal » */
   if(S.role==='parent'&&!S.vue&&S.tab==='suivi'&&app){const cal=[...app.querySelectorAll(':scope>.card')].find(c=>{const e=c.querySelector('.eyebrow');return e&&/^mon calendrier$/i.test(e.textContent.trim())});
     if(cal){const seg=app.querySelector(':scope>.seg');if(seg){if(seg.nextElementSibling!==cal)seg.after(cal)}else if(app.firstElementChild!==cal)app.prepend(cal)}
