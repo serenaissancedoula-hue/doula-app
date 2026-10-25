@@ -55,6 +55,7 @@ body{margin:0;background:var(--bg)}
 .b3-date button{border:0;border-radius:12px;padding:10px 14px;background:var(--accent);color:#fff;font-weight:700}
 .b3-note{font-size:.74rem;color:var(--muted);margin:0}
 #b3Retour{position:absolute;left:max(16px,env(safe-area-inset-left,0px));top:-2px;border:0;background:none;color:var(--accent);font:700 .85rem var(--f-body);padding:4px 0;cursor:pointer}.mb-titre{position:relative;padding-top:22px}
+.mb-sem,.mb-nav,.mb-prog{display:none!important}
 button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 </style>
 </head>
@@ -73,9 +74,7 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
       <div class="b3-aide">Glissez pour tourner · pincez pour zoomer</div>
       <div class="b3-mesure" id="b3Mesure" hidden></div>
       <div class="b3-charge" id="b3Charge">Chargement de bébé…</div>
-      <div class="b3-vues" role="group" aria-label="Angle de vue">
-        <button data-v="face" aria-pressed="true">Face</button><button data-v="trois">3/4</button><button data-v="profil">Profil</button><button data-v="dos">Dos</button><button id="b3Tourner" aria-pressed="false">Tourner</button>
-      </div>
+      
     </div>
     <p class="b3-stade" id="b3Stade"></p>
     <div class="b3-outils">
@@ -155,7 +154,7 @@ let mode3d=true;
 function modeVue(complet){mode3d=complet;
   ctl.minAzimuthAngle=complet?-Infinity:-.3;ctl.maxAzimuthAngle=complet?Infinity:.3;
   ctl.minPolarAngle=complet?0:Math.PI/2-.3;ctl.maxPolarAngle=complet?Math.PI:Math.PI/2+.3;
-  document.querySelectorAll('[data-v=profil],[data-v=dos],#b3Tourner').forEach(b=>b.hidden=!complet);
+  
   if(!complet){tourner(false);anim={a:camera.position.clone(),b:new THREE.Vector3(0,0,4.4),t:0}}}
 function devant(oui){ctl.minAzimuthAngle=oui?-1.2:-Infinity;ctl.maxAzimuthAngle=oui?1.2:Infinity;
   document.querySelectorAll('[data-v=dos]').forEach(b=>b.hidden=oui);if(oui){tourner(false);anim={a:camera.position.clone(),b:new THREE.Vector3(0,0,4.4),t:0}}}
@@ -163,8 +162,7 @@ function devant(oui){ctl.minAzimuthAngle=oui?-1.2:-Infinity;ctl.maxAzimuthAngle=
 const VUES={face:[0,0,4.4],trois:[2.9,.6,3.3],profil:[4.4,.3,0],dos:[0,.3,-4.4]};let anim=null;
 const vb=[...document.querySelectorAll('[data-v]')];
 vb.forEach(b=>b.onclick=()=>{vb.forEach(x=>x.setAttribute('aria-pressed',x===b));anim={a:camera.position.clone(),b:new THREE.Vector3(...VUES[b.dataset.v]),t:0};tourner(false)});
-function tourner(on){ctl.autoRotate=on;$('b3Tourner').setAttribute('aria-pressed',on)}
-$('b3Tourner').onclick=()=>tourner(!ctl.autoRotate);
+function tourner(on){ctl.autoRotate=on}
 let ctlActif=false;ctl.addEventListener('end',()=>{ctlActif=false});ctl.addEventListener('start',()=>{ctlActif=true;tourner(false);anim=null;vb.forEach(x=>x.setAttribute('aria-pressed','false'))});
 function taille(){const r=scene3.getBoundingClientRect();renderer.setSize(r.width,r.height,false);camera.aspect=r.width/r.height;camera.updateProjectionMatrix()}
 new ResizeObserver(taille).observe(scene3);taille();
@@ -223,7 +221,7 @@ function bande(){[...strip.children].forEach((b,i)=>{b.classList.toggle('sel',i=
   const b=strip.children[w];strip.scrollTo({left:b.offsetLeft-strip.clientWidth/2+b.clientWidth/2,behavior:'smooth'});
   $('b3Prog').style.width=Math.min(100,w/40*100)+'%';
   const f=w>=4?B3_FRUITS[Math.min(42,w)]:null;$('b3Mesure').hidden=!f;if(f)$('b3Mesure').textContent=String(f[1]).replace('.',',')+' cm · '+(f[2]?(f[2]>=1000?String((f[2]/1000).toFixed(1)).replace('.',',')+' kg':f[2]+' g'):'< 1 g')}
-function afficher(){$('b3Peaux').hidden=w<4;$('b3Stade').textContent=stade(w);$('b3Titre').textContent='Semaine '+w+(w===actu?' · cette semaine':'');bande();
+function afficher(){$('b3Peaux').hidden=w<4;$('b3Stade').textContent=stade(w);{const lmp=new Date(new Date(dpa+'T00:00:00').getTime()-280*DAY),ga=Math.max(0,Math.floor((Date.now()-lmp)/DAY)),j=ga%7;$('b3Titre').textContent=w+' semaine'+(w>1?'s':'')+(j?' + '+j+' jour'+(j>1?'s':''):'')}bande();
   $('b3Prev').disabled=w<=0;$('b3Next').disabled=w>=42;$('b3Texte').innerHTML=bebe3dTextePage(w);$('b3Tri').textContent=b3Trimestre(w);infoBpm(w);montrer(w)}
 $('b3Prev').onclick=()=>{if(w>0){w--;afficher()}};$('b3Next').onclick=()=>{if(w<42){w++;afficher()}};
 $('b3Ok').onclick=()=>{const v=$('b3Dpa').value;if(!v)return;dpa=v;try{localStorage.setItem('sere-b3-dpa',v)}catch(e){}actu=semaineActuelle();w=actu;afficher()};

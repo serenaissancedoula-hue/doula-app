@@ -9,9 +9,9 @@ const _svgBebeDessin=svgBebe;
 function bebeSerieSecours(img,w,id){const z=img.closest('.bebe-zone');if(z)z.outerHTML=_svgBebeDessin(w,id)}
 svgBebe=function(w,id){const src=bebeSerieImage(w);if(!src)return _svgBebeDessin(w,id);
   const M=mouvement(w),b=bpm(w),zid=id||'bebeZone';
-  return '<div class="bebe-zone reel photo '+M[3]+'" id="'+zid+'" style="--bpm:'+(b?60/b:1)+'s">'+
+  return '<div class="bebe-zone reel photo '+M[3]+'" id="'+zid+'" data-w="'+w+'" style="--bpm:'+(b?60/b:1)+'s">'+
     '<div class="photo-rond"><img src="'+src+'" alt="Bébé à '+w+' semaines" decoding="async" draggable="false" onerror="bebeSerieSecours(this,'+w+',\''+zid+'\')"></div></div>'};
-/* Image fixe : elle ne flotte pas et ne tourne pas (choix de la propriétaire). */
+/* L'image ne flotte pas. Bébé en 3D (bebe-3d-carte.js) se pose par-dessus dès qu'il est chargé. */
 (function(){const st=document.createElement('style');st.textContent=
   '.bebe-zone.photo{position:relative}'+
   '.bebe-zone.photo .photo-rond{width:100%;height:100%;border-radius:50%;overflow:hidden;background:#120d10;box-shadow:0 0 0 2px rgba(244,199,179,.55),inset 0 0 30px rgba(0,0,0,.5)}'+
@@ -20,13 +20,3 @@ svgBebe=function(w,id){const src=bebeSerieImage(w);if(!src)return _svgBebeDessin
   '.bebe-zone.photo{touch-action:auto;cursor:pointer}'+
   '#bebePE .pe-btn[data-act="bebeTourner"],#bebePE .pe-btn[data-act="bebeMiroir"]{display:none}';
   document.head.appendChild(st)})();
-/* En plein écran, on retire la mention « faire tourner » quand c'est l'image fixe. */
-const _ouvrirBebePEPhoto=ouvrirBebePE;
-ouvrirBebePE=function(){_ouvrirBebePEPhoto();const d=document.getElementById('bebePE');if(!d)return;bebe3dLien(d);if(!d.querySelector('.bebe-zone.photo'))return;
-  d.querySelectorAll('p,small,span').forEach(e=>{if(e.children.length===0&&e.textContent.includes('Glissez le doigt pour faire tourner bébé. '))e.textContent=e.textContent.replace('Glissez le doigt pour faire tourner bébé. ','')})};
-/* Bouton « Voir bébé en 3D » : ouvre la page 3D à la bonne semaine (date prévue de la maman). */
-function bebe3dLien(d){try{const st=stage();if(st.k!=='preg'||!st.g.dpa)return;const x=st.g.dpa,z=n=>String(n).padStart(2,'0');
-  const dpa=x.getFullYear()+'-'+z(x.getMonth()+1)+'-'+z(x.getDate());
-  const a=document.createElement('a');a.className='pe-3d';a.href='bebe-tourne.html?dpa='+dpa;a.innerHTML=icon('fa-cube')+' Voir bébé en 3D';
-  const mv=d.querySelector('.pe-mv');if(mv)mv.after(a);else d.appendChild(a)}catch(e){}}
-(function(){const st=document.createElement('style');st.textContent='#bebePE .pe-3d{display:inline-flex;align-items:center;gap:8px;align-self:center;margin:4px auto 0;padding:10px 18px;border-radius:99px;background:rgba(255,240,236,.16);color:#fff;font-weight:700;text-decoration:none;border:1px solid rgba(255,235,230,.35)}';document.head.appendChild(st)})();

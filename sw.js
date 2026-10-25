@@ -1,19 +1,24 @@
 /* Sérénaissance — appli des doulas et des familles (service worker).
    Toujours la version la plus récente quand il y a Internet; Supabase ne passe jamais par le cache.
    Reçoit les notifications (messages, rendez-vous, documents, rappels, mot du jour). */
-var VERSION = 'sere-app-v6';
+var VERSION = 'sere-app-v7';
 var BASE = self.registration.scope;
+var BEBE3D = 'sere-bebe3d-v1'; /* gros modèles 3D de bébé : gardés sur le téléphone, téléchargés une seule fois */
 self.addEventListener('install', function (e) {
   e.waitUntil(caches.open(VERSION).then(function (c) { return c.addAll(['./', 'style.css', 'logo.png', 'icones/icone-192.png']).catch(function () {}); }).then(function () { return self.skipWaiting(); }));
 });
 self.addEventListener('activate', function (e) {
-  e.waitUntil(caches.keys().then(function (l) { return Promise.all(l.filter(function (k) { return k !== VERSION; }).map(function (k) { return caches.delete(k); })); }).then(function () { return self.clients.claim(); }));
+  e.waitUntil(caches.keys().then(function (l) { return Promise.all(l.filter(function (k) { return k !== VERSION && k !== BEBE3D; }).map(function (k) { return caches.delete(k); })); }).then(function () { return self.clients.claim(); }));
 });
 self.addEventListener('fetch', function (e) {
   var req = e.request; if (req.method !== 'GET') return;
   var url = new URL(req.url);
   var ok = url.origin === self.location.origin || /^(cdn\.jsdelivr\.net|fonts\.googleapis\.com|fonts\.gstatic\.com|cdnjs\.cloudflare\.com)$/.test(url.hostname);
   if (!ok || url.search.indexOf('token_hash') >= 0 || url.pathname.endsWith('version.json')) return;
+  if (url.origin === self.location.origin && /\/img\/bebe3d\/(serie\/|sphere-)/.test(url.pathname)) {
+    e.respondWith(caches.open(BEBE3D).then(function (c) { return c.match(req).then(function (r) { return r || fetch(req).then(function (rep) { if (rep && rep.ok) c.put(req, rep.clone()); return rep; }); }); }));
+    return;
+  }
   e.respondWith(fetch(req.mode === 'navigate' || url.origin === self.location.origin ? new Request(req.url, { cache: 'no-store' }) : req).then(function (rep) {
     if (rep && (rep.ok || rep.type === 'opaque')) { var copie = rep.clone(); caches.open(VERSION).then(function (c) { c.put(req, copie); }); }
     return rep;
