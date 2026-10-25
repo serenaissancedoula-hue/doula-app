@@ -70,7 +70,7 @@ const $=id=>document.getElementById(id),DAY=864e5,pad=w=>String(w).padStart(2,'0
 /* ---- scène ---- */
 const scene3=$('b3Scene'),renderer=new THREE.WebGLRenderer({antialias:true,alpha:true});
 renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.outputEncoding=THREE.sRGBEncoding;
-renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.25;
+renderer.toneMapping=THREE.LinearToneMapping;renderer.toneMappingExposure=1.05;
 scene3.prepend(renderer.domElement);
 const scene=new THREE.Scene(),camera=new THREE.PerspectiveCamera(32,1,.05,50);camera.position.set(0,0,4.4);
 const ctl=new THREE.OrbitControls(camera,renderer.domElement);ctl.enableDamping=true;ctl.enablePan=false;ctl.minDistance=2.4;ctl.maxDistance=8;
@@ -90,17 +90,13 @@ let peau=0;try{peau=+(localStorage.getItem('sere-b3-peau')||0)}catch(e){}
 function modelePour(w){if(w<9)return null;let m=null;for(const k of MODELES)if(k<=w)m=k;return m===null?MODELES[0]:m}
 function teinter(o){const c=PEAUX[peau][1];o.traverse(n=>{if(n.isMesh)(Array.isArray(n.material)?n.material:[n.material]).forEach(m=>{if(!m.userData.c0)m.userData.c0=m.color.clone();m.color.copy(m.userData.c0).multiply(new THREE.Color(c[0],c[1],c[2]))})})}
 const gl=new THREE.GLTFLoader();
-function chargerModele(k){return new Promise((ok,ko)=>gl.load('img/bebe3d/modeles/semaine-'+pad(k)+'.glb?v=6',g=>{
+function chargerModele(k){return new Promise((ok,ko)=>gl.load('img/bebe3d/modeles/semaine-'+pad(k)+'.glb?v=7',g=>{
   const o=g.scene; // modèle Meshy d'origine ; seulement l'aspect de la peau : mat et doux, pas métallique
   o.traverse(n=>{if(n.isMesh){const a=n.material;
-    // matière « peau » : texture d'origine de Meshy (couleur, relief, rugosité), sans effet métal,
-    // avec un léger velouté et une lueur rosée qui imite la lumière qui traverse la peau
-    const m=new THREE.MeshPhysicalMaterial({map:a.map,normalMap:a.normalMap,roughnessMap:a.roughnessMap,
-      metalness:0,roughness:1,reflectivity:.18,clearcoat:0,
-      sheen:new THREE.Color(.42,.22,.2),
-      emissive:new THREE.Color(.16,.05,.04),emissiveMap:a.map,
-      side:THREE.DoubleSide,vertexColors:a.vertexColors});
-    if(a.normalMap)m.normalScale=new THREE.Vector2(1.2,1.2);
+    // peau : la photo projetée porte déjà la lumière et les détails ; on éclaire doucement, sans reflet
+    const m=new THREE.MeshStandardMaterial({map:a.map,normalMap:a.normalMap,metalness:0,roughness:.9,vertexColors:!!a.vertexColors,
+      emissive:a.map?new THREE.Color(.22,.2,.2):new THREE.Color(0,0,0),emissiveMap:a.map||null,side:THREE.DoubleSide});
+    if(a.normalMap)m.normalScale=new THREE.Vector2(.6,.6);
     if(a.color&&!a.map)m.color.copy(a.color);
     n.material=m}});
   const box=new THREE.Box3().setFromObject(o),sz=box.getSize(new THREE.Vector3()),c=box.getCenter(new THREE.Vector3());
