@@ -18,7 +18,6 @@ function abActivites(st){const auj=ab0(Date.now()),L=S.logs||[],A=L.filter(l=>l.
     ['couches','fa-droplet','#d9e6d4','Noter une couche',co.length?'Aujourd\'hui : '+co.filter(l=>l.pipi).length+' mouillée(s), '+co.filter(l=>l.selle).length+' selle(s)':'Pipi, selle, couleur'],
     ['sommeil','fa-moon','#dbe2f0','Noter le sommeil',som?'Aujourd\'hui : '+Math.floor(som/3600)+' h '+String(Math.round(som%3600/60)).padStart(2,'0'):'Siestes et nuits'],
     ['croissance','fa-weight-scale','#f2e3c4','Suivre la croissance',poi?'Dernière pesée : '+cm((poi.g/1000).toFixed(2))+' kg':'Noter une pesée']];
-  R.push(['dev','fa-seedling','#e3ecd9','Développement','Ce qu\'il apprend en ce moment, jusqu\'à 5 ans']);
   if(vac)R.push(['vaccins','fa-syringe','#ecdcea','Vaccins',vac.txt.replace(/^Vaccins de /,'')+' · '+fmtS(vac.d)]);
   return '<div class="card ab-act"><span class="eyebrow">Programme</span><h2>Activités</h2><div class="ab-liste">'+R.map(r=>'<button class="ab-row" data-ab="'+r[0]+'"><span class="ab-ic" style="background:'+r[2]+'">'+icon(r[1])+'</span><span class="ab-tx"><b>'+r[3]+'</b><small>'+esc(r[4])+'</small></span>'+icon('fa-chevron-right')+'</button>').join('')+'</div></div>'}
 function abHaut(st){const p=S.parent,n=(p.naissance||{}),nom=(n.prenomBebe||'').trim(),mom=(p.prenom&&p.prenom!=='Exemple'?p.prenom:'').trim(),A=abAge(st.birth);
@@ -37,7 +36,11 @@ const _pA=pAccueil;
 pAccueil=function(){const h=_pA.apply(this,arguments);try{const st=stage();if(st.k!=='pp')return h;return abHaut(st)+h}catch(e){return h}};
 /* l'en-tête de bébé reste tout en haut, au-dessus du mot du jour et du reste */
 const _rAB=render;render=function(){const x=_rAB.apply(this,arguments);try{if(S.role==='parent'&&!S.vue&&(S.tab||'accueil')==='accueil'){const app=document.getElementById('app'),t=app&&app.querySelector(':scope>.ab-top');
-  if(t){if(app.firstElementChild!==t)app.prepend(t);const d24=[...app.querySelectorAll(':scope>.card')].find(c=>/^dernières 24 heures/i.test(((c.querySelector('.eyebrow')||{}).textContent||'').trim()));const act=t.querySelector('.ab-act');if(d24&&act)t.insertBefore(d24,act);const sh=app.querySelector(':scope>.sh');if(sh)sh.remove();const mot=app.querySelector(':scope>.card.mot');if(mot)app.insertBefore(mot,t)}}}catch(e){}return x};
+  if(t){if(app.firstElementChild!==t)app.prepend(t);const d24=[...app.querySelectorAll(':scope>.card')].find(c=>/^dernières 24 heures/i.test(((c.querySelector('.eyebrow')||{}).textContent||'').trim()));const act=t.querySelector('.ab-act');if(d24&&act)t.insertBefore(d24,act);const sh=app.querySelector(':scope>.sh');if(sh)sh.remove();const mot=app.querySelector(':scope>.card.mot');if(mot)app.insertBefore(mot,t)
+    /* pas de doublons : ce qui se trouve déjà dans le Journal bébé, Suivi ou Ma doula n'est pas répété ici */
+    app.querySelectorAll(':scope>.quick').forEach(x=>x.remove());
+    [...app.querySelectorAll(':scope>.card')].forEach(c=>{const e=((c.querySelector('.eyebrow')||{}).textContent||'').trim();
+      if(/^\d+\s*jours?\s*de vie/i.test(c.textContent.trim())||/jours? de vie$|^comment va le moral|^petites lectures|^ma doula$/i.test(e)||(c.classList.contains('tint')&&/ma doula/i.test(e)))c.remove()})}}}catch(e){}return x};
 document.addEventListener('click',e=>{const b=e.target.closest('[data-ab]');if(!b)return;e.stopPropagation();const v=b.dataset.ab;S.vue=null;S.sub='';
   if(v==='dev'&&window.dvOuvrir){dvOuvrir();return}
   if(v==='vaccins'){S.tab='suivi'}else{S.tab='journal';S.jbTab=v}scrollTo(0,0);render()},true);
