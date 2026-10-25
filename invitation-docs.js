@@ -36,3 +36,9 @@ inviteEnvoyer=async function(b){lire();const I=etat(),c=S.clients.find(x=>x.id==
     close();const ok=await inviter(c.id,txt);if(ok){S.inv=null;await chargerClientDetail(c.id);S.ctab='docs';render();toast(sel.length?'Invitation et documents envoyés':'Invitation envoyée')}}
   catch(e){b.disabled=false;b.textContent='Réessayer';toast('Pas envoyé : '+(e.message||'erreur'))}};
 })();
+/* dossier d'une famille : onglets avec icônes, toujours visibles en haut, l'onglet actif centré */
+(function(){if(window.ESPACE==='parent')return;const st=document.createElement('style');st.textContent=
+ '.ctabs{position:sticky;top:calc(env(safe-area-inset-top,0px) + 64px);z-index:20;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding:8px 4px;margin:0 -4px 14px;background:var(--bg,#f7efe9);border-radius:0 0 16px 16px}.ctabs::-webkit-scrollbar{display:none}'+
+ '.ctabs button{flex:none;display:flex;flex-direction:column;align-items:center;gap:4px;min-width:74px;padding:8px 10px;border:0;border-radius:14px;background:var(--card);color:var(--muted);font:600 .72rem var(--f-body);cursor:pointer;box-shadow:0 1px 3px rgba(70,45,30,.08)}.ctabs button i,.ctabs button svg{font-size:1.05rem}'+
+ '.ctabs button.on{background:var(--accent);color:#fff}.parcours-acc summary .pill{margin-left:8px}';document.head.appendChild(st);
+ const _r=render;render=function(){const x=_r.apply(this,arguments);try{const n=document.querySelector('.ctabs'),b=n&&n.querySelector('.on'),tp=document.querySelector('.top');if(n&&tp)n.style.top=tp.offsetHeight+'px';if(b)n.scrollLeft=b.offsetLeft-(n.clientWidth-b.offsetWidth)/2}catch(e){}return x}})();
