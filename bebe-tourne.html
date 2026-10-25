@@ -119,14 +119,15 @@ let peau=0;try{peau=+(localStorage.getItem('sere-b3-peau')||0)}catch(e){}
 function modelePour(w){if(w<4)return null;if(w<9)return 9;if(MODELES.includes(w))return w;let m=MODELES[0];for(const k of MODELES)if(k<=w)m=k;return m} // toutes les semaines en 3D : le bébé de la semaine, sinon le plus proche
 function teinter(o){if(o.userData&&o.userData.photo)return;const c=PEAUX[peau][1];o.traverse(n=>{if(n.isMesh)(Array.isArray(n.material)?n.material:[n.material]).forEach(m=>{if(!m.userData.c0)m.userData.c0=m.color.clone();m.color.copy(m.userData.c0).multiply(new THREE.Color(c[0],c[1],c[2]))})})}
 const gl=new THREE.GLTFLoader();
-function chargerModele(k){return new Promise((ok,ko)=>gl.load('img/bebe3d/modeles/semaine-'+pad(k)+'.glb?v=9',g=>{
+function chargerModele(k){return new Promise((ok,ko)=>gl.load('img/bebe3d/modeles/semaine-'+pad(k)+'.glb?v=10',g=>{
   const o=g.scene; // modèle Meshy d'origine ; seulement l'aspect de la peau : mat et doux, pas métallique
   o.traverse(n=>{if(n.isMesh){const a=n.material;
     // peau : la photo projetée porte déjà la lumière et les détails ; on éclaire doucement, sans reflet
     const m=new THREE.MeshPhysicalMaterial({map:a.map,normalMap:a.normalMap,metalness:0,roughness:.68,reflectivity:.3,vertexColors:!!a.vertexColors,
       sheen:new THREE.Color(.18,.09,.08),emissive:a.map?new THREE.Color(.05,.016,.012):new THREE.Color(0,0,0),emissiveMap:a.map||null,side:THREE.DoubleSide});
     if(a.normalMap)m.normalScale=new THREE.Vector2(1,1);
-    if(a.color&&!a.map)m.color.copy(a.color);
+    if(!a.map&&!a.vertexColors)m.color.set('#e8b09c'); // modèle gris sans texture : on lui donne une vraie couleur de peau
+    else if(a.color&&!a.map)m.color.copy(a.color);
     n.material=m}});
   const box=new THREE.Box3().setFromObject(o),sz=box.getSize(new THREE.Vector3()),c=box.getCenter(new THREE.Vector3());
   const piv=new THREE.Group();o.position.sub(c);piv.add(o);piv.userData.base=2.1/Math.max(sz.x,sz.y,sz.z);piv.scale.setScalar(piv.userData.base);ok(piv)},undefined,ko))}
