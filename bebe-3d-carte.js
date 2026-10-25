@@ -107,5 +107,9 @@ document.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e.tar
   '.b3h-carte .bb2-haut{grid-template-columns:1fr}.b3h-carte>.prog:empty{display:none}'+
   '.b3c-alt{display:grid;font-family:var(--f-display);font-size:1.2rem;line-height:1.25;color:var(--ink)}.b3c-alt span{grid-area:1/1;animation:b3cAlt 8s ease-in-out infinite}.b3c-alt span+span{animation-delay:-4s}'+
   '@keyframes b3cAlt{0%,42%{opacity:1}50%,92%{opacity:0}100%{opacity:1}}'+
+  '#bebePE{background:radial-gradient(ellipse at 50% 45%,#6b3238 0%,#3a1a20 48%,#1b0d11 100%)!important}'+
+  '#bebePE .bebe-zone.photo{width:min(100vw,600px)!important;max-width:none!important;height:min(62vh,600px);aspect-ratio:auto!important;margin:0 auto;filter:none!important}'+
+  '#bebePE .bebe-zone.photo .photo-rond{border-radius:0;background:transparent;box-shadow:none}'+
+  '#bebePE .bebe-zone.photo img{object-fit:contain;-webkit-mask-image:radial-gradient(circle,#000 55%,transparent 72%);mask-image:radial-gradient(circle,#000 55%,transparent 72%)}'+
   '@media (prefers-reduced-motion:reduce){.b3c-alt span{animation:none}.b3c-alt span+span{display:none}}';
   document.head.appendChild(st)})();
