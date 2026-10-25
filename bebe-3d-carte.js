@@ -12,7 +12,7 @@ function b3cScript(src){return new Promise((ok,ko)=>{const s=document.createElem
 function b3cLibs(){if(!B3C.pret)B3C.pret=(window.THREE?Promise.resolve():b3cScript('https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js'))
   .then(()=>Promise.all([THREE.OrbitControls?0:b3cScript('https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js'),
     THREE.GLTFLoader?0:b3cScript('https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js')]))
-  .then(()=>{const r=new THREE.WebGLRenderer({antialias:true,alpha:true});r.setPixelRatio(Math.min(devicePixelRatio,2));r.outputEncoding=THREE.sRGBEncoding;
+  .then(()=>{const r=new THREE.WebGLRenderer({antialias:true,alpha:true});r.setPixelRatio(Math.min(devicePixelRatio,1.5));r.outputEncoding=THREE.sRGBEncoding;
     r.toneMapping=THREE.ACESFilmicToneMapping;r.domElement.className='b3c-toile';B3C.ren=r;
     const sc=new THREE.Scene(),cam=new THREE.PerspectiveCamera(32,1,.05,50);cam.position.set(0,0,4.4);B3C.scene=sc;B3C.cam=cam;
     sc.add(new THREE.HemisphereLight(0xfff0ea,0x4a1f28,.75));
@@ -20,7 +20,8 @@ function b3cLibs(){if(!B3C.pret)B3C.pret=(window.THREE?Promise.resolve():b3cScri
     const k2=new THREE.DirectionalLight(0xff8f7a,1.1);k2.position.set(-3,1,-3);sc.add(k2);
     const k3=new THREE.DirectionalLight(0xffe4da,.3);k3.position.set(0,-3,2);sc.add(k3);
     const c=new THREE.OrbitControls(cam,r.domElement);c.enableDamping=true;c.enablePan=false;c.minDistance=2.2;c.maxDistance=8;c.autoRotate=false;c.enabled=false;
-    c.addEventListener('change',b3cDessiner);B3C.ctl=c;
+    c.minPolarAngle=.35;c.maxPolarAngle=Math.PI-.35;c.rotateSpeed=.7;c.zoomSpeed=.8;
+    c.addEventListener('change',()=>{if(!B3C.plein)b3cDessiner()});B3C.ctl=c;
     /* les gestes sur bébé en plein écran ne doivent pas déclencher les autres actions de la carte */
     ['pointerdown','click'].forEach(ev=>r.domElement.addEventListener(ev,e=>{if(B3C.plein)e.stopPropagation()}));
     B3C.ro=new ResizeObserver(b3cTaille);return true});
@@ -29,8 +30,7 @@ function b3cTaille(){const t=B3C.ren&&B3C.ren.domElement,p=t&&t.parentNode;if(!p
   B3C.ren.setSize(r.width,r.height,false);B3C.cam.aspect=r.width/r.height;B3C.cam.updateProjectionMatrix();b3cDessiner()}
 function b3cDessiner(){if(B3C.ren&&B3C.ren.domElement.parentNode)B3C.ren.render(B3C.scene,B3C.cam)}
 function b3cMatiere(o){o.traverse(n=>{if(n.isMesh){const a=n.material;
-  const m=new THREE.MeshPhysicalMaterial({map:a.map,normalMap:a.normalMap,metalness:0,roughness:.68,reflectivity:.3,
-    sheen:new THREE.Color(.18,.09,.08),emissive:a.map?new THREE.Color(.05,.016,.012):new THREE.Color(0,0,0),emissiveMap:a.map||null,side:THREE.DoubleSide});
+  const m=new THREE.MeshStandardMaterial({map:a.map,normalMap:a.normalMap,metalness:0,roughness:.7,emissive:a.map?new THREE.Color(.05,.016,.012):new THREE.Color(0,0,0),emissiveMap:a.map||null,side:THREE.DoubleSide});
   if(!a.map)m.color.set('#e8b09c');n.material=m}})}
 function b3cCentrer(o,taille){const box=new THREE.Box3().setFromObject(o),sz=box.getSize(new THREE.Vector3()),c=box.getCenter(new THREE.Vector3());
   const g=new THREE.Group();o.position.sub(c);g.add(o);g.scale.setScalar(taille/Math.max(sz.x,sz.y,sz.z));return g}
@@ -44,7 +44,7 @@ function b3cCharger(w){const f=b3cFichier(w),cle=f||'sphere-04';if(B3C.cache[cle
       const o=new THREE.Group();o.add(s);o.scale.setScalar(1.05);o.userData.cle=cle;ok(o)},undefined,ko)})}
 function b3cVueFace(){const c=B3C.ctl;B3C.cam.position.set(0,0,4.4);c.target.set(0,0,0);c.update()}
 function b3cLimites(cle){const d=B3C_DEVANT.includes(cle);B3C.ctl.minAzimuthAngle=d?-1.2:-Infinity;B3C.ctl.maxAzimuthAngle=d?1.2:Infinity}
-function b3cAnimer(){if(B3C.boucle)return;B3C.boucle=true;(function f(){if(!B3C.plein){B3C.boucle=false;return}B3C.ctl.update();b3cDessiner();requestAnimationFrame(f)})()}
+function b3cAnimer(){if(B3C.boucle)return;B3C.boucle=true;(function f(){if(!B3C.plein){B3C.boucle=false;return}if(B3C.ctl.update()||!B3C.vu){B3C.vu=true;b3cDessiner()}requestAnimationFrame(f)})()}
 /* Trouve où bébé doit s'afficher (plein écran en priorité, sinon la carte) et y place la 3D. */
 function b3cPlacer(){B3C.attente=false;
   const pe=document.querySelector('#bebePE .bebe-zone.photo'),carte=document.querySelector('.bebe-carte .bebe-zone.photo'),z=pe||carte;
@@ -55,7 +55,7 @@ function b3cPlacer(){B3C.attente=false;
     if(B3C.obj!==o){if(B3C.obj)B3C.scene.remove(B3C.obj);B3C.scene.add(o);B3C.obj=o;b3cLimites(o.userData.cle);b3cVueFace()}
     if(t.parentNode!==rond){if(B3C.rond)B3C.rond.classList.remove('b3c-ok');rond.appendChild(t);B3C.rond=rond;B3C.ro.disconnect();B3C.ro.observe(rond)}
     if(B3C.plein&&!plein)b3cVueFace();B3C.plein=plein;B3C.ctl.enabled=plein;rond.classList.add('b3c-ok');
-    b3cTaille();if(plein)b3cAnimer()}).catch(()=>{const r=z.querySelector('.photo-rond');if(r)r.classList.add('b3c-echec')}) /* si la 3D échoue : la photo s'affiche */}
+    b3cTaille();if(plein){B3C.vu=false;b3cAnimer()}}).catch(()=>{const r=z.querySelector('.photo-rond');if(r)r.classList.add('b3c-echec')}) /* si la 3D échoue : la photo s'affiche */}
 function b3cSurveiller(){if(B3C.attente)return;B3C.attente=true;requestAnimationFrame(b3cPlacer)}
 new MutationObserver(b3cSurveiller).observe(document.body,{childList:true,subtree:true});
 (function(){const st=document.createElement('style');st.textContent=
@@ -127,6 +127,20 @@ const B3F_MOMENTS=[[5,'Tout commence','Le cœur, le cerveau et la moelle épini�
   [31,'Ses yeux s\'ouvrent','Il ouvre les yeux et perçoit la lumière à travers votre ventre. Il dort et s\'éveille par cycles.'],
   [36,'Il prend des forces','Il prend du poids pour bien se garder au chaud. Ses mouvements deviennent des roulades et des poussées.'],
   [42,'Prêt à vous rencontrer','Bébé est bien tassé. Il doit bouger chaque jour autant qu\'avant : au moindre doute, appelez.']];
+const B3F_SENS=[[8,'Ses sens ne fonctionnent pas encore : le cerveau, le cœur et la moelle épinière se mettent en place.'],
+  [13,'Il réagit au toucher : quand sa main frôle sa bouche, il bouge. Il ne voit et n\'entend pas encore.'],
+  [17,'Ses papilles se forment. Il perçoit une lumière forte à travers ses paupières fermées.'],
+  [22,'Il commence à entendre : votre cœur, votre respiration, les bruits de votre ventre, puis votre voix.'],
+  [27,'Il entend de mieux en mieux et peut sursauter à un bruit fort. Il goûte le liquide amniotique, qui change selon ce que vous mangez.'],
+  [31,'Il reconnaît votre voix et celle de vos proches. Ses yeux s\'ouvrent : il perçoit la lumière à travers le ventre.'],
+  [35,'Il s\'habitue à la mélodie de votre langue et peut se souvenir d\'une chanson souvent entendue.'],
+  [42,'Tous ses sens sont prêts. À la naissance, il reconnaîtra votre voix, votre odeur et le battement de votre cœur.']];
+function b3fDetails(w){const I=infoSemaine(w)||[],M=mouvement(w),se=(B3F_SENS.find(s=>w<=s[0])||[])[1],f=fruit(w);
+  const bloc=(ic,ti,tx)=>tx?'<div class="b3f-bloc"><span class="b3f-ic">'+icon(ic)+'</span><div><b>'+ti+'</b><p>'+esc(tx)+'</p></div></div>':'';
+  return '<p class="b3f-intro">'+esc(I[1]||'')+'</p>'+
+    bloc('fa-person-swimming','Ses mouvements',M&&M[2])+bloc('fa-ear-listen','Ce qu\'il ressent',se)+
+    bloc('fa-apple-whole','Sa grosseur','Comparable à : '+((typeof FRUIT_EMOJI!=='undefined'&&FRUIT_EMOJI[f[0]])?FRUIT_EMOJI[f[0]]+' ':'')+f[0]+' (environ '+cm(f[1])+' cm).')+
+    bloc('fa-heart','Et vous',I[2])+bloc('fa-lightbulb','Petit conseil',I[3])}
 function b3fMoment(w){return B3F_MOMENTS.find(m=>w<=m[0])||B3F_MOMENTS[B3F_MOMENTS.length-1]}
 const _ouvrirBebePE3D=ouvrirBebePE;
 ouvrirBebePE=function(){_ouvrirBebePE3D();const d=document.getElementById('bebePE');if(!d)return;
@@ -139,11 +153,11 @@ ouvrirBebePE=function(){_ouvrirBebePE3D();const d=document.getElementById('bebeP
     '<span class="b3f-aide">Glissez le doigt pour tourner bébé</span></div>'+
     '<button class="pe-fermer b3f-fermer" data-act="bebePEFermer" aria-label="Fermer">'+icon('fa-xmark')+'</button>'+
     '<div class="b3f-carte"><div class="b3f-titre"><h2>'+esc(mo[1])+'</h2>'+(b?'<button class="b3f-son" data-act="bebePESon" aria-label="Couper ou remettre le son du cœur">'+icon(S.sonCoeur?'fa-volume-high':'fa-volume-xmark')+'</button>':'')+'</div>'+
-    '<p>'+esc(mo[2])+'</p>'+(b?'<p class="b3f-note">Son du cœur : une illustration, pas le vrai cœur de votre bébé.</p>':'')+'</div>';
+    b3fDetails(w)+(b?'<p class="b3f-note">Son du cœur : une illustration, pas le vrai cœur de votre bébé.</p>':'')+'</div>';
   b3cSurveiller()};
 (function(){const st=document.createElement('style');st.textContent=
-  '#bebePE.b3f{display:block;padding:0;overflow:hidden;background:radial-gradient(ellipse at 50% 42%,#fffaf6 0%,#f7ebe2 52%,#ecdbcf 100%)!important}'+
-  '.b3f-scene{position:absolute;left:0;right:0;top:0;bottom:var(--b3f-h,190px)}'+
+  '#bebePE.b3f{display:flex!important;flex-direction:column;align-items:stretch!important;justify-content:flex-start!important;gap:0!important;padding:0!important;overflow:hidden;background:radial-gradient(ellipse at 50% 42%,#fffaf6 0%,#f7ebe2 52%,#ecdbcf 100%)!important}'+
+  '.b3f-scene{position:relative;flex:1 1 auto;min-height:0}'+
   '#bebePE.b3f .bebe-zone.photo{position:absolute;inset:0;width:100%!important;height:100%!important;max-width:none!important;aspect-ratio:auto!important;margin:0}'+
   '.b3f-chiffres{position:absolute;left:18px;bottom:18px;display:flex;flex-direction:column;gap:10px;pointer-events:none;color:var(--ink)}'+
   '.b3f-chiffres div{font-size:.9rem}.b3f-chiffres b{font-size:1.55rem;font-variant-numeric:tabular-nums}.b3f-chiffres span{display:block;font-size:.75rem;color:var(--muted);margin-top:-2px}'+
@@ -151,8 +165,10 @@ ouvrirBebePE=function(){_ouvrirBebePE3D();const d=document.getElementById('bebeP
   '.b3f-sem b{display:block;font-family:var(--f-display);font-size:3.4rem;line-height:1;color:var(--accent)}.b3f-sem span{font-size:1rem}'+
   '.b3f-aide{position:absolute;left:0;right:0;top:calc(env(safe-area-inset-top,0px) + 22px);text-align:center;font-size:.75rem;color:var(--muted);pointer-events:none}'+
   '#bebePE .b3f-fermer{position:absolute;top:calc(env(safe-area-inset-top,0px) + 12px);right:14px;z-index:5;background:rgba(255,255,255,.8);color:var(--ink);border:1px solid var(--line)}'+
-  '.b3f-carte{position:absolute;left:0;right:0;bottom:0;min-height:var(--b3f-h,190px);box-sizing:border-box;background:var(--card,#fff);color:var(--ink);border-radius:26px 26px 0 0;padding:20px 20px calc(18px + env(safe-area-inset-bottom,0px));box-shadow:0 -8px 26px rgba(120,70,50,.12)}'+
+  '.b3f-carte{position:relative;flex:0 0 auto;max-height:46vh;overflow-y:auto;-webkit-overflow-scrolling:touch;box-sizing:border-box;background:var(--card,#fff);color:var(--ink);border-radius:26px 26px 0 0;padding:20px 20px calc(18px + env(safe-area-inset-bottom,0px));box-shadow:0 -8px 26px rgba(120,70,50,.12)}'+
   '.b3f-titre{display:flex;align-items:center;justify-content:space-between;gap:12px}.b3f-titre h2{margin:0;font-size:1.45rem}'+
   '.b3f-son{flex:none;width:46px;height:40px;border-radius:12px;border:0;background:var(--accent);color:#fff;font-size:1.05rem;cursor:pointer}'+
-  '.b3f-carte p{margin:8px 0 0;color:var(--muted);line-height:1.45}.b3f-carte .b3f-note{font-size:.72rem;margin-top:10px}';
+  '.b3f-carte p{margin:8px 0 0;color:var(--muted);line-height:1.45}.b3f-intro{color:var(--ink)!important;font-size:1rem}'+
+  '.b3f-bloc{display:flex;gap:12px;align-items:flex-start;margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}.b3f-bloc b{color:var(--ink);font-size:.95rem}.b3f-bloc p{margin:2px 0 0!important;font-size:.92rem}'+
+  '.b3f-ic{flex:none;width:34px;height:34px;border-radius:50%;background:var(--soft);color:var(--accent);display:grid;place-items:center;font-size:.95rem}.b3f-carte .b3f-note{font-size:.72rem;margin-top:10px}';
   document.head.appendChild(st)})();
