@@ -6,7 +6,10 @@ const _r=render;render=function(){const x=_r.apply(this,arguments);try{
   const app=document.getElementById('app');
   /* Suivi : le calendrier en premier, juste sous « Mon suivi / Mon journal » */
   if(S.role==='parent'&&!S.vue&&S.tab==='suivi'&&app){const cal=[...app.querySelectorAll(':scope>.card')].find(c=>{const e=c.querySelector('.eyebrow');return e&&/^mon calendrier$/i.test(e.textContent.trim())});
-    if(cal){const seg=app.querySelector(':scope>.seg');if(seg){if(seg.nextElementSibling!==cal)seg.after(cal)}else if(app.firstElementChild!==cal)app.prepend(cal)}}
+    if(cal){const seg=app.querySelector(':scope>.seg');if(seg){if(seg.nextElementSibling!==cal)seg.after(cal)}else if(app.firstElementChild!==cal)app.prepend(cal)}
+    /* les vaccins de bébé tout en haut, avant le calendrier */
+    const vac=[...app.querySelectorAll(':scope>.card')].find(c=>{const e=c.querySelector('.eyebrow');return e&&/^vaccins de bébé$/i.test(e.textContent.trim())});
+    if(vac){const seg=app.querySelector(':scope>.seg');if(seg){if(seg.nextElementSibling!==vac)seg.after(vac)}else if(app.firstElementChild!==vac)app.prepend(vac)}}
   /* Accueil : bébé tout en haut (grossesse et après la naissance), puis les raccourcis */
   if(S.role==='parent'&&!S.vue&&(S.tab||'accueil')==='accueil'){const bc=app&&(app.querySelector(':scope>.b3h-carte')||app.querySelector(':scope>.bebe-carte'));
     if(bc){const sh=app.querySelector(':scope>.sh');if(sh)sh.remove();if(app.firstElementChild!==bc)app.prepend(bc);const q=app.querySelector(':scope>.quick');if(q&&bc.nextElementSibling!==q)bc.after(q)}}}catch(e){}return x};
