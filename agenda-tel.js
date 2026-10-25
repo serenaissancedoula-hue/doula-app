@@ -31,3 +31,6 @@ document.addEventListener('click',e=>{const f=e.target.closest('[data-ag-fin]');
   const b=e.target.closest('[data-ag]');if(!b)return;e.stopPropagation();const r=agTrouver(b.dataset.ag);if(r)agProposer(r)},true);
 /* bouton « Agenda » sur les rendez-vous confirmés */
 if(typeof cRdvs==='function'){const _crAG=cRdvs;cRdvs=function(c){return _crAG(c).replace(/<button class="btn sm ghost" data-act="rdvModifier" data-id="(\d+)">Changer l'heure<\/button>/g,(m,id)=>{const r=agTrouver(id);return (r&&r.statut==='confirme'?'<button class="btn sm ghost" data-ag="'+id+'">'+icon('fa-calendar-plus')+'Agenda</button>':'')+m})}}
+
+/* parcours de la famille (doula) : petit « x » pour effacer une date mise par erreur */
+document.addEventListener('click',e=>{const b=e.target.closest('[data-pclr]');if(!b)return;e.stopPropagation();e.preventDefault();const i=b.parentElement.querySelector('input[type=date]');if(!i)return;i.value='';i.dispatchEvent(new Event('input',{bubbles:true}));i.dispatchEvent(new Event('change',{bubbles:true}));toast('Date effacée')},true);
