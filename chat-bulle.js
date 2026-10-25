@@ -116,3 +116,34 @@ if(typeof pParametres==='function'){const _ppCB=pParametres;pParametres=function
   else{const L=(S.clients||[]).filter(x=>!x.archivee_le);c+=L.length?'<div class="list">'+L.map(x=>'<div class="li"><div class="tx"><b>'+esc(cName(x))+'</b></div><button class="btn sm ghost" data-cb-eff="'+x.id+'">'+icon('fa-trash')+' Effacer</button></div>').join('')+'</div>':'<p class="small muted">Aucune conversation.</p>'}
   h+=c+'</div>'}catch(e){}return h}}
 setTimeout(function rep(){if(typeof MOI!=='undefined'&&MOI){cbChargerEff().then(()=>{try{render()}catch(e){}})}else setTimeout(rep,1500)},1500);
+/* glisser une conversation vers la gauche : Archiver ou Supprimer (liste des familles de la doula) */
+(function(){
+let ARCH=null;async function chargerArch(){try{const {data}=await sb.auth.getUser();ARCH=((data&&data.user&&data.user.user_metadata)||{}).chat_archive||{}}catch(e){ARCH=ARCH||{}}return ARCH}
+async function sauverArch(a){const {error}=await sb.auth.updateUser({data:{chat_archive:a}});if(error){toast('Pas enregistré : '+(error.message||'erreur'));return false}ARCH=a;return true}
+const _liste=cbListeFamilles;
+cbListeFamilles=function(){if(ARCH===null){chargerArch().then(()=>{if(CB.ouvert&&!CB.fid)cbDessiner(true)});ARCH={}}
+  const tous=(S.clients||[]).filter(c=>!c.archivee_le&&c.statut!=='archivee');const arch=tous.filter(c=>ARCH[c.id]&&!(NONLUS[c.id]>0));
+  const h=_liste.apply(this,arguments),t=document.createElement('template');t.innerHTML=h;
+  t.content.querySelectorAll('.cb-fam').forEach(b=>{const id=b.dataset.id,est=!!ARCH[id]&&!(NONLUS[id]>0);if(est&&!CB.voirArch){b.remove();return}if(!est&&CB.voirArch){b.remove();return}
+    const w=document.createElement('div');w.className='cb-sw';w.innerHTML='<div class="cb-act"><button class="cb-a-arch" data-cb-arch="'+id+'">'+icon(est?'fa-box-open':'fa-box-archive')+'<span>'+(est?'Désarchiver':'Archiver')+'</span></button><button class="cb-a-sup" data-cb-sup="'+id+'">'+icon('fa-trash')+'<span>Supprimer</span></button></div>';
+    b.replaceWith(w);b.classList.add('cb-swi');w.appendChild(b)});
+  const fams=t.content.querySelector('.cb-fams');
+  if(fams){if(CB.voirArch&&!arch.length)fams.innerHTML='<p class="small muted" style="padding:16px">Aucune conversation archivée.</p>';
+    fams.insertAdjacentHTML('beforeend',(arch.length||CB.voirArch)?'<button class="cb-archlien" data-cb-voirarch="1">'+(CB.voirArch?icon('fa-arrow-left')+' Retour aux conversations':icon('fa-box-archive')+' Conversations archivées ('+arch.length+')')+'</button>':'');
+    if(!CB.voirArch&&tous.length)fams.insertAdjacentHTML('afterbegin','<p class="xs muted cb-astuce">Glissez une conversation vers la gauche pour l\'archiver ou la supprimer.</p>')}
+  return [...t.content.childNodes].map(n=>n.outerHTML||n.textContent||'').join('')};
+/* le geste (l'ouverture est gardée même si la fenêtre se redessine) */
+let G=null;const _cbD=cbDessiner;cbDessiner=function(){if(G)return;const r=_cbD.apply(this,arguments);try{if(CB.swOuvert){const el=document.querySelector('.cb-swi[data-id="'+CB.swOuvert+'"]');if(el){el.style.transition='none';el.style.transform='translateX(-160px)';el.dataset.o='1'}}}catch(e){}return r};const ouvrir=(el,x)=>{el.style.transform='translateX('+x+'px)'};
+function fermerTous(sauf){document.querySelectorAll('.cb-swi').forEach(e=>{if(e!==sauf){e.style.transition='transform .2s';ouvrir(e,0);e.dataset.o=''}})}
+document.addEventListener('touchstart',e=>{const el=e.target.closest('.cb-swi');if(!el)return;G={el,x0:e.touches[0].clientX,y0:e.touches[0].clientY,base:el.dataset.o?-160:0,move:false};el.style.transition='none'},{passive:true});
+document.addEventListener('touchmove',e=>{if(!G)return;const dx=e.touches[0].clientX-G.x0,dy=e.touches[0].clientY-G.y0;if(!G.move&&Math.abs(dy)>Math.abs(dx))return(G=null);if(Math.abs(dx)>6)G.move=true;if(G.move)ouvrir(G.el,Math.max(-170,Math.min(0,G.base+dx)))},{passive:true});
+document.addEventListener('touchend',()=>{if(!G)return;const el=G.el,m=new DOMMatrix(getComputedStyle(el).transform).m41;el.style.transition='transform .2s';if(G.move){const o=m<-60;ouvrir(el,o?-160:0);el.dataset.o=o?'1':'';CB.swOuvert=o?el.dataset.id:null;if(o)fermerTous(el);el.dataset.glisse='1';setTimeout(()=>{el.dataset.glisse=''},350)}G=null});
+/* un toucher pendant/juste après un glissement ne doit pas ouvrir la conversation */
+document.addEventListener('click',e=>{const el=e.target.closest('.cb-swi');if(el&&(el.dataset.glisse||el.dataset.o)){e.stopPropagation();e.preventDefault();if(el.dataset.o&&!el.dataset.glisse){el.style.transition='transform .2s';ouvrir(el,0);el.dataset.o='';CB.swOuvert=null}return}
+  let b;if(b=e.target.closest('[data-cb-voirarch]')){e.stopPropagation();CB.voirArch=!CB.voirArch;cbDessiner(true);return}
+  if(b=e.target.closest('[data-cb-arch]')){e.stopPropagation();const id=b.dataset.cbArch,a=Object.assign({},ARCH||{});if(a[id])delete a[id];else a[id]=new Date().toISOString();CB.swOuvert=null;sauverArch(a).then(ok=>{if(ok){cbDessiner(true);toast(a[id]?'Conversation archivée':'Conversation désarchivée')}});return}
+  if(b=e.target.closest('[data-cb-sup]')){e.stopPropagation();if(b.dataset.c!=='1'){b.dataset.c='1';b.querySelector('span').textContent='Confirmer';return}CB.swOuvert=null;const fb=document.createElement('button');fb.dataset.c='1';cbEffacer(b.dataset.cbSup,fb).then(()=>cbDessiner(true));return}},true);
+const st=document.createElement('style');st.textContent='.cb-sw{position:relative;overflow:hidden;border-bottom:1px solid var(--line)}.cb-sw .cb-fam{border-bottom:0}.cb-swi{position:relative;z-index:1;background:var(--card);will-change:transform}'+
+ '.cb-act{position:absolute;inset:0 0 0 auto;width:160px;display:flex}.cb-act button{flex:1;border:0;color:#fff;font:600 .72rem var(--f-body);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer}.cb-a-arch{background:#8a7a6f}.cb-a-sup{background:#c0392b}'+
+ '.cb-archlien{display:flex;gap:8px;align-items:center;width:100%;padding:14px;border:0;background:none;color:var(--accent);font:600 .85rem var(--f-body);cursor:pointer}.cb-astuce{padding:8px 14px 0;margin:0}';document.head.appendChild(st);
+})();
