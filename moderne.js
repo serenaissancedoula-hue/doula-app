@@ -21,7 +21,7 @@ const _r=render;render=function(){const x=_r.apply(this,arguments);try{
   /* Journal bébé a son propre onglet : plus besoin du choix « Mon suivi / Mon journal » */
   if(app&&S.role==='parent'&&(S.tab==='suivi'||S.tab==='journal')){const sg=[...app.querySelectorAll(':scope>.seg')].find(x=>x.querySelector('[data-act=spv]'));if(sg)sg.remove()}
   /* Suivi : le calendrier en premier, juste sous « Mon suivi / Mon journal » */
-  if(S.role==='parent'&&!S.vue&&S.tab==='suivi'&&app){const cal=[...app.querySelectorAll(':scope>.card')].find(c=>{const e=c.querySelector('.eyebrow');return e&&/^mon calendrier$/i.test(e.textContent.trim())});
+  if(S.role==='parent'&&!S.vue&&S.tab==='suivi'&&!S.sub&&app){const cal=[...app.querySelectorAll(':scope>.card')].find(c=>{const e=c.querySelector('.eyebrow');return e&&/^mon calendrier$/i.test(e.textContent.trim())});
     if(cal){const seg=app.querySelector(':scope>.seg');if(seg){if(seg.nextElementSibling!==cal)seg.after(cal)}else if(app.firstElementChild!==cal)app.prepend(cal)}
     const prep=app.querySelector(':scope>.mod-prep');if(prep&&cal&&cal.nextElementSibling!==prep)cal.after(prep);
     /* les vaccins de bébé tout en haut, avant le calendrier */

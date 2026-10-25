@@ -1,7 +1,7 @@
 /* Sérénaissance — chat en direct avec la doula : bouton flottant + mise à jour instantanée des messages (temps réel). */
 function chatNonLus(){try{return S.role==='parent'?MSGS.filter(m=>m.de_doula&&!m.lu).length:Object.values(NONLUS||{}).reduce((a,b)=>a+(+b||0),0)}catch(e){return 0}}
 function majBoutonChat(){try{let b=document.getElementById('chatFab');
-  const parent=S.role==='parent'&&FAM&&!S.vue,doula=S.role==='doula'&&ME_DOULA&&!S.vue,surMsg=(parent&&S.tab==='madoula'&&(S.seg||'messages')==='messages')||(doula&&S.openClient&&S.ctab==='messages');
+  const parent=S.role==='parent'&&FAM&&!S.vue,doula=S.role==='doula'&&ME_DOULA&&!S.vue,surMsg=(doula&&S.openClient&&S.ctab==='messages');
   if(!(parent||doula)||surMsg||document.getElementById('layer')&&document.getElementById('layer').innerHTML){if(b)b.remove();return}
   const n=chatNonLus();if(!b){b=document.createElement('button');b.id='chatFab';b.setAttribute('data-act','chatOuvrir');document.body.appendChild(b)}
   b.innerHTML='<i class="fa-solid fa-comments"></i><span>Chat</span>'+(n?'<b>'+n+'</b>':'')}catch(e){}}

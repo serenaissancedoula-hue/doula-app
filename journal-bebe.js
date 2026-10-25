@@ -40,7 +40,11 @@ pJournal=function(){const st=stage();if(st.k!=='pp')return _pJ.apply(this,argume
   let avant='';try{const o=_pJ.apply(this,arguments),a=o.indexOf('</div>',o.indexOf('<div class="seg">'))+6,b=o.indexOf('<div class="sh">');if(a>5&&b>a)avant=o.slice(a,b)}catch(e){}
   const n=((S.parent.naissance||{}).prenomBebe||'').trim()||'Bébé',d=Math.max(0,st.day|0),s=Math.floor(d/7),j=d%7;
   const tab=JB_TABS.find(t=>t[0]===S.jbTab)||JB_TABS[0],types=tab[3],L=S.logs.filter(l=>types.includes(l.type));
-  let h='<div class="sh jb-tete">'+(d>=7?'<span class="eyebrow acc">'+s+' semaine'+(s>1?'s':'')+(j?' et '+j+' jour'+(j>1?'s':''):'')+'</span>':'')+'<h1>'+(d===0?esc(n)+' est arrivé(e) aujourd\'hui 🩷':esc(n)+' a '+d+' jour'+(d>1?'s':''))+'</h1><p class="sub">Repas, couches, sommeil et croissance</p></div>';
+  const B=new Date(st.birth),N=new Date();let mo=(N.getFullYear()-B.getFullYear())*12+N.getMonth()-B.getMonth();if(N.getDate()<B.getDate())mo--;mo=Math.max(0,mo);
+  const pl=(x,u,us)=>x+' '+(x>1?us:u);
+  const titre=d===0?esc(n)+' est arrivé(e) aujourd\'hui 🩷':d<90?esc(n)+' a '+pl(d,'jour','jours'):mo<24?esc(n)+' a '+mo+' mois':esc(n)+' a '+pl(Math.floor(mo/12),'an','ans')+(mo%12?' et '+mo%12+' mois':'');
+  const sous=d<7?'':d<90?pl(s,'semaine','semaines')+(j?' et '+pl(j,'jour','jours'):''):pl(d,'jour','jours')+' de vie';
+  let h='<div class="sh jb-tete">'+(sous?'<span class="eyebrow acc">'+sous+'</span>':'')+'<h1>'+titre+'</h1><p class="sub">Repas, couches, sommeil et croissance</p></div>';
   h+='<div class="jb-tabs" role="tablist">'+JB_TABS.map(t=>'<button role="tab" aria-selected="'+(t===tab)+'" data-jb="'+t[0]+'">'+icon(t[1])+'<span>'+t[2]+'</span></button>').join('')+'</div>';
   h+=typeof timerCard==='function'?timerCard():'';
   const aj=tab[0]==='resume'?[]:types;

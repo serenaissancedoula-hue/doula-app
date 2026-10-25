@@ -18,7 +18,7 @@ function stats(day){
   const sein=L.filter(l=>l.type==='sein'),tot=sein.reduce((a,l)=>a+(+l.sec||0),0);
   const bib=L.filter(l=>l.type==='biberon').reduce((a,l)=>a+(+l.ml||0),0);
   return '<div class="grid3"><div class="stat"><b>'+sein.length+'</b><span>tétées · '+dur(tot)+'</span></div><div class="stat"><b>'+bib+' ml</b><span>au biberon</span></div>'+(iv||'<div class="stat"><b>'+L.length+'</b><span>boires en 24 h</span></div>')+'</div>'}
-function kit(){const st=stage();if(st.k!=='pp')return '';const day=st.day;
+function kit(){const st=stage();if(st.k!=='pp'||st.day>365)return '';const day=st.day;
   const btn=(a,v,ic,t)=>'<button class="qbtn" data-act="'+a+'"'+(v?' data-v="'+v+'"':'')+'>'+icon(ic)+t+'</button>';
   let h='<div class="card"><span class="eyebrow acc">Boires de bébé</span><h2>Jour '+day+'</h2><p class="small muted">Repère : '+nb(day)+' · environ '+ml(day)+' par biberon.</p><div class="quick">'+
    (S.timer?'':btn('feedGo','G','fa-person-breastfeeding','Sein gauche')+btn('feedGo','D','fa-person-breastfeeding','Sein droit'))+(gB()?'':btn('bibGo','','fa-bottle-droplet','Biberon (chrono)'))+btn('tirage','','fa-pump-medical','Tirage')+btn('couche','','fa-droplet','Couche')+btn('sommeil','','fa-moon','Sommeil')+btn('poids','','fa-weight-scale','Poids')+'</div>'+stats(day)+'</div>';
