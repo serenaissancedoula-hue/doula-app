@@ -9,14 +9,21 @@ const DV=[];for(let w=1;w<=12;w++)DV.push({d0:(w-1)*7,d1:w*7-1,lab:String(w),u:w
 function dvIndex(day){const i=DV.findIndex(p=>day>=p.d0&&day<=p.d1);return i<0?(day<0?0:DV.length-1):i}
 function dvInfoPP(d){try{return (typeof BEBE_PP!=='undefined'&&BEBE_PP.find(x=>d>=x[0]&&d<=x[1]))||BEBE_PP[BEBE_PP.length-1]}catch(e){return null}}
 function dvPer(d){try{const P=window.bbPER||[];return P.find(x=>d<=x.max)||P[P.length-1]||null}catch(e){return null}}
+/* visuel façon appli de bébé : grand chiffre (semaine / mois / ans), photo d'un bébé de cet âge et mesures moyennes (OMS, filles et garçons, 3e au 97e percentile, arrondi) */
+const DV_MES=[[0,46,54,2.5,4.4],[1,50.5,58.5,3.2,5.6],[2,54,62,4,6.9],[3,57,65,4.6,7.8],[4,59,67.5,5,8.5],[5,61,69.5,5.4,9.1],[6,62.5,71.5,5.7,9.5],[7,64,73,6,9.9],[8,65.5,74.5,6.3,10.3],[9,66.5,76,6.5,10.6],[10,68,77.5,6.7,10.9],[11,69,78.5,6.9,11.2],[12,70,80,7,11.5],[15,73,83.5,7.6,12.3],[18,76,87,8.1,13],[21,78.5,90,8.6,13.7],[24,81,92.5,9,14.3],[30,85,97.5,10,15.5],[36,88.5,102,10.8,16.9],[42,92,106,11.6,18.2],[48,95,110,12.2,19.5],[54,98,113,12.9,20.8],[60,100,116,13.7,22]];
+function dvMes(d){const m=d/30.44;let r=DV_MES[0];DV_MES.forEach(x=>{if(m>=x[0]-.25)r=x});return r}
+function dvPhoto(d){const m=d/30.44;return d<14?'nouveau-ne':d<28?'sem-3-4':d<56?'sem-5-8':d<84?'sem-9-12':m<6?'4-5-mois':m<8?'6-7-mois':m<10?'8-9-mois':m<12?'10-11-mois':m<15?'1-an':m<21?'15-18-mois':m<30?'21-24-mois':m<42?'2-3-ans':m<54?'3-4-ans':'4-5-ans'}
+function dvVisuel(P,avecNum,ic){const mid=Math.round((P.d0+P.d1)/2),M=dvMes(mid),c=x=>String(x).replace('.',',');
+  return (avecNum?'<div class="dvx-num"><i></i><div><b>'+P.lab+'</b><span>'+P.u+'</span></div><i></i></div>':'')+
+    '<div class="dvx-row"><div class="dvx-img"><span>'+(ic||'🌱')+'</span><img src="img/dev/'+dvPhoto(mid)+'.jpg" alt="" onerror="this.remove()"></div>'+
+    '<div class="dvx-mes"><div><small>Taille moyenne</small><b>'+c(M[1])+' à '+c(M[2])+' cm</b></div><div><small>Poids moyen</small><b>'+c(M[3])+' à '+c(M[4])+' kg</b></div><p>Repères de l\'OMS</p></div></div>'}
 function dvPage(){const st=stage();if(st.k!=='pp')return '';const nom=esc(((S.parent.naissance||{}).prenomBebe||'').trim()||'Bébé'),cur=dvIndex(st.day);
   const i=S.devSel==null?cur:Math.max(0,Math.min(DV.length-1,S.devSel)),P=DV[i],mid=Math.round((P.d0+P.d1)/2),I=dvInfoPP(P.d0)||[],E=dvPer(mid)||{};
   const deb=addD(st.birth,P.d0),fin=addD(st.birth,P.d1),f=x=>x.toLocaleDateString('fr-CA',{day:'numeric',month:'short',year:P.d0>300?'numeric':undefined});
   const ph=S.parent.photoBebe;
   let h=back('sub','','Suivi')+'<div class="sh"><span class="eyebrow acc">De la naissance à 5 ans</span><h1>Développement</h1></div>';
   h+='<div class="dv-bande" role="tablist">'+DV.map((p,k)=>'<button role="tab" data-dv="'+k+'" aria-selected="'+(k===i)+'"'+(k===cur?' class="actu"':'')+'><b>'+p.lab+'</b><span>'+p.u+'</span></button>').join('')+'</div>';
-  h+='<div class="dv-haut"><div class="dv-img'+(ph?' ph':'')+'">'+(ph?'<img src="'+esc(ph)+'" alt="">':'<span>'+(E.ic||'🌱')+'</span>')+'</div>'+
-    '<div class="dv-info"><span class="eyebrow">'+(k=>k===cur?'Maintenant':k<cur?'Déjà passé':'À venir')(i)+'</span><b>'+P.t+'</b><span class="small muted">du '+f(deb)+' au '+f(fin)+'</span>'+(E.t?'<span class="pill acc">'+E.t+'</span>':'')+'</div></div>';
+  h+=dvVisuel(P,false,E.ic)+'<p class="dv-quand"><b>'+P.t+'</b> · '+(i===cur?'maintenant':i<cur?'déjà passé':'à venir')+' · du '+f(deb)+' au '+f(fin)+'</p>';
   if(I[2])h+='<div class="card"><h2>'+esc(I[2])+'</h2><h3 class="dv-h">'+icon('fa-baby')+' '+nom+'</h3><p>'+I[3]+'</p>'+(I[4]?'<h3 class="dv-h">'+icon('fa-spa')+' Vous</h3><p>'+I[4]+'</p>':'')+(I[5]?'<div class="banner sage">'+icon('fa-lightbulb')+'<div class="small"><b>Ce que disent les études :</b> '+I[5]+'</div></div>':'')+'</div>';
   if(E.ph)h+='<div class="card"><h3 class="dv-h">'+icon('fa-star')+' Ce qu\'il apprend vers cet âge</h3><ul class="clean dv-l">'+E.ph.map(x=>'<li>'+esc(x)+'</li>').join('')+'</ul><p class="xs muted">Des repères, pas des examens : chaque enfant va à son rythme.</p></div>';
   if(E.tips)h+='<div class="card"><h3 class="dv-h">'+icon('fa-hand-holding-heart')+' Comment l\'accompagner</h3><ul class="clean dv-l">'+E.tips.map(x=>'<li>'+esc(x)+'</li>').join('')+'</ul></div>';
@@ -31,8 +38,9 @@ function dvAge(st){const d=Math.max(0,st.day|0),B=new Date(st.birth),N=new Date(
 function dvSuivi(st){const nom=esc(((S.parent.naissance||{}).prenomBebe||'').trim()||'Bébé'),cur=dvIndex(st.day),P=DV[cur],I=dvInfoPP(st.day)||[],E=dvPer(st.day)||{},ph=S.parent.photoBebe;
   const f=x=>x.toLocaleDateString('fr-CA',{day:'numeric',month:'long'}),deb=addD(st.birth,P.d0),fin=addD(st.birth,P.d1),wk=Math.floor(Math.max(0,st.day)/7)+1;
   const gros=st.day<84?['Semaine',wk]:st.day<730?['Mois',Math.floor(st.day/30.44)]:['Ans',Math.floor(st.day/365.25)];
-  let h='<div class="sh"><span class="eyebrow acc">Suivi de '+nom+'</span><h1>'+nom+' a '+dvAge(st)+'</h1></div>';
-  h+='<div class="card dvs-sem"><div class="dvs-haut"><div class="dvs-num"><span>'+gros[0]+'</span><b>'+gros[1]+'</b></div><div class="dvs-img'+(ph?' ph':'')+'">'+(ph?'<img src="'+esc(ph)+'" alt="">':'<span>'+(E.ic||'🌱')+'</span>')+'</div></div>'+
+  const fille=/^f/i.test((S.parent.naissance||{}).sexe||''),ttl=st.day<1?nom+' est arrivé'+(fille?'e':'')+' aujourd\'hui 🩷':nom+' a '+dvAge(st);
+  let h='<div class="sh"><span class="eyebrow acc">Suivi de '+nom+'</span><h1>'+ttl+'</h1></div>';
+  h+='<div class="card dvs-sem">'+dvVisuel(P,true,E.ic)+
     '<span class="eyebrow">'+P.t+' · du '+f(deb)+' au '+f(fin)+'</span>'+(I[2]?'<h2 style="margin:4px 0 6px">'+esc(I[2])+'</h2>':'')+(I[3]?'<p>'+I[3]+'</p>':'')+
     (E.ph&&E.ph.length?'<h3 class="dv-h">'+icon('fa-star')+' Ce que '+nom+' pourrait faire en ce moment</h3><ul class="clean dv-l">'+E.ph.slice(0,4).map(x=>'<li>'+esc(x)+'</li>').join('')+'</ul>':'')+
     '<p class="xs muted">Des repères, pas des examens : chaque bébé va à son rythme.</p>'+
@@ -50,6 +58,10 @@ const _rDV=render;render=function(){const x=_rDV.apply(this,arguments);try{if(S.
   '.dv-bande button.actu::after{content:"";position:absolute;bottom:5px;left:50%;width:5px;height:5px;margin-left:-2.5px;border-radius:50%;background:var(--sage)}'+
   '.dv-bande button[aria-selected=true]{background:var(--accent);color:#fff}.dv-bande button[aria-selected=true] b{color:#fff}'+
   '.li .tx .pill{white-space:normal;display:inline-block;max-width:100%;margin-top:4px;line-height:1.3;text-align:left}'+
+  '.dvx-num{display:flex;align-items:center;gap:14px;margin:0 0 14px}.dvx-num i{flex:1;height:2px;background:var(--accent);opacity:.35;border-radius:2px}.dvx-num div{display:flex;flex-direction:column;align-items:center;line-height:1}.dvx-num b{font-size:1.5rem;color:var(--accent);font-weight:700}.dvx-num span{font-size:.7rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin-top:4px}'+
+  '.dvx-row{display:grid;grid-template-columns:1.25fr 1fr;gap:12px;margin-bottom:14px}.dvx-img{position:relative;aspect-ratio:1;border-radius:20px;overflow:hidden;background:linear-gradient(150deg,#f6e3d8,#e8cdbf);display:grid;place-items:center;font-size:3.2rem}.dvx-img img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}'+
+  '.dvx-mes{display:flex;flex-direction:column;justify-content:center;gap:12px;padding:12px 14px;border-radius:20px;background:var(--soft)}.dvx-mes div{display:flex;flex-direction:column;gap:2px}.dvx-mes small{font-size:.74rem;color:var(--muted)}.dvx-mes b{font-size:1rem;line-height:1.2}.dvx-mes p{margin:0;font-size:.66rem;color:var(--muted)}'+
+  '.dv-quand{font-size:.82rem;color:var(--muted);margin:-4px 2px 14px}.dv-quand b{color:var(--ink)}'+
   '.dvs-haut{display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:stretch;margin-bottom:12px}.dvs-num{display:flex;flex-direction:column;justify-content:center;align-items:center;min-width:96px;border-radius:20px;background:var(--accent);color:#fff;padding:12px}.dvs-num span{font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;opacity:.9}.dvs-num b{font-size:3rem;line-height:1;font-family:var(--f-display)}'+
   '.dvs-img{border-radius:20px;overflow:hidden;min-height:120px;max-height:170px;background:linear-gradient(150deg,#f6e3d8,#e8cdbf);display:grid;place-items:center;font-size:3rem}.dvs-img img{width:100%;height:100%;object-fit:cover}'+
   '.dv-haut{display:grid;grid-template-columns:1.1fr 1fr;gap:12px;margin-bottom:14px}.dv-img{aspect-ratio:1;border-radius:22px;overflow:hidden;background:linear-gradient(150deg,#f6e3d8,#e8cdbf);display:grid;place-items:center;font-size:3.4rem}'+
