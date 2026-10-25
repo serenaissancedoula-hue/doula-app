@@ -62,6 +62,7 @@ function listeHtml(){const L=filtrer();
   return '<p class="xs muted">'+L.length+' doula'+(L.length>1?'s':'')+(A.q?' pour « '+esc(A.q)+' »':'')+'</p>'+L.map(d=>carte(d,true)).join('')}
 function demandesHtml(){if(!A.dem.length)return '';
   return '<div class="card"><span class="eyebrow acc">Mes demandes</span><div class="list">'+A.dem.map(x=>{const s=STAT[x.statut]||STAT.nouvelle;return '<div class="li"><div class="ic">'+icon(x.statut==='acceptee'?'fa-circle-check':'fa-paper-plane')+'</div><div class="tx"><b>'+esc(x.doula_nom||'Une doula')+'</b><span>'+new Date(x.created_at).toLocaleDateString('fr-CA',{day:'numeric',month:'short'})+(x.statut==='acceptee'?' · surveillez vos courriels : une invitation arrive':'')+'</span></div><span class="pill '+s[1]+'">'+s[0]+'</span></div>'}).join('')+'</div></div>'}
+window.ecranChercheuse=(...a)=>ecranChercheuse(...a);
 async function ecranChercheuse(pub){
   $('#tabs').innerHTML='';$('#gear').hidden=true;
   $('#app').innerHTML='<div style="max-width:640px;margin:0 auto;width:100%" class="stack"><p class="small muted" style="text-align:center;padding:40px">Chargement…</p></div>';
