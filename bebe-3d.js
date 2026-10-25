@@ -106,3 +106,33 @@ function bebe3dTemps(w){const api=_b3.api,A=_b3.anim;if(!api||!A)return;
   t=Math.max(0,Math.min(A.duree-.05,t));
   api.pause();api.seekTo(t);setTimeout(()=>{try{api.pause()}catch(e){}},150);
   const d=document.getElementById('b3Debug');if(d)d.textContent='Semaine '+w+' → '+t.toFixed(2)+' s sur '+A.duree.toFixed(1)+' s ('+A.nom+')'}
+
+/* ---- Données pour la page « Mon bébé en 3D » (taille, trimestre, semaines 0 à 3) ---- */
+const B3_FRUITS={4:['graine de pavot',.1,0],5:['graine de sésame',.2,0],6:['lentille',.4,0],7:['bleuet',1,0],8:['framboise',1.6,1],9:['cerise',2.3,2],10:['fraise',3.1,4],11:['figue',4.1,7],12:['lime',5.4,14],13:['citron',7.4,23],14:['nectarine',8.7,43],15:['pomme',10.1,70],16:['avocat',11.6,100],17:['poire',13,140],18:['poivron',14.2,190],19:['mangue',15.3,240],20:['banane',25.6,300],21:['carotte',26.7,360],22:['papaye',27.8,430],23:['pamplemousse',28.9,500],24:['épi de maïs',30,600],25:['chou-fleur',34.6,660],26:['laitue romaine',35.6,760],27:['brocoli',36.6,875],28:['aubergine',37.6,1000],29:['courge musquée',38.6,1150],30:['chou',39.9,1300],31:['noix de coco',41.1,1500],32:['céleri-rave',42.4,1700],33:['ananas',43.7,1900],34:['cantaloup',45,2100],35:['melon miel',46.2,2400],36:['laitue pommée',47.4,2600],37:['bette à carde',48.6,2900],38:['poireau',49.8,3100],39:['mini melon d\'eau',50.7,3300],40:['citrouille',51.2,3500],41:['citrouille',51.5,3600],42:['citrouille',51.7,3700]};
+const B3_MASC=['bleuet','citron','avocat','poivron','pamplemousse','épi','chou-fleur','brocoli','chou','céleri-rave','ananas','cantaloup','melon','poireau','mini'];
+function b3Trimestre(w){return w<=13?'1er trimestre':w<=27?'2e trimestre':'3e trimestre'}
+const B3_DEBUT={
+ 0:['Semaine des dernières règles : la grossesse se compte à partir du premier jour de vos dernières règles, avant même la conception.','Vos règles : le corps se prépare à une nouvelle ovulation.','Si vous planifiez une grossesse, commencez l\'acide folique (au moins 0,4 mg par jour) dès maintenant.'],
+ 1:['Un ovule mûrit dans l\'un de vos ovaires et l\'utérus prépare une muqueuse épaisse pour l\'accueillir.','Fin des règles. Vous ne remarquez encore rien de particulier.','Continuez l\'acide folique, limitez l\'alcool et le tabac.'],
+ 2:['L\'ovulation a lieu : l\'ovule est libéré et peut être fécondé dans les 24 heures. La fécondation se fait souvent à la fin de cette semaine.','Certaines femmes sentent une petite douleur d\'ovulation ou remarquent des pertes plus claires.','Les jours autour de l\'ovulation sont les plus fertiles.'],
+ 3:['L\'œuf fécondé se divise en plusieurs cellules (la morula, puis le blastocyste) et voyage vers l\'utérus pour s\'y implanter.','Rien de visible encore. Un petit saignement d\'implantation est possible.','Le test de grossesse est encore trop tôt : attendez la date de vos règles.']};
+function b3Mouvement(w){if(w<=2)return'Pas encore de bébé : la conception a lieu vers la fin de la 2e semaine.';if(w<4)return'Pas encore de bébé formé : les cellules se multiplient.';if(w<8)return'Pas encore de mouvements. Le cœur commence à battre vers la 6e semaine.';const m=B3_MOUV.find(x=>w>=x[0]&&w<=x[1]);return m?m[2]:''}
+function b3Taille(w){if(w<4)return'';const f=B3_FRUITS[Math.min(42,w)];if(!f)return'';const art=B3_MASC.includes(f[0].split(' ')[0])?'d\'un ':'d\'une ';
+  const cm=String(f[1]).replace('.',','),g=f[2]?(f[2]>=1000?String((f[2]/1000).toFixed(1)).replace('.',',')+' kg':f[2]+' g'):'moins de 1 g';
+  return'<div class="b3-chiffres"><div><span>Grosseur</span><b>'+(typeof FRUIT_EMOJI!=='undefined'&&FRUIT_EMOJI[f[0]]?FRUIT_EMOJI[f[0]]+' ':'')+art+bebe3dEsc(f[0])+'</b></div><div><span>Taille</span><b>'+cm+' cm</b></div><div><span>Poids</span><b>'+g+'</b></div></div>'}
+function bebe3dTextePage(w){
+  const I=w<4?[w].concat(B3_DEBUT[w]):((typeof SEMAINES!=='undefined')?SEMAINES.find(s=>s[0]===Math.min(42,w)):null);
+  const bloc=(t,x)=>x?'<div class="b3-bloc"><b>'+t+'</b><p>'+bebe3dEsc(x)+'</p></div>':'';
+  return b3Taille(w)+bloc(w<4?'Ce qui se passe cette semaine':'Ce que bébé fait cette semaine',I?I[1]:'')+
+    bloc('Ses mouvements',b3Mouvement(w))+bloc('Ce qu\'il entend et ressent',w<4?'':bebe3dSens(w))+
+    bloc('À quoi vous attendre',I?I[2]:'')+bloc('Petit conseil',I?I[3]:'')}
+
+const B3_MOUV=[
+  [4,7,'Pas encore de mouvements : le cœur, lui, bat déjà dès 6 semaines.',''],
+  [8,12,'Bébé fait de petits tressaillements et étire son corps tout entier. Vous ne le sentez pas encore.','tressaille'],
+  [13,17,'Il bouge bras et jambes, porte les mains à son visage et fait des culbutes dans le liquide.','culbute'],
+  [18,24,'Coups de pied, étirements et hoquet : vous commencez à sentir de petits papillons, puis de vrais petits coups.','coups'],
+  [25,31,'Coups de pied plus forts, poings, hoquet rythmé. Il dort et s\'éveille par cycles.','coups fort'],
+  [32,36,'Il a moins de place : roulades, étirements et poussées plutôt que grands coups. Les mouvements ne doivent pas diminuer.','roule'],
+  [37,42,'Bébé est tassé : il s\'étire, pousse et se tortille. Il doit bouger chaque jour autant qu\'avant.','roule']];
+
