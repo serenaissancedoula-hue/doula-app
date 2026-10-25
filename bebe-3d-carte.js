@@ -55,7 +55,7 @@ function b3cPlacer(){B3C.attente=false;
     if(B3C.obj!==o){if(B3C.obj)B3C.scene.remove(B3C.obj);B3C.scene.add(o);B3C.obj=o;b3cLimites(o.userData.cle);b3cVueFace()}
     if(t.parentNode!==rond){if(B3C.rond)B3C.rond.classList.remove('b3c-ok');rond.appendChild(t);B3C.rond=rond;B3C.ro.disconnect();B3C.ro.observe(rond)}
     if(B3C.plein&&!plein)b3cVueFace();B3C.plein=plein;B3C.ctl.enabled=plein;rond.classList.add('b3c-ok');
-    b3cTaille();if(plein)b3cAnimer()}).catch(()=>{}) /* la photo reste affichée */}
+    b3cTaille();if(plein)b3cAnimer()}).catch(()=>{const r=z.querySelector('.photo-rond');if(r)r.classList.add('b3c-echec')}) /* si la 3D échoue : la photo s'affiche */}
 function b3cSurveiller(){if(B3C.attente)return;B3C.attente=true;requestAnimationFrame(b3cPlacer)}
 new MutationObserver(b3cSurveiller).observe(document.body,{childList:true,subtree:true});
 (function(){const st=document.createElement('style');st.textContent=
@@ -91,23 +91,25 @@ carteBebe=function(g){let h=_carteBebe3D(g);
 document.addEventListener('click',e=>{const z=e.target.closest('.b3h');if(z&&!e.target.closest('[data-act]')&&!document.getElementById('bebePE')&&typeof ouvrirBebePE==='function')ouvrirBebePE()});
 document.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e.target.classList&&e.target.classList.contains('b3h')){e.preventDefault();ouvrirBebePE()}});
 (function(){const st=document.createElement('style');st.textContent=
-  '.b3h{position:relative;width:100%;aspect-ratio:1/1.08;border-radius:26px;overflow:hidden;cursor:pointer;color:#fff7f2;'+
-    'background:radial-gradient(ellipse at 60% 45%,#6b3238 0%,#3a1a20 48%,#1b0d11 100%);box-shadow:0 14px 34px rgba(80,30,25,.22)}'+
+  '.b3h{position:relative;width:100%;aspect-ratio:1/1.08;border-radius:26px;overflow:hidden;cursor:pointer;color:var(--ink);'+
+    'background:radial-gradient(ellipse at 50% 42%,#fffaf6 0%,#f7ebe2 52%,#ecdbcf 100%);box-shadow:0 10px 28px rgba(120,70,50,.14)}'+
   '.b3h-bebe{position:absolute;inset:0}.b3h .bebe-zone{position:absolute;inset:0;max-width:none!important;width:100%;height:100%;aspect-ratio:auto;margin:0;filter:none}'+
   '.b3h .bebe-zone.photo .photo-rond{border-radius:0;background:transparent;box-shadow:none}'+
+  '.b3h .photo-rond:not(.b3c-echec) img,#bebePE.b3f .photo-rond:not(.b3c-echec) img{opacity:0}'+
+  '.b3h .photo-rond:not(.b3c-ok):not(.b3c-echec)::after,#bebePE.b3f .photo-rond:not(.b3c-ok):not(.b3c-echec)::after{content:"Bébé arrive…";position:absolute;inset:0;display:grid;place-items:center;color:var(--muted);font-size:.9rem}'+
   '.b3h .bebe-zone.photo img{object-fit:contain;padding:12% 6% 14%;box-sizing:border-box;-webkit-mask-image:radial-gradient(circle,#000 55%,transparent 72%);mask-image:radial-gradient(circle,#000 55%,transparent 72%)}'+
-  '.b3h-salut{position:absolute;left:18px;top:16px;display:flex;flex-direction:column;pointer-events:none;text-shadow:0 1px 8px rgba(0,0,0,.35)}'+
-  '.b3h-salut span{font-size:.95rem;opacity:.85}.b3h-salut b{font-family:var(--f-display);font-size:1.7rem;line-height:1.1}'+
+  '.b3h-salut{position:absolute;left:18px;top:16px;display:flex;flex-direction:column;pointer-events:none}'+
+  '.b3h-salut span{font-size:.95rem;color:var(--muted)}.b3h-salut b{font-family:var(--f-display);font-size:1.7rem;line-height:1.1}'+
   '.b3h-bas{position:absolute;left:14px;right:14px;bottom:14px;display:flex;align-items:center;justify-content:space-between;gap:10px;pointer-events:none}'+
-  '.b3h-jour{font-family:var(--f-display);font-size:1.15rem;text-shadow:0 1px 8px rgba(0,0,0,.4)}.b3h-jour b{font-size:1.9rem;margin-left:4px}'+
-  '.b3h-btn{display:inline-flex;align-items:center;gap:7px;padding:8px 14px;border-radius:99px;background:rgba(255,244,238,.16);border:1px solid rgba(255,235,228,.35);font-weight:700;font-size:.85rem;backdrop-filter:blur(6px)}'+
+  '.b3h-jour{font-family:var(--f-display);font-size:1.15rem}.b3h-jour b{font-size:1.9rem;margin-left:4px}'+
+  '.b3h-btn{display:inline-flex;align-items:center;gap:7px;padding:8px 14px;border-radius:99px;background:rgba(255,255,255,.75);border:1px solid var(--line);color:var(--accent);font-weight:700;font-size:.85rem;backdrop-filter:blur(6px)}'+
   '.b3h-info{background:var(--soft);border-radius:20px;padding:14px 16px;display:flex;flex-direction:column;gap:6px}'+
   '.b3h-ligne{display:flex;align-items:center;justify-content:space-between;gap:10px}'+
   '.b3h-mod{border:0;background:none;color:var(--accent);font-weight:700;font-size:.85rem;padding:4px 0;cursor:pointer}'+
   '.b3h-carte .bb2-haut{grid-template-columns:1fr}.b3h-carte>.prog:empty{display:none}'+
   '.b3c-alt{display:grid;font-family:var(--f-display);font-size:1.2rem;line-height:1.25;color:var(--ink)}.b3c-alt span{grid-area:1/1;animation:b3cAlt 8s ease-in-out infinite}.b3c-alt span+span{animation-delay:-4s}'+
   '@keyframes b3cAlt{0%,42%{opacity:1}50%,92%{opacity:0}100%{opacity:1}}'+
-  '#bebePE{background:radial-gradient(ellipse at 50% 45%,#6b3238 0%,#3a1a20 48%,#1b0d11 100%)!important}'+
+  '#bebePE{background:radial-gradient(ellipse at 50% 42%,#fffaf6 0%,#f7ebe2 52%,#ecdbcf 100%)!important;color:var(--ink)!important}'+
   '#bebePE .bebe-zone.photo{width:min(100vw,600px)!important;max-width:none!important;height:min(62vh,600px);aspect-ratio:auto!important;margin:0 auto;filter:none!important}'+
   '#bebePE .bebe-zone.photo .photo-rond{border-radius:0;background:transparent;box-shadow:none}'+
   '#bebePE .bebe-zone.photo img{object-fit:contain;-webkit-mask-image:radial-gradient(circle,#000 55%,transparent 72%);mask-image:radial-gradient(circle,#000 55%,transparent 72%)}'+
@@ -140,16 +142,16 @@ ouvrirBebePE=function(){_ouvrirBebePE3D();const d=document.getElementById('bebeP
     '<p>'+esc(mo[2])+'</p>'+(b?'<p class="b3f-note">Son du cœur : une illustration, pas le vrai cœur de votre bébé.</p>':'')+'</div>';
   b3cSurveiller()};
 (function(){const st=document.createElement('style');st.textContent=
-  '#bebePE.b3f{display:block;padding:0;overflow:hidden;background:radial-gradient(ellipse at 50% 38%,#6b3238 0%,#3a1a20 45%,#1b0d11 100%)!important}'+
+  '#bebePE.b3f{display:block;padding:0;overflow:hidden;background:radial-gradient(ellipse at 50% 42%,#fffaf6 0%,#f7ebe2 52%,#ecdbcf 100%)!important}'+
   '.b3f-scene{position:absolute;left:0;right:0;top:0;bottom:var(--b3f-h,190px)}'+
   '#bebePE.b3f .bebe-zone.photo{position:absolute;inset:0;width:100%!important;height:100%!important;max-width:none!important;aspect-ratio:auto!important;margin:0}'+
-  '.b3f-chiffres{position:absolute;left:18px;bottom:18px;display:flex;flex-direction:column;gap:10px;pointer-events:none;color:#fff7f2;text-shadow:0 1px 10px rgba(0,0,0,.45)}'+
-  '.b3f-chiffres div{font-size:.9rem}.b3f-chiffres b{font-size:1.55rem;font-variant-numeric:tabular-nums}.b3f-chiffres span{display:block;font-size:.75rem;opacity:.8;margin-top:-2px}'+
-  '.b3f-sem{position:absolute;right:18px;bottom:18px;text-align:right;pointer-events:none;color:#fff7f2;text-shadow:0 1px 10px rgba(0,0,0,.45)}'+
-  '.b3f-sem b{display:block;font-family:var(--f-display);font-size:3.4rem;line-height:1}.b3f-sem span{font-size:1rem}'+
-  '.b3f-aide{position:absolute;left:0;right:0;top:calc(env(safe-area-inset-top,0px) + 22px);text-align:center;font-size:.75rem;color:#f3dde2;opacity:.7;pointer-events:none}'+
-  '#bebePE .b3f-fermer{position:absolute;top:calc(env(safe-area-inset-top,0px) + 12px);right:14px;z-index:5}'+
-  '.b3f-carte{position:absolute;left:0;right:0;bottom:0;min-height:var(--b3f-h,190px);box-sizing:border-box;background:var(--card,#fff);color:var(--ink);border-radius:26px 26px 0 0;padding:20px 20px calc(18px + env(safe-area-inset-bottom,0px));box-shadow:0 -10px 30px rgba(0,0,0,.25)}'+
+  '.b3f-chiffres{position:absolute;left:18px;bottom:18px;display:flex;flex-direction:column;gap:10px;pointer-events:none;color:var(--ink)}'+
+  '.b3f-chiffres div{font-size:.9rem}.b3f-chiffres b{font-size:1.55rem;font-variant-numeric:tabular-nums}.b3f-chiffres span{display:block;font-size:.75rem;color:var(--muted);margin-top:-2px}'+
+  '.b3f-sem{position:absolute;right:18px;bottom:18px;text-align:right;pointer-events:none;color:var(--ink)}'+
+  '.b3f-sem b{display:block;font-family:var(--f-display);font-size:3.4rem;line-height:1;color:var(--accent)}.b3f-sem span{font-size:1rem}'+
+  '.b3f-aide{position:absolute;left:0;right:0;top:calc(env(safe-area-inset-top,0px) + 22px);text-align:center;font-size:.75rem;color:var(--muted);pointer-events:none}'+
+  '#bebePE .b3f-fermer{position:absolute;top:calc(env(safe-area-inset-top,0px) + 12px);right:14px;z-index:5;background:rgba(255,255,255,.8);color:var(--ink);border:1px solid var(--line)}'+
+  '.b3f-carte{position:absolute;left:0;right:0;bottom:0;min-height:var(--b3f-h,190px);box-sizing:border-box;background:var(--card,#fff);color:var(--ink);border-radius:26px 26px 0 0;padding:20px 20px calc(18px + env(safe-area-inset-bottom,0px));box-shadow:0 -8px 26px rgba(120,70,50,.12)}'+
   '.b3f-titre{display:flex;align-items:center;justify-content:space-between;gap:12px}.b3f-titre h2{margin:0;font-size:1.45rem}'+
   '.b3f-son{flex:none;width:46px;height:40px;border-radius:12px;border:0;background:var(--accent);color:#fff;font-size:1.05rem;cursor:pointer}'+
   '.b3f-carte p{margin:8px 0 0;color:var(--muted);line-height:1.45}.b3f-carte .b3f-note{font-size:.72rem;margin-top:10px}';
