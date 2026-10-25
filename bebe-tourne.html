@@ -54,13 +54,14 @@ body{margin:0;background:var(--bg)}
 .b3-date input{flex:1;min-width:0;padding:10px;border-radius:12px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font:inherit}
 .b3-date button{border:0;border-radius:12px;padding:10px 14px;background:var(--accent);color:#fff;font-weight:700}
 .b3-note{font-size:.74rem;color:var(--muted);margin:0}
+#b3Retour{position:absolute;left:max(16px,env(safe-area-inset-left,0px));top:-2px;border:0;background:none;color:var(--accent);font:700 .85rem var(--f-body);padding:4px 0;cursor:pointer}.mb-titre{position:relative;padding-top:22px}
 button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 </style>
 </head>
 <body>
 <main class="mb">
   <header class="mb-haut">
-    <div class="mb-titre">
+    <div class="mb-titre"><button id="b3Retour" class="mb-retour" aria-label="Retour à l'appli">‹ Retour</button>
       <div><span class="mb-tri" id="b3Tri"></span><h1 id="b3Titre">Semaine 20</h1></div>
       <div class="mb-nav"><button id="b3Prev" aria-label="Semaine précédente">‹</button><button id="b3Next" aria-label="Semaine suivante">›</button></div>
     </div>
@@ -73,7 +74,7 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
       <div class="b3-mesure" id="b3Mesure" hidden></div>
       <div class="b3-charge" id="b3Charge">Chargement de bébé…</div>
       <div class="b3-vues" role="group" aria-label="Angle de vue">
-        <button data-v="face" aria-pressed="true">Face</button><button data-v="trois">3/4</button><button data-v="profil">Profil</button><button data-v="dos">Dos</button><button id="b3Tourner" aria-pressed="true">Tourner</button>
+        <button data-v="face" aria-pressed="true">Face</button><button data-v="trois">3/4</button><button data-v="profil">Profil</button><button data-v="dos">Dos</button><button id="b3Tourner" aria-pressed="false">Tourner</button>
       </div>
     </div>
     <p class="b3-stade" id="b3Stade"></p>
@@ -103,7 +104,8 @@ renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.
 scene3.prepend(renderer.domElement);
 const scene=new THREE.Scene(),camera=new THREE.PerspectiveCamera(32,1,.05,50);camera.position.set(0,0,4.4);
 const ctl=new THREE.OrbitControls(camera,renderer.domElement);ctl.enableDamping=true;ctl.enablePan=false;ctl.minDistance=2.4;ctl.maxDistance=8;
-ctl.autoRotate=!matchMedia('(prefers-reduced-motion: reduce)').matches;ctl.autoRotateSpeed=1.6;
+ctl.autoRotate=false; // bébé reste immobile : on le tourne seulement avec le doigt
+ctl.autoRotateSpeed=1.6;
 scene.add(new THREE.HemisphereLight(0xfff0ea,0x4a1f28,.75));
 const k1=new THREE.DirectionalLight(0xfff2e8,1.35);k1.position.set(2,3,4);scene.add(k1);
 const k2=new THREE.DirectionalLight(0xff8f7a,1.1);k2.position.set(-3,1,-3);scene.add(k2);
@@ -113,13 +115,16 @@ let bebe=null;const cache={};
 /* ---- construit le bébé en relief à partir de la photo ---- */
 function chargerImg(src){return new Promise((ok,ko)=>{const i=new Image();i.onload=()=>ok(i);i.onerror=ko;i.src=src})}
 /* ---- vrais bébés 3D (Meshy), semaine par semaine ---- */
-const MODELES=[9, 10, 12, 13, 14, 15, 16, 17, 18, 21, 22, 23, 25, 26, 27, 28, 30, 31, 32, 33, 34, 35, 36, 38, 39, 40, 42];
+/* Série 3D (Meshy, faite à partir des images Firefly de l'appli, même style) : [dernière semaine, fichier img/bebe3d/serie/stade-XX.glb].
+   Semaines 0 à 4 : sphère avec la photo (ovule, fécondation, zygote, blastocyste). */
+const SERIE=[[5,'04a'],[6,'04b'],[8,'04'],[11,'05'],[15,'06'],[21,'07'],[27,'08'],[35,'09'],[42,'10']];
+const DEVANT=['07','10']; // modèles dont l'arrière est la poche : on tourne seulement devant
 const PEAUX=[['Naturelle',[1,1,1],'#e8a693'],['Claire',[1.06,1.02,1],'#f2c4b2'],['Dorée',[.92,.78,.62],'#c98c66'],['Mate',[.74,.56,.43],'#9d6a4c'],['Foncée',[.5,.35,.26],'#5e3b2a']];
 let peau=0;try{peau=+(localStorage.getItem('sere-b3-peau')||0)}catch(e){}
-function modelePour(w){if(w<4)return null;if(w<9)return 9;if(MODELES.includes(w))return w;let m=MODELES[0];for(const k of MODELES)if(k<=w)m=k;return m} // toutes les semaines en 3D : le bébé de la semaine, sinon le plus proche
+function modelePour(w){if(w<=4)return null;const e=SERIE.find(x=>w<=x[0]);return e?e[1]:'10'}
 function teinter(o){if(o.userData&&o.userData.photo)return;const c=PEAUX[peau][1];o.traverse(n=>{if(n.isMesh)(Array.isArray(n.material)?n.material:[n.material]).forEach(m=>{if(!m.userData.c0)m.userData.c0=m.color.clone();m.color.copy(m.userData.c0).multiply(new THREE.Color(c[0],c[1],c[2]))})})}
 const gl=new THREE.GLTFLoader();
-function chargerModele(k){return new Promise((ok,ko)=>gl.load('img/bebe3d/modeles/semaine-'+pad(k)+'.glb?v=10',g=>{
+function chargerModele(k){return new Promise((ok,ko)=>gl.load('img/bebe3d/serie/stade-'+k+'.glb?v=1',g=>{
   const o=g.scene; // modèle Meshy d'origine ; seulement l'aspect de la peau : mat et doux, pas métallique
   o.traverse(n=>{if(n.isMesh){const a=n.material;
     // peau : la photo projetée porte déjà la lumière et les détails ; on éclaire doucement, sans reflet
@@ -136,14 +141,14 @@ async function construire(w){
   const k=modelePour(w);
   if(k!==null){if(!cache['m'+k])cache['m'+k]=await chargerModele(k);const m=cache['m'+k];teinter(m);return cache[w]=m}
   // semaines 0 à 3 : l'ovule et les premières cellules sont ronds → vraie sphère 3D avec la photo
-  const tx=await new THREE.TextureLoader().loadAsync('img/bebe3d/sphere-'+pad(w)+'.jpg?v=1');tx.encoding=THREE.sRGBEncoding;tx.anisotropy=8;
+  const tx=await new THREE.TextureLoader().loadAsync('img/bebe3d/sphere-'+pad(w)+'.jpg?v=2');tx.encoding=THREE.sRGBEncoding;tx.anisotropy=8;
   const g=new THREE.SphereGeometry(.95,96,64),p=g.attributes.position,uv=g.attributes.uv;
   for(let i=0;i<p.count;i++){const x=p.getX(i),y=p.getY(i),z=p.getZ(i),sx=z>=0?x:-x;uv.setXY(i,.5+sx/1.9*.98,.5+y/1.9*.98)}
   const sp=new THREE.Mesh(g,new THREE.MeshStandardMaterial({map:tx,roughness:.55,metalness:0,emissive:new THREE.Color(.12,.06,.05),emissiveMap:tx}));
   sp.userData.base=.72;sp.scale.setScalar(.72);sp.userData.photo=true;return cache[w]=sp}
 let semAff=-1;
 async function montrer(w){semAff=w;$('b3Charge').hidden=false;
-  try{const m=await construire(w);if(w!==semAff)return;if(bebe)scene.remove(bebe);bebe=m;teinter(m);scene.add(m);pop=0;modeVue(true)}catch(e){$('b3Charge').textContent='Impossible de charger bébé. Vérifiez votre connexion.';return}
+  try{const m=await construire(w);if(w!==semAff)return;if(bebe)scene.remove(bebe);bebe=m;teinter(m);scene.add(m);pop=0;modeVue(true);devant(DEVANT.includes(modelePour(w)))}catch(e){$('b3Charge').textContent='Impossible de charger bébé. Vérifiez votre connexion.';return}
   $('b3Charge').hidden=true;[w-1,w+1].forEach(k=>{if(k>=0&&k<=42)setTimeout(()=>construire(k).catch(()=>{}),400)})}
 /* vues : rotation complète pour les bébés 3D ; avant 9 semaines (image en relief), léger mouvement de face seulement */
 let mode3d=true;
@@ -152,6 +157,8 @@ function modeVue(complet){mode3d=complet;
   ctl.minPolarAngle=complet?0:Math.PI/2-.3;ctl.maxPolarAngle=complet?Math.PI:Math.PI/2+.3;
   document.querySelectorAll('[data-v=profil],[data-v=dos],#b3Tourner').forEach(b=>b.hidden=!complet);
   if(!complet){tourner(false);anim={a:camera.position.clone(),b:new THREE.Vector3(0,0,4.4),t:0}}}
+function devant(oui){ctl.minAzimuthAngle=oui?-1.2:-Infinity;ctl.maxAzimuthAngle=oui?1.2:Infinity;
+  document.querySelectorAll('[data-v=dos]').forEach(b=>b.hidden=oui);if(oui){tourner(false);anim={a:camera.position.clone(),b:new THREE.Vector3(0,0,4.4),t:0}}}
 /* vues */
 const VUES={face:[0,0,4.4],trois:[2.9,.6,3.3],profil:[4.4,.3,0],dos:[0,.3,-4.4]};let anim=null;
 const vb=[...document.querySelectorAll('[data-v]')];
@@ -203,12 +210,13 @@ $('b3Son').onclick=()=>{sonOn=!sonOn;$('b3Son').setAttribute('aria-pressed',sonO
 function infoBpm(w){const b=bpmSemaine(w);$('b3Son').hidden=!b;if(!b&&sonOn){$('b3Son').click()}$('b3Bpm').textContent=b?'Son cœur bat environ '+b+' fois par minute.':'Le cœur de bébé commence à battre vers la 6e semaine.'}
 
 /* ---- semaines ---- */
-let dpa=null;try{dpa=localStorage.getItem('sere-b3-dpa')}catch(e){}
+let dpa=null;const qDpa=new URLSearchParams(location.search).get('dpa');
+if(qDpa&&/^\d{4}-\d{2}-\d{2}$/.test(qDpa))dpa=qDpa;else try{dpa=localStorage.getItem('sere-b3-dpa')}catch(e){}
 if(!dpa)dpa=new Date(Date.now()+140*DAY).toISOString().slice(0,10);
 $('b3Dpa').value=dpa;
 function semaineActuelle(){const lmp=new Date(new Date(dpa+'T00:00:00').getTime()-280*DAY);return Math.max(0,Math.min(42,Math.floor((Date.now()-lmp)/DAY/7)))}
 let actu=semaineActuelle(),w=actu;
-function stade(w){const k=modelePour(w);return k!==null&&k!==w?'Modèle 3D le plus proche : bébé de '+k+' semaines.':''}
+function stade(w){return ''}
 const strip=$('b3Sem');strip.innerHTML=Array.from({length:43},(_,i)=>'<button role="tab" data-s="'+i+'" aria-label="Semaine '+i+'">'+i+'</button>').join('');
 strip.onclick=e=>{const b=e.target.closest('[data-s]');if(!b)return;w=+b.dataset.s;afficher()};
 function bande(){[...strip.children].forEach((b,i)=>{b.classList.toggle('sel',i===w);b.classList.toggle('actu',i===actu);b.setAttribute('aria-selected',i===w)});
@@ -219,6 +227,7 @@ function afficher(){$('b3Peaux').hidden=w<4;$('b3Stade').textContent=stade(w);$(
   $('b3Prev').disabled=w<=0;$('b3Next').disabled=w>=42;$('b3Texte').innerHTML=bebe3dTextePage(w);$('b3Tri').textContent=b3Trimestre(w);infoBpm(w);montrer(w)}
 $('b3Prev').onclick=()=>{if(w>0){w--;afficher()}};$('b3Next').onclick=()=>{if(w<42){w++;afficher()}};
 $('b3Ok').onclick=()=>{const v=$('b3Dpa').value;if(!v)return;dpa=v;try{localStorage.setItem('sere-b3-dpa',v)}catch(e){}actu=semaineActuelle();w=actu;afficher()};
+$('b3Retour').onclick=()=>{if(history.length>1&&document.referrer)history.back();else location.href='parents/'};
 afficher();
 </script>
 </body>
