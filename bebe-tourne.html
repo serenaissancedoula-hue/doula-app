@@ -90,7 +90,7 @@ let peau=0;try{peau=+(localStorage.getItem('sere-b3-peau')||0)}catch(e){}
 function modelePour(w){if(w<9)return null;let m=null;for(const k of MODELES)if(k<=w)m=k;return m===null?MODELES[0]:m}
 function teinter(o){const c=PEAUX[peau][1];o.traverse(n=>{if(n.isMesh)(Array.isArray(n.material)?n.material:[n.material]).forEach(m=>{if(!m.userData.c0)m.userData.c0=m.color.clone();m.color.copy(m.userData.c0).multiply(new THREE.Color(c[0],c[1],c[2]))})})}
 const gl=new THREE.GLTFLoader();
-function chargerModele(k){return new Promise((ok,ko)=>gl.load('img/bebe3d/modeles/semaine-'+pad(k)+'.glb?v=4',g=>{
+function chargerModele(k){return new Promise((ok,ko)=>gl.load('img/bebe3d/modeles/semaine-'+pad(k)+'.glb?v=5',g=>{
   const o=g.scene;o.traverse(n=>{if(n.isMesh){const m=n.material;m.side=THREE.DoubleSide;m.roughness=.55;m.metalness=0;if(m.map)m.map.anisotropy=4;
     m.emissive=new THREE.Color(0x3a1418);m.emissiveIntensity=.25}});
   const box=new THREE.Box3().setFromObject(o),sz=box.getSize(new THREE.Vector3()),c=box.getCenter(new THREE.Vector3());
