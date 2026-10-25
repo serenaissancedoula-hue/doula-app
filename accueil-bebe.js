@@ -35,7 +35,7 @@ const _pA=pAccueil;
 pAccueil=function(){const h=_pA.apply(this,arguments);try{const st=stage();if(st.k!=='pp')return h;return abHaut(st)+h}catch(e){return h}};
 /* l'en-tête de bébé reste tout en haut, au-dessus du mot du jour et du reste */
 const _rAB=render;render=function(){const x=_rAB.apply(this,arguments);try{if(S.role==='parent'&&!S.vue&&(S.tab||'accueil')==='accueil'){const app=document.getElementById('app'),t=app&&app.querySelector(':scope>.ab-top');
-  if(t){if(app.firstElementChild!==t)app.prepend(t);const sh=app.querySelector(':scope>.sh');if(sh)sh.remove()}}}catch(e){}return x};
+  if(t){if(app.firstElementChild!==t)app.prepend(t);const sh=app.querySelector(':scope>.sh');if(sh)sh.remove();const mot=app.querySelector(':scope>.card.mot');if(mot)app.insertBefore(mot,t)}}}catch(e){}return x};
 document.addEventListener('click',e=>{const b=e.target.closest('[data-ab]');if(!b)return;e.stopPropagation();const v=b.dataset.ab;S.vue=null;S.sub='';
   if(v==='vaccins'){S.tab='suivi'}else{S.tab='journal';S.jbTab=v}scrollTo(0,0);render()},true);
 document.addEventListener('change',async e=>{if(!e.target||e.target.id!=='abPhoto')return;const f=e.target.files&&e.target.files[0];if(!f)return;
