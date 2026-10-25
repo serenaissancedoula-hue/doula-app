@@ -12,6 +12,7 @@ body{margin:0}
 .b3-scene{position:relative;width:100%;aspect-ratio:1/1;max-height:66vh;border-radius:26px;overflow:hidden;background:radial-gradient(circle at 50% 42%,#5a2632,#200b11 75%)}
 .b3-scene canvas{display:block;width:100%;height:100%;touch-action:none;cursor:grab}
 .b3-aide{position:absolute;left:0;right:0;top:12px;text-align:center;font-size:.75rem;color:#f3dde2;opacity:.8;pointer-events:none}
+.b3-relief{position:absolute;left:12px;right:12px;bottom:56px;text-align:center;font-size:.75rem;color:#f3dde2;opacity:.85;pointer-events:none}
 .b3-charge{position:absolute;inset:0;display:grid;place-items:center;color:#f3dde2;font-weight:600;pointer-events:none}
 .b3-vues{position:absolute;left:8px;right:8px;bottom:10px;display:flex;gap:6px;justify-content:center;flex-wrap:wrap}
 .b3-vues button{border:0;border-radius:99px;padding:6px 12px;font:600 .75rem var(--f-body);background:rgba(255,240,242,.16);color:#fbe9ec;backdrop-filter:blur(6px);cursor:pointer}
@@ -42,6 +43,7 @@ body{margin:0}
   <span class="b3-test">Page de test · bébé en 3D</span>
   <div class="b3-scene" id="b3Scene">
     <div class="b3-aide">Glissez pour tourner · pincez pour zoomer</div>
+    <div class="b3-relief" id="b3Relief" hidden>Avant 9 semaines, bébé est un tout petit embryon : on le voit de face.</div>
     <div class="b3-charge" id="b3Charge">Chargement de bébé…</div>
     <div class="b3-vues" role="group" aria-label="Angle de vue">
       <button data-v="face" aria-pressed="true">Face</button><button data-v="trois">3/4</button><button data-v="profil">Profil</button><button data-v="dos">Dos</button><button id="b3Tourner" aria-pressed="true">Tourner</button>
@@ -140,15 +142,23 @@ async function construire(w){
   return cache[w]=m}
 let semAff=-1;
 async function montrer(w){semAff=w;$('b3Charge').hidden=false;
-  try{const m=await construire(w);if(w!==semAff)return;if(bebe)scene.remove(bebe);bebe=m;teinter(m);scene.add(m);pop=0}catch(e){$('b3Charge').textContent='Impossible de charger bébé. Vérifiez votre connexion.';return}
+  try{const m=await construire(w);if(w!==semAff)return;if(bebe)scene.remove(bebe);bebe=m;teinter(m);scene.add(m);pop=0;modeVue(modelePour(w)!==null)}catch(e){$('b3Charge').textContent='Impossible de charger bébé. Vérifiez votre connexion.';return}
   $('b3Charge').hidden=true;[w-1,w+1].forEach(k=>{if(k>=0&&k<=42)setTimeout(()=>construire(k).catch(()=>{}),400)})}
+/* vues : rotation complète pour les bébés 3D ; avant 9 semaines (image en relief), léger mouvement de face seulement */
+let mode3d=true;
+function modeVue(complet){mode3d=complet;
+  ctl.minAzimuthAngle=complet?-Infinity:-.3;ctl.maxAzimuthAngle=complet?Infinity:.3;
+  ctl.minPolarAngle=complet?0:Math.PI/2-.3;ctl.maxPolarAngle=complet?Math.PI:Math.PI/2+.3;
+  document.querySelectorAll('[data-v=profil],[data-v=dos],#b3Tourner').forEach(b=>b.hidden=!complet);
+  $('b3Relief').hidden=complet;
+  if(!complet){tourner(false);anim={a:camera.position.clone(),b:new THREE.Vector3(0,0,4.4),t:0}}}
 /* vues */
 const VUES={face:[0,0,4.4],trois:[2.9,.6,3.3],profil:[4.4,.3,0],dos:[0,.3,-4.4]};let anim=null;
 const vb=[...document.querySelectorAll('[data-v]')];
 vb.forEach(b=>b.onclick=()=>{vb.forEach(x=>x.setAttribute('aria-pressed',x===b));anim={a:camera.position.clone(),b:new THREE.Vector3(...VUES[b.dataset.v]),t:0};tourner(false)});
 function tourner(on){ctl.autoRotate=on;$('b3Tourner').setAttribute('aria-pressed',on)}
 $('b3Tourner').onclick=()=>tourner(!ctl.autoRotate);
-ctl.addEventListener('start',()=>{tourner(false);anim=null;vb.forEach(x=>x.setAttribute('aria-pressed','false'))});
+let ctlActif=false;ctl.addEventListener('end',()=>{ctlActif=false});ctl.addEventListener('start',()=>{ctlActif=true;tourner(false);anim=null;vb.forEach(x=>x.setAttribute('aria-pressed','false'))});
 function taille(){const r=scene3.getBoundingClientRect();renderer.setSize(r.width,r.height,false);camera.aspect=r.width/r.height;camera.updateProjectionMatrix()}
 new ResizeObserver(taille).observe(scene3);taille();
 let pop=1,last=performance.now();
@@ -156,7 +166,7 @@ let pop=1,last=performance.now();
   if(anim){anim.t=Math.min(1,anim.t+dt/.7);const e=1-Math.pow(1-anim.t,3),d=THREE.MathUtils.lerp(anim.a.length(),anim.b.length(),e);
     camera.position.copy(anim.a.clone().lerp(anim.b,e).normalize().multiplyScalar(d));if(anim.t>=1)anim=null}
   if(bebe&&pop<1){pop=Math.min(1,pop+dt/.45);bebe.scale.setScalar((bebe.userData.base||1.05)*(.86+.14*(1-Math.pow(1-pop,3))))}
-  ctl.update();renderer.render(scene,camera);requestAnimationFrame(boucle)})(last);
+  if(!mode3d&&!anim&&!ctlActif){const t=performance.now()/1000;camera.position.set(Math.sin(t*.5)*.8,Math.sin(t*.37)*.35,4.3)}ctl.update();renderer.render(scene,camera);requestAnimationFrame(boucle)})(last);
 
 /* ---- couleur de peau ---- */
 function peaux(){$('b3Peaux').innerHTML=PEAUX.map((p,i)=>'<button style="background:'+p[2]+'" aria-label="Peau '+p[0]+'" title="'+p[0]+'" aria-pressed="'+(i===peau)+'" data-i="'+i+'"></button>').join('')}
