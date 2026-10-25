@@ -71,7 +71,7 @@ body{margin:0}
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
 <script src="bebe-donnees.js?v=114"></script>
-<script src="bebe-3d.js?v=115"></script>
+<script src="bebe-3d.js?v=117"></script>
 <script>
 const $=id=>document.getElementById(id),DAY=864e5,pad=w=>String(w).padStart(2,'0');
 /* ---- scène ---- */
@@ -94,7 +94,7 @@ function chargerImg(src){return new Promise((ok,ko)=>{const i=new Image();i.onlo
 const MODELES=[9, 10, 12, 13, 14, 15, 16, 17, 18, 21, 22, 23, 25, 26, 27, 28, 30, 31, 32, 33, 34, 35, 36, 38, 39, 40, 42];
 const PEAUX=[['Naturelle',[1,1,1],'#e8a693'],['Claire',[1.06,1.02,1],'#f2c4b2'],['Dorée',[.92,.78,.62],'#c98c66'],['Mate',[.74,.56,.43],'#9d6a4c'],['Foncée',[.5,.35,.26],'#5e3b2a']];
 let peau=0;try{peau=+(localStorage.getItem('sere-b3-peau')||0)}catch(e){}
-function modelePour(w){if(w<9)return null;let m=null;for(const k of MODELES)if(k<=w)m=k;return m===null?MODELES[0]:m}
+function modelePour(w){return MODELES.includes(w)?w:null} // chaque semaine garde sa propre image : bébé 3D s'il existe, sinon sa photo en relief
 function teinter(o){const c=PEAUX[peau][1];o.traverse(n=>{if(n.isMesh)(Array.isArray(n.material)?n.material:[n.material]).forEach(m=>{if(!m.userData.c0)m.userData.c0=m.color.clone();m.color.copy(m.userData.c0).multiply(new THREE.Color(c[0],c[1],c[2]))})})}
 const gl=new THREE.GLTFLoader();
 function chargerModele(k){return new Promise((ok,ko)=>gl.load('img/bebe3d/modeles/semaine-'+pad(k)+'.glb?v=8',g=>{
@@ -204,7 +204,7 @@ function demarrer(){AC=AC||new (window.AudioContext||window.webkitAudioContext)(
   minuteur=setInterval(()=>{battre();while(prochainM<AC.currentTime+.5){maman(prochainM);maman(prochainM+.3);prochainM+=60/72}},90)}
 function arreter(){clearInterval(minuteur);if(ambiance){const g=ambiance[3];g.gain.setTargetAtTime(0,AC.currentTime,.15);const a=ambiance;setTimeout(()=>a.slice(0,3).forEach(n=>{try{n.stop()}catch(e){}}),600)}ambiance=null}
 $('b3Son').onclick=()=>{sonOn=!sonOn;$('b3Son').setAttribute('aria-pressed',sonOn);$('b3Son').textContent=sonOn?'Arrêter le son':'Écouter bébé';sonOn?demarrer():arreter()};
-function infoBpm(w){const b=bpmSemaine(w);$('b3Bpm').textContent=b?'Son cœur bat environ '+b+' fois par minute.':'Le cœur de bébé commence à battre vers la 6e semaine.'}
+function infoBpm(w){const b=bpmSemaine(w);$('b3Son').hidden=!b;if(!b&&sonOn){$('b3Son').click()}$('b3Bpm').textContent=b?'Son cœur bat environ '+b+' fois par minute.':'Le cœur de bébé commence à battre vers la 6e semaine.'}
 
 /* ---- semaines ---- */
 let dpa=null;try{dpa=localStorage.getItem('sere-b3-dpa')}catch(e){}
@@ -212,8 +212,7 @@ if(!dpa)dpa=new Date(Date.now()+140*DAY).toISOString().slice(0,10);
 $('b3Dpa').value=dpa;
 function semaineActuelle(){const lmp=new Date(new Date(dpa+'T00:00:00').getTime()-280*DAY);return Math.max(0,Math.min(42,Math.floor((Date.now()-lmp)/DAY/7)))}
 let actu=semaineActuelle(),w=actu;
-function stade(w){const k=modelePour(w);if(k===null){const g=[[3,4],[5,6],[7,8]].find(([a,b])=>w>=a&&w<=b);return g&&g[0]!==g[1]?'Image : stade de '+g[0]+' à '+g[1]+' semaines':''}
-  const i=MODELES.indexOf(k),fin=(i<MODELES.length-1?MODELES[i+1]-1:42);return fin>k?'Bébé en 3D : stade de '+k+' à '+fin+' semaines':''}
+function stade(w){const g=[[3,4],[5,6],[7,8]].find(([a,b])=>w>=a&&w<=b);return g?'Même image pour les semaines '+g[0]+' et '+g[1]:''}
 function afficher(){$('b3Stade').textContent=stade(w);$('b3Titre').textContent='Semaine '+w;$('b3Pill').hidden=(w!==actu);
   $('b3Prev').disabled=w<=0;$('b3Next').disabled=w>=42;$('b3Texte').innerHTML=bebe3dTextePage(w);$('b3Tri').textContent=b3Trimestre(w);infoBpm(w);montrer(w)}
 $('b3Prev').onclick=()=>{if(w>0){w--;afficher()}};$('b3Next').onclick=()=>{if(w<42){w++;afficher()}};
