@@ -7,7 +7,7 @@
 if(window.ESPACE!=='parent')return;
 const J=864e5,j0=t=>{const d=new Date(t);d.setHours(0,0,0,0);return +d},fd=(t,o)=>new Date(t).toLocaleDateString('fr-CA',o||{weekday:'short',day:'numeric',month:'short'}),cm=x=>String(x).replace('.',',');
 const sauver=()=>{try{if(typeof saveParent==='function')saveParent();else save()}catch(e){}};
-function modeConception(){try{return S.role==='parent'&&S.parent&&S.parent.parcours==='conception'&&stage().k==='none'}catch(e){return false}}
+function modeConception(){try{return S.role==='parent'&&S.parent&&stage().k==='none'&&(S.parent.parcours==='conception'||!!S.parent.suiviCycle)}catch(e){return false}}
 window.ftMode=modeConception;
 /* ---------- types de notes ---------- */
 const OV={neg:['Négatif','#9aa3ad'],hausse:['En hausse','#e0a458'],pos:['Positif','#d9735b'],pic:['Pic (LH)','#c2410c']};
@@ -136,11 +136,10 @@ function choisir(v){S.parent.parcours=v;sauver();
   if(v==='grossesse'){S.vue=null;S.tab='suivi';render();return}
   sheet('Bébé est né 💗','<label class="f">Date de naissance<input type="date" id="ft_nd" max="'+dateAuj()+'" value="'+dateAuj()+'"></label><label class="f">Prénom de bébé<input id="ft_np" value="'+esc((S.parent.naissance||{}).prenomBebe||'')+'"></label><label class="f">Sexe<select id="ft_ns"><option value="">—</option><option>Fille</option><option>Garçon</option></select></label><button class="btn" data-ft-bebe="1">Commencer</button>')}
 /* ---------- branchements ---------- */
-const _pA=pAccueil;pAccueil=function(){try{if(S.role==='parent'&&stage().k==='none'){if(!S.parent.parcours)return choixParcours();if(S.parent.parcours==='conception')return accueilFT()}}catch(e){}return _pA.apply(this,arguments)};
+const _pA=pAccueil;pAccueil=function(){try{if(S.role==='parent'&&stage().k==='none'){if(!S.parent.parcours&&!S.parent.suiviCycle&&!(S.parent.naissance||{}).date)return choixParcours();if(modeConception())return accueilFT()}}catch(e){}return _pA.apply(this,arguments)};
 const _pS=pSuivi;pSuivi=function(){try{if(modeConception())return guideFT()}catch(e){}return _pS.apply(this,arguments)};
 const _pJ=pJournal;pJournal=function(){try{if(modeConception())return journalFT()}catch(e){}return _pJ.apply(this,arguments)};
-if(typeof pParametres==='function'){const _pp=pParametres;pParametres=function(){const h=_pp.apply(this,arguments);if(S.role!=='parent')return h;const p=S.parent.parcours||'';
-  return h+'<div class="card"><span class="eyebrow acc">Mon parcours</span><p class="small muted">Changez ici si votre situation change.</p><div class="ft-par">'+[['conception','🌱 Essais bébé'],['grossesse','🤰 Grossesse'],['bebe','👶 Bébé est né']].map(c=>'<button class="chip'+(p===c[0]?' on':'')+'" data-ft-parcours="'+c[0]+'">'+c[1]+'</button>').join('')+'</div></div>'}}
+/* le choix du parcours dans Paramètres est dans profils.js (« Mes suivis ») */
 /* onglets : « Mon cycle » et « Fertilité » en mode essais bébé */
 const ORIG={};const _r=render;render=function(){try{if(typeof PTABS2!=='undefined'){const m=modeConception();PTABS2.forEach(t=>{if(!ORIG[t[0]])ORIG[t[0]]=[t[1],t[2]];if(m&&t[0]==='journal'){t[1]='fa-calendar-days';t[2]='Mon cycle'}else if(m&&t[0]==='suivi'){t[1]='fa-seedling';t[2]='Fertilité'}else{t[1]=ORIG[t[0]][0];t[2]=ORIG[t[0]][1]}})}}catch(e){}
   const x=_r.apply(this,arguments);try{if(modeConception()&&S.tab==='accueil'&&!S.vue){const app=document.getElementById('app'),sh=app.querySelector(':scope>.sh');if(sh&&app.firstElementChild!==sh)app.prepend(sh)}}catch(e){}return x};
@@ -166,7 +165,7 @@ document.addEventListener('click',async e=>{const g=s=>e.target.closest(s);let b
   if(b=g('[data-ft-parcours]')){e.stopPropagation();choisir(b.dataset.ftParcours);return}
   if(g('[data-ft-bebe]')){e.stopPropagation();const d=$('#ft_nd').value;if(!d){toast('Choisissez la date de naissance');return}S.parent.naissance=Object.assign({},S.parent.naissance||{},{date:d,prenomBebe:$('#ft_np').value.trim(),sexe:$('#ft_ns').value||((S.parent.naissance||{}).sexe||'')});S.parent.parcours='bebe';sauver();close();S.vue=null;S.tab='accueil';render();return}
   if(g('[data-ft-enceinte]')){e.stopPropagation();const C=cycle();if(C.vide){close();S.parent.parcours='grossesse';sauver();S.vue=null;S.tab='suivi';render();toast('Entrez la date de vos dernières règles ou de votre échographie');return}
-    S.parent.ddr=iso(new Date(C.deb));S.parent.parcours='grossesse';sauver();close();S.vue=null;S.tab='accueil';render();toast('Félicitations ! Votre suivi de grossesse commence 💗');return}
+    S.parent.ddr=iso(new Date(C.deb));['echoDate','echoSA','echoJ','dpaEquipe'].forEach(k=>{S.parent[k]=''});S.parent.suiviCycle=false;S.parent.profil='grossesse';if(!(S.parent.naissance||{}).date)S.parent.parcours='grossesse';sauver();close();S.vue=null;S.tab='accueil';render();toast('Félicitations ! Votre suivi de grossesse commence 💗');return}
 },true);
 (function(){const st=document.createElement('style');st.textContent=
  '.ft-choix{display:grid;gap:12px}.ft-ch{display:grid;grid-template-columns:56px 1fr;grid-template-rows:auto auto;column-gap:14px;align-items:center;text-align:left;border:0;border-radius:22px;padding:18px;background:var(--card);color:var(--ink);box-shadow:var(--shadow);font:inherit;cursor:pointer}.ft-ch span{grid-row:1/3;font-size:2.4rem;text-align:center}.ft-ch b{font-size:1.15rem}.ft-ch small{color:var(--muted);font-size:.85rem}'+

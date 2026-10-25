@@ -49,7 +49,7 @@ function b3cAnimer(){if(B3C.boucle)return;B3C.boucle=true;(function f(){if(!B3C.
 function b3cPlacer(){B3C.attente=false;
   const pe=document.querySelector('#bebePE .bebe-zone.photo'),carte=document.querySelector('.bebe-carte .bebe-zone.photo'),z=pe||carte;
   if(!z)return;const w=+z.dataset.w;if(!w)return;
-  b3cLibs().then(()=>b3cCharger(w)).then(o=>{
+  b3cLibs().then(()=>b3cCharger(w)).then(o=>window.b3cMulti?window.b3cMulti(o):o).then(o=>{
     const z2=document.querySelector('#bebePE .bebe-zone.photo')||document.querySelector('.bebe-carte .bebe-zone.photo');if(z2!==z)return;
     const rond=z.querySelector('.photo-rond'),t=B3C.ren.domElement,plein=!!pe;
     if(B3C.obj!==o){if(B3C.obj)B3C.scene.remove(B3C.obj);B3C.scene.add(o);B3C.obj=o;b3cLimites(o.userData.cle);b3cVueFace()}
