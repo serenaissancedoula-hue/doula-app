@@ -348,9 +348,10 @@ document.addEventListener('click',async e=>{const b=e.target.closest('[data-act]
   case 'feedSwitch':{const T=S.timer;await logPush({type:'sein',side:T.side,sec:Math.round((Date.now()-T.start)/1000),t:T.start});S.timer={side:T.side==='G'?'D':'G',start:Date.now(),t0:T.t0};toast('Sein '+(T.side==='G'?'droit':'gauche'));break}
   case 'feedStop':{const T=S.timer;S.timer=null;await logPush({type:'sein',side:T.side,sec:Math.round((Date.now()-T.start)/1000),t:T.start});toast('Tétée enregistrée');break}
   case 'feedCancel':S.timer=null;break;
-  case 'kickStart':S.kick={start:Date.now(),count:0};if(S.tab!=='journal')S.tab='accueil';break;
-  case 'kickAdd':S.kick.count++;break;
-  case 'kickStop':{const K=S.kick;S.kick=null;if(K.count)await logPush({type:'mvt',count:K.count,sec:Math.round((Date.now()-K.start)/1000),t:K.start});break}
+  /* Mouvements de bébé : pas de chrono ; chaque appui note l'heure à laquelle bébé a bougé. */
+  case 'kickStart':S.kick=null;S.mvtOuvert=true;if(S.tab!=='journal')S.tab='accueil';break;
+  case 'kickAdd':S.kick=null;S.mvtOuvert=true;await logPush({type:'mvt',count:1,heure:1,t:Date.now()});toast('Noté à '+fmtT(Date.now()));break;
+  case 'kickStop':{const K=S.kick;S.kick=null;S.mvtOuvert=false;if(K&&K.count)await logPush({type:'mvt',count:K.count,sec:Math.round((Date.now()-K.start)/1000),t:K.start});break}
   case 'contr':S.showContr=true;break;
   case 'contrHide':S.showContr=false;S.contrActive=null;break;
   case 'contrStart':S.contrActive=Date.now();S.showContr=true;break;
