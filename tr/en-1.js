@@ -465,5 +465,13 @@ window.TR_EN=Object.assign(window.TR_EN||{},{
 "Respirer devient plus facile si bébé descend, mais vous urinez plus souvent.": "Breathing gets easier if baby drops, but you urinate more often.",
 "Dépistage du streptocoque du groupe B entre 35 et 37 semaines.": "Group B strep screening between 35 and 37 weeks.",
 "Bébé est considéré à terme. Ses poumons continuent de mûrir.": "Baby is considered full term. Its lungs keep maturing.",
-"Perte possible du bouchon muqueux : ce n'est pas une urgence.": "Possible loss of the mucus plug: it is not an emergency."
+"Perte possible du bouchon muqueux : ce n'est pas une urgence.": "Possible loss of the mucus plug: it is not an emergency.",
+"Se rappeler de moi": "Remember me",
+"Mon lieu": "My location",
+"Masquer": "Hide",
+"Afficher": "Show",
+"Pas fait": "Not done",
+"Mes conversations": "My conversations",
+"Bébé a bougé": "Baby moved",
+"Voir en grand": "View full screen"
 });
