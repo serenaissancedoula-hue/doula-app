@@ -9,18 +9,18 @@ const _svgBebeDessin=svgBebe;
 function bebeSerieSecours(img,w,id){const z=img.closest('.bebe-zone');if(z)z.outerHTML=_svgBebeDessin(w,id)}
 svgBebe=function(w,id){const src=bebeSerieImage(w);if(!src)return _svgBebeDessin(w,id);
   const M=mouvement(w),b=bpm(w),zid=id||'bebeZone';
-  const tr='rotate('+(S.bebeRot||0)+'deg) scaleX('+(S.bebeMiroir?-1:1)+')';
   return '<div class="bebe-zone reel photo '+M[3]+'" id="'+zid+'" style="--bpm:'+(b?60/b:1)+'s">'+
-    '<div class="tourne photo-rond" style="transform:'+tr+'"><img src="'+src+'" alt="Bébé à '+w+' semaines" decoding="async" draggable="false" onerror="bebeSerieSecours(this,'+w+',\''+zid+'\')"></div></div>'};
-/* Le bouton « Tourner » et le glissement du doigt (bebe.js) tournent aussi l'image. */
-const _tournerVisuelDessin=typeof tournerVisuel==='function'?tournerVisuel:null;
-tournerVisuel=function(){if(_tournerVisuelDessin)_tournerVisuelDessin();
-  document.querySelectorAll('.bebe-zone.photo .tourne').forEach(d=>{d.style.transform='rotate('+(S.bebeRot||0)+'deg) scaleX('+(S.bebeMiroir?-1:1)+')'})};
+    '<div class="photo-rond"><img src="'+src+'" alt="Bébé à '+w+' semaines" decoding="async" draggable="false" onerror="bebeSerieSecours(this,'+w+',\''+zid+'\')"></div></div>'};
+/* Image fixe : elle ne flotte pas et ne tourne pas (choix de la propriétaire). */
 (function(){const st=document.createElement('style');st.textContent=
   '.bebe-zone.photo{position:relative}'+
-  '.bebe-zone.photo .photo-rond{width:100%;height:100%;border-radius:50%;overflow:hidden;background:#120d10;box-shadow:0 0 0 2px rgba(244,199,179,.55),inset 0 0 30px rgba(0,0,0,.5);transition:transform .35s ease}'+
-  '.bebe-zone.photo img{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none;user-select:none;-webkit-user-select:none;animation:bebeFlotte 7s ease-in-out infinite}'+
+  '.bebe-zone.photo .photo-rond{width:100%;height:100%;border-radius:50%;overflow:hidden;background:#120d10;box-shadow:0 0 0 2px rgba(244,199,179,.55),inset 0 0 30px rgba(0,0,0,.5)}'+
+  '.bebe-zone.photo img{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none;user-select:none;-webkit-user-select:none}'+
   '.bb2-img .bebe-zone.photo{transform:none}.bb2-img .bebe-zone.photo .photo-rond{border-radius:0;box-shadow:none}'+
-  '@keyframes bebeFlotte{0%,100%{transform:scale(1.04) translateY(0)}50%{transform:scale(1.06) translateY(-1.5%)}}'+
-  '@media (prefers-reduced-motion:reduce){.bebe-zone.photo img{animation:none}.bebe-zone.photo .photo-rond{transition:none}}';
+  '.bebe-zone.photo{touch-action:auto;cursor:pointer}'+
+  '#bebePE .pe-btn[data-act="bebeTourner"],#bebePE .pe-btn[data-act="bebeMiroir"]{display:none}';
   document.head.appendChild(st)})();
+/* En plein écran, on retire la mention « faire tourner » quand c'est l'image fixe. */
+const _ouvrirBebePEPhoto=ouvrirBebePE;
+ouvrirBebePE=function(){_ouvrirBebePEPhoto();const d=document.getElementById('bebePE');if(!d||!d.querySelector('.bebe-zone.photo'))return;
+  d.querySelectorAll('p,small,span').forEach(e=>{if(e.children.length===0&&e.textContent.includes('Glissez le doigt pour faire tourner bébé. '))e.textContent=e.textContent.replace('Glissez le doigt pour faire tourner bébé. ','')})};
