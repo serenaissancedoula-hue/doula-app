@@ -19,7 +19,7 @@ function abActivites(st){const auj=ab0(Date.now()),L=S.logs||[],A=L.filter(l=>l.
     ['sommeil','fa-moon','#dbe2f0','Noter le sommeil',som?'Aujourd\'hui : '+Math.floor(som/3600)+' h '+String(Math.round(som%3600/60)).padStart(2,'0'):'Siestes et nuits'],
     ['croissance','fa-weight-scale','#f2e3c4','Suivre la croissance',poi?'Dernière pesée : '+cm((poi.g/1000).toFixed(2))+' kg':'Noter une pesée']];
   if(vac)R.push(['vaccins','fa-syringe','#ecdcea','Vaccins',vac.txt.replace(/^Vaccins de /,'')+' · '+fmtS(vac.d)]);
-  return '<div class="card ab-act"><span class="eyebrow">Programme</span><h2>Activités</h2><div class="ab-liste">'+R.map(r=>'<button class="ab-row" data-ab="'+r[0]+'"><span class="ab-ic" style="background:'+r[2]+'">'+icon(r[1])+'</span><span class="ab-tx"><b>'+r[3]+'</b><small>'+esc(r[4])+'</small></span>'+icon('fa-chevron-right')+'</button>').join('')+'</div></div>'}
+  return '<div class="card ab-act"><span class="eyebrow">Programme</span><h2>Activités</h2><div class="ab-liste">'+R.map(r=>'<button class="ab-row" data-ab="'+r[0]+'"><span class="ab-ic" data-dk="1" data-dt="1" style="background:'+r[2]+'">'+icon(r[1])+'</span><span class="ab-tx"><b>'+r[3]+'</b><small>'+esc(r[4])+'</small></span>'+icon('fa-chevron-right')+'</button>').join('')+'</div></div>'}
 function abHaut(st){const p=S.parent,n=(p.naissance||{}),nom=(n.prenomBebe||'').trim(),mom=(p.prenom&&p.prenom!=='Exemple'?p.prenom:'').trim(),A=abAge(st.birth);
   const auj=new Date().toLocaleDateString('fr-CA',{weekday:'long',day:'numeric',month:'long'});
   const rond=(src,txt,cls)=>src?'<img class="ab-av '+cls+'" src="'+esc(src)+'" alt="">':'<span class="ab-av '+cls+'">'+esc((txt||'?')[0].toUpperCase())+'</span>';
@@ -61,6 +61,6 @@ document.addEventListener('change',async e=>{if(!e.target||e.target.id!=='abPhot
   '.ab-top>.card{margin-top:14px}.ab-act{margin-top:14px}.ab-act h2{margin:-6px 0 2px}.ab-liste{display:flex;flex-direction:column}.ab-row{display:flex;align-items:center;gap:12px;width:100%;padding:12px 0;border:0;border-bottom:1px solid color-mix(in srgb,var(--line) 70%,transparent);background:none;color:inherit;font:inherit;text-align:left;cursor:pointer}.ab-row:last-child{border-bottom:0}'+
   '.ab-ic{width:42px;height:42px;flex:none;border-radius:50%;display:grid;place-items:center;color:#7a4a3a;font-size:1rem}.ab-tx{flex:1;min-width:0;display:flex;flex-direction:column}.ab-tx b{font-size:.95rem}.ab-tx small{color:var(--muted);font-size:.8rem}.ab-row>i:last-child,.ab-row>svg:last-child{color:var(--muted);font-size:.8rem}'+
   '[data-theme=dark] .ab-hero:not(.photo){background:linear-gradient(160deg,#4a332b,#36261f)!important}[data-theme=dark] .ab-hero:not(.photo) .ab-salut,[data-theme=dark] .ab-hero:not(.photo) .ab-age,[data-theme=dark] .ab-ajout{color:#f2d3c4!important}[data-theme=dark] .ab-ajout svg,[data-theme=dark] .ab-ajout i{background:rgba(255,255,255,.12)!important}'+
-  '[data-theme=dark] .ab-ic{background:color-mix(in srgb,var(--accent) 22%,transparent)!important;color:var(--accent-lt,#f2c9b9)!important}';
+  '[data-theme=dark] .ab-ic{background:rgba(232,150,125,.2)!important;color:#f4cdbd!important}';
   document.head.appendChild(st)})();
 })();

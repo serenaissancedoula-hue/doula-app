@@ -15,17 +15,17 @@ function agTrouver(id){return ((S.role==='parent'?RDV:CRDV)||[]).find(x=>String(
 function agProposer(r){const I=agInfos(r);
   sheet('Ajouter à votre agenda ?','<p class="small"><b>'+esc(I.titre)+'</b><br>'+quand(r.debut)+(I.lieu?' · '+esc(I.lieu):'')+'</p>'+
     '<p class="small muted">Ajoutez ce rendez-vous à l\'agenda de votre téléphone, avec un rappel 1 heure avant.</p>'+
-    '<div class="stack" style="gap:8px"><a class="btn" style="text-align:center;text-decoration:none" href="data:text/calendar;charset=utf-8,'+encodeURIComponent(agIcs(r))+'" download="rendez-vous.ics" data-ag-fin="1">'+icon('fa-mobile-screen')+'iPhone ou iPad (Calendrier Apple)</a>'+
+    '<div class="stack" style="gap:8px"><a class="btn" style="text-align:center;text-decoration:none" href="data:text/calendar;charset=utf-8,'+encodeURIComponent(agIcs(r))+'" target="_blank" rel="noopener" data-ag-fin="1">'+icon('fa-mobile-screen')+'iPhone ou iPad (Calendrier Apple)</a>'+
     '<a class="btn" style="text-align:center;text-decoration:none" href="'+agGoogle(r)+'" target="_blank" rel="noopener" data-ag-fin="1">'+icon('fa-calendar-plus')+'Android (Google Agenda)</a>'+
     '<button class="btn ghost" data-ag-fin="1">Non merci</button></div>')}
 /* une seule proposition par rendez-vous et par personne (gardé sur ce téléphone) */
 function agCle(){return 'sere-agenda-vu-'+(S.role||'')}
 function agVus(){try{return JSON.parse(localStorage.getItem(agCle())||'null')}catch(e){return null}}
 function agGarder(L){try{localStorage.setItem(agCle(),JSON.stringify(L.slice(-300)))}catch(e){}}
-function agVerifier(){try{if(!S.role||!MOI)return;const R=((S.role==='parent'?RDV:CRDV)||[]).filter(r=>r.statut==='confirme'&&new Date(r.debut)>Date.now());
+function agVerifier(){try{if(!S.role||!MOI||window._agSession)return;const R=((S.role==='parent'?RDV:CRDV)||[]).filter(r=>r.statut==='confirme'&&new Date(r.debut)>Date.now());
   let vus=agVus();if(vus===null){agGarder(R.map(r=>String(r.id)));return} // première fois : on ne propose pas les anciens rendez-vous
   const l=document.getElementById('layer');if(l&&l.innerHTML)return;
-  const r=R.find(x=>!vus.includes(String(x.id)));if(!r)return;vus.push(String(r.id));agGarder(vus);agProposer(r)}catch(e){}}
+  const r=R.find(x=>!vus.includes(String(x.id)));if(!r)return;/* une seule fenêtre : tous les rendez-vous confirmés sont marqués vus (le bouton Agenda reste sur chacun) */R.forEach(x=>{if(!vus.includes(String(x.id)))vus.push(String(x.id))});agGarder(vus);window._agSession=1;agProposer(r)}catch(e){}}
 let _agT=null;const _rAG=render;render=function(){const x=_rAG.apply(this,arguments);clearTimeout(_agT);_agT=setTimeout(agVerifier,600);return x};
 document.addEventListener('click',e=>{const f=e.target.closest('[data-ag-fin]');if(f){setTimeout(()=>{try{close()}catch(x){}},f.tagName==='A'?400:0);if(f.tagName!=='A')e.preventDefault();return}
   const b=e.target.closest('[data-ag]');if(!b)return;e.stopPropagation();const r=agTrouver(b.dataset.ag);if(r)agProposer(r)},true);

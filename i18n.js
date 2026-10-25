@@ -56,7 +56,7 @@
   function bouton(){
     var b=document.createElement('button');b.type='button';b.id='langBtn';b.setAttribute('data-notr','1');
     b.textContent=lang==='en'?'FR':'EN';b.setAttribute('aria-label',lang==='en'?'Passer en français':'Switch to English');
-    b.style.cssText='position:fixed;right:max(10px,env(safe-area-inset-right,0px));bottom:calc(env(safe-area-inset-bottom,0px) + 136px);z-index:55;border:1px solid var(--line,#ddd);background:var(--card,#fff);color:var(--ink,#333);border-radius:50px;padding:6px 12px;font:700 12px var(--f-body,sans-serif);opacity:.85;box-shadow:0 4px 12px rgba(0,0,0,.12)';
+    b.style.cssText='display:none!important;position:fixed;right:max(10px,env(safe-area-inset-right,0px));bottom:calc(env(safe-area-inset-bottom,0px) + 136px);z-index:55;border:1px solid var(--line,#ddd);background:var(--card,#fff);color:var(--ink,#333);border-radius:50px;padding:6px 12px;font:700 12px var(--f-body,sans-serif);opacity:.85;box-shadow:0 4px 12px rgba(0,0,0,.12)';
     b.onclick=function(){try{localStorage.setItem(CLE,lang==='en'?'fr':'en')}catch(e){}location.reload()};
     document.body.appendChild(b);
   }
