@@ -105,7 +105,7 @@ async function envoiEnvoyer(b){lireEnv();const E=S.env,c=S.clients.find(x=>x.id=
   const lotTitre=E.moment==='bienvenue'?'Votre pochette de bienvenue':M?M[1]:'Documents de votre doula',ORD=['merci','fin','forfaits','contrat','accueil','consentement','photos','satisfaction'];
   const ordre=['satisfaction','photos','consentement','accueil','contrat','fin','forfaits','merci'];
   try{for(const k of ordre){if(!E.sel[k])continue;let row;
-      if(LETTRES_TYPES[k])row={type:k,titre:LETTRES_TYPES[k],contenu:k==='merci'?E.merciTxt:remplirModele(modeleTexte(k==='forfaits'?'lettre_forfaits':'lettre_fin'),c,{prixVivants:true}),champs:[],sig_parent_requise:false,sig_doula_requise:false,statut:'signe'};
+      if(LETTRES_TYPES[k])row={type:k,titre:LETTRES_TYPES[k],contenu:k==='merci'?E.merciTxt:(k==='forfaits'&&window.paiementTexte?remplirModele(modeleTexte('lettre_forfaits'),c,{prixVivants:true}).replace(/\n+Au plaisir,/,window.paiementTexte()+'\n\nAu plaisir,'):remplirModele(modeleTexte(k==='forfaits'?'lettre_forfaits':'lettre_fin'),c,{prixVivants:true})),champs:[],sig_parent_requise:false,sig_doula_requise:false,statut:'signe'};
       else{const T=DOC_TYPES[k];row={type:k,titre:T.titre,contenu:remplirModele(modeleTexte(k),c,{prixVivants:true}),champs:T.champs,sig_parent_requise:T.sigP,sig_doula_requise:T.sigD,statut:'a_remplir'}}
       row.famille_id=c.id;row.silencieux=true;row.lot=lot;row.lot_titre=lotTitre==='Après la rencontre d\'approche'?'Mes forfaits et mes prix':lotTitre;row.ordre=ORD.indexOf(k);const {error}=await sb.from('fam_documents').insert(row);if(error)throw error;titres.unshift(row.titre)}
     const msg=(String(E.msg||'').trim()||'Du nouveau dans votre appli !')+'\n\n📎 Dans votre appli (Ma doula › Documents) :\n• '+titres.join('\n• ');
