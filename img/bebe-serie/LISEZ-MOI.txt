@@ -1,0 +1,14 @@
+Série d'images de bébé (Adobe Firefly, 25 oct. 2026), même style pour toute la grossesse.
+Semaine affichée (semaines d'aménorrhée) -> image :
+  4        stade-03 (blastocyste)
+  5 à 6    pas encore d'image : le dessin de l'appli s'affiche (ajouter stade-04a.jpg plus tard)
+  7 à 8    stade-04
+  9 à 11   stade-05
+  12 à 15  stade-06
+  16 à 21  stade-07
+  22 à 27  stade-08
+  28 à 35  stade-09
+  36 à 42  stade-10 (tête en bas)
+stade-01 (fécondation) et stade-02 (zygote) sont prêts pour les semaines 2 et 3 si on les affiche un jour.
+Pour remplacer une image : garder le même nom, carré 720 x 720, puis augmenter BEBE_SERIE_V dans bebe-photo.js.
+Pour passer à une image par semaine : ajouter les fichiers et compléter BEBE_SERIE dans bebe-photo.js.
