@@ -12,18 +12,23 @@ function dvPer(d){try{const P=window.bbPER||[];return P.find(x=>d<=x.max)||P[P.l
 /* visuel façon appli de bébé : grand chiffre (semaine / mois / ans), photo d'un bébé de cet âge et mesures moyennes (OMS, filles et garçons, 3e au 97e percentile, arrondi) */
 const DV_MES=[[0,46,54,2.5,4.4],[1,50.5,58.5,3.2,5.6],[2,54,62,4,6.9],[3,57,65,4.6,7.8],[4,59,67.5,5,8.5],[5,61,69.5,5.4,9.1],[6,62.5,71.5,5.7,9.5],[7,64,73,6,9.9],[8,65.5,74.5,6.3,10.3],[9,66.5,76,6.5,10.6],[10,68,77.5,6.7,10.9],[11,69,78.5,6.9,11.2],[12,70,80,7,11.5],[15,73,83.5,7.6,12.3],[18,76,87,8.1,13],[21,78.5,90,8.6,13.7],[24,81,92.5,9,14.3],[30,85,97.5,10,15.5],[36,88.5,102,10.8,16.9],[42,92,106,11.6,18.2],[48,95,110,12.2,19.5],[54,98,113,12.9,20.8],[60,100,116,13.7,22]];
 function dvMes(d){const m=d/30.44;let r=DV_MES[0];DV_MES.forEach(x=>{if(m>=x[0]-.25)r=x});return r}
+/* photos de bébés libres de droits (Unsplash), une par âge ; une photo locale img/dev/<clé>.jpg peut les remplacer */
+const DV_PH={"nouveau-ne": "photo-1662670629059-4772ec99b720", "sem-3-4": "photo-1679919996303-1824ae520235", "sem-5-8": "photo-1596034640116-a68045d257fe", "sem-9-12": "photo-1649880210584-3365f4c4c08b", "4-5-mois": "photo-1552788960-65fcafe071a5", "6-7-mois": "photo-1697751228979-ca968ceabe02", "8-9-mois": "photo-1503284116362-30c49f508156", "10-11-mois": "photo-1495131292899-bc096577e8f5", "1-an": "photo-1526864972308-bf02b0c2ab8c", "15-18-mois": "photo-1476089194965-888edb96d2dc", "21-24-mois": "photo-1507077630565-b23bbbe732ec", "2-3-ans": "flagged/photo-1556776124-2f0ebdaef26b", "3-4-ans": "photo-1560130958-0ea787c275de", "4-5-ans": "photo-1501686637-b7aa9c48a882"};
+function dvPhotoUrl(k){return 'https://images.unsplash.com/'+DV_PH[k]+'?w=640&h=640&fit=crop&crop=faces,entropy&auto=format&q=70'}
 function dvPhoto(d){const m=d/30.44;return d<14?'nouveau-ne':d<28?'sem-3-4':d<56?'sem-5-8':d<84?'sem-9-12':m<6?'4-5-mois':m<8?'6-7-mois':m<10?'8-9-mois':m<12?'10-11-mois':m<15?'1-an':m<21?'15-18-mois':m<30?'21-24-mois':m<42?'2-3-ans':m<54?'3-4-ans':'4-5-ans'}
-function dvVisuel(P,avecNum,ic){const mid=Math.round((P.d0+P.d1)/2),M=dvMes(mid),c=x=>String(x).replace('.',',');
+function dvVisuel(P,avecNum,ic,etat){const mid=Math.round((P.d0+P.d1)/2),M=dvMes(mid),c=x=>String(x).replace('.',','),k=dvPhoto(mid),st=stage();
+  const f=x=>x.toLocaleDateString('fr-CA',{day:'numeric',month:'short',year:P.d0>300?'numeric':undefined}),E=dvPer(mid)||{};
   return (avecNum?'<div class="dvx-num"><i></i><div><b>'+P.lab+'</b><span>'+P.u+'</span></div><i></i></div>':'')+
-    '<div class="dvx-row"><div class="dvx-img"><span>'+(ic||'🌱')+'</span><img src="img/dev/'+dvPhoto(mid)+'.jpg" alt="" onerror="this.remove()"></div>'+
-    '<div class="dvx-mes"><div><small>Taille moyenne</small><b>'+c(M[1])+' à '+c(M[2])+' cm</b></div><div><small>Poids moyen</small><b>'+c(M[3])+' à '+c(M[4])+' kg</b></div><p>Repères de l\'OMS</p></div></div>'}
-function dvPage(){const st=stage();if(st.k!=='pp')return '';const nom=esc(((S.parent.naissance||{}).prenomBebe||'').trim()||'Bébé'),cur=dvIndex(st.day);
+    '<div class="dvx-row"><div class="dvx-img"><span>'+(ic||'🌱')+'</span><img src="'+dvPhotoUrl(k)+'" alt="" loading="lazy" onerror="if(this.nextSibling)this.nextSibling.remove();this.remove()"><small>Photo : Unsplash</small></div>'+
+    '<div class="dvx-mes"><span class="eyebrow">'+(etat||'')+'</span><b class="dvx-t">'+P.t+'</b><span class="dvx-d">du '+f(addD(st.birth,P.d0))+' au '+f(addD(st.birth,P.d1))+'</span>'+
+    '<div class="dvx-m"><small>Taille moyenne</small><b>'+c(M[1])+'–'+c(M[2])+' cm</b></div><div class="dvx-m"><small>Poids moyen</small><b>'+c(M[3])+'–'+c(M[4])+' kg</b></div>'+(E.t?'<span class="pill acc dvx-p">'+E.t+'</span>':'')+'</div></div>'}
+function dvPage(dansSuivi){const st=stage();if(st.k!=='pp')return '';const nom=esc(((S.parent.naissance||{}).prenomBebe||'').trim()||'Bébé'),cur=dvIndex(st.day);
   const i=S.devSel==null?cur:Math.max(0,Math.min(DV.length-1,S.devSel)),P=DV[i],mid=Math.round((P.d0+P.d1)/2),I=dvInfoPP(P.d0)||[],E=dvPer(mid)||{};
   const deb=addD(st.birth,P.d0),fin=addD(st.birth,P.d1),f=x=>x.toLocaleDateString('fr-CA',{day:'numeric',month:'short',year:P.d0>300?'numeric':undefined});
   const ph=S.parent.photoBebe;
-  let h=back('sub','','Suivi')+'<div class="sh"><span class="eyebrow acc">De la naissance à 5 ans</span><h1>Développement</h1></div>';
+  let h=dansSuivi?'':back('sub','','Suivi')+'<div class="sh"><span class="eyebrow acc">De la naissance à 5 ans</span><h1>Développement</h1></div>';
   h+='<div class="dv-bande" role="tablist">'+DV.map((p,k)=>'<button role="tab" data-dv="'+k+'" aria-selected="'+(k===i)+'"'+(k===cur?' class="actu"':'')+'><b>'+p.lab+'</b><span>'+p.u+'</span></button>').join('')+'</div>';
-  h+=dvVisuel(P,false,E.ic)+'<p class="dv-quand"><b>'+P.t+'</b> · '+(i===cur?'maintenant':i<cur?'déjà passé':'à venir')+' · du '+f(deb)+' au '+f(fin)+'</p>';
+  h+=dvVisuel(P,false,E.ic,i===cur?'Maintenant':i<cur?'Déjà passé':'À venir');
   if(I[2])h+='<div class="card"><h2>'+esc(I[2])+'</h2><h3 class="dv-h">'+icon('fa-baby')+' '+nom+'</h3><p>'+I[3]+'</p>'+(I[4]?'<h3 class="dv-h">'+icon('fa-spa')+' Vous</h3><p>'+I[4]+'</p>':'')+(I[5]?'<div class="banner sage">'+icon('fa-lightbulb')+'<div class="small"><b>Ce que disent les études :</b> '+I[5]+'</div></div>':'')+'</div>';
   if(E.ph)h+='<div class="card"><h3 class="dv-h">'+icon('fa-star')+' Ce qu\'il apprend vers cet âge</h3><ul class="clean dv-l">'+E.ph.map(x=>'<li>'+esc(x)+'</li>').join('')+'</ul><p class="xs muted">Des repères, pas des examens : chaque enfant va à son rythme.</p></div>';
   if(E.tips)h+='<div class="card"><h3 class="dv-h">'+icon('fa-hand-holding-heart')+' Comment l\'accompagner</h3><ul class="clean dv-l">'+E.tips.map(x=>'<li>'+esc(x)+'</li>').join('')+'</ul></div>';
@@ -35,22 +40,15 @@ function dvPage(){const st=stage();if(st.k!=='pp')return '';const nom=esc(((S.pa
 function dvAge(st){const d=Math.max(0,st.day|0),B=new Date(st.birth),N=new Date();let m=(N.getFullYear()-B.getFullYear())*12+N.getMonth()-B.getMonth();if(N.getDate()<B.getDate())m--;m=Math.max(0,m);
   const pl=(x,u,us)=>x+' '+(x>1?us:u);if(d<7)return pl(d,'jour','jours');if(d<91)return pl(Math.floor(d/7),'semaine','semaines')+(d%7?' et '+pl(d%7,'jour','jours'):'');
   if(m<24){const r=new Date(B);r.setMonth(B.getMonth()+m);const w=Math.floor((N-r)/864e5/7);return m+' mois'+(w?' et '+pl(w,'semaine','semaines'):'')}return pl(Math.floor(m/12),'an','ans')+(m%12?' et '+m%12+' mois':'')}
-function dvSuivi(st){const nom=esc(((S.parent.naissance||{}).prenomBebe||'').trim()||'Bébé'),cur=dvIndex(st.day),P=DV[cur],I=dvInfoPP(st.day)||[],E=dvPer(st.day)||{},ph=S.parent.photoBebe;
-  const f=x=>x.toLocaleDateString('fr-CA',{day:'numeric',month:'long'}),deb=addD(st.birth,P.d0),fin=addD(st.birth,P.d1),wk=Math.floor(Math.max(0,st.day)/7)+1;
-  const gros=st.day<84?['Semaine',wk]:st.day<730?['Mois',Math.floor(st.day/30.44)]:['Ans',Math.floor(st.day/365.25)];
-  const fille=/^f/i.test((S.parent.naissance||{}).sexe||''),ttl=st.day<1?nom+' est arrivé'+(fille?'e':'')+' aujourd\'hui 🩷':nom+' a '+dvAge(st);
-  let h='<div class="sh"><span class="eyebrow acc">Suivi de '+nom+'</span><h1>'+ttl+'</h1></div>';
-  h+='<div class="card dvs-sem">'+dvVisuel(P,true,E.ic)+
-    '<span class="eyebrow">'+P.t+' · du '+f(deb)+' au '+f(fin)+'</span>'+(I[2]?'<h2 style="margin:4px 0 6px">'+esc(I[2])+'</h2>':'')+(I[3]?'<p>'+I[3]+'</p>':'')+
-    (E.ph&&E.ph.length?'<h3 class="dv-h">'+icon('fa-star')+' Ce que '+nom+' pourrait faire en ce moment</h3><ul class="clean dv-l">'+E.ph.slice(0,4).map(x=>'<li>'+esc(x)+'</li>').join('')+'</ul>':'')+
-    '<p class="xs muted">Des repères, pas des examens : chaque bébé va à son rythme.</p>'+
-    '<button class="btn" data-dvgo="1" style="width:100%">'+icon('fa-book-open')+'Lire la suite</button></div>';
-  return h+(window.bbVaccins?window.bbVaccins(st):'')}
+function dvSuivi(st){const nom=esc(((S.parent.naissance||{}).prenomBebe||'').trim()||'Bébé'),fille=/^f/i.test((S.parent.naissance||{}).sexe||'');
+  const ttl=st.day<1?nom+' est arrivé'+(fille?'e':'')+' aujourd\'hui 🩷':nom+' a '+dvAge(st);
+  return '<div class="sh"><span class="eyebrow acc">Développement de '+nom+'</span><h1>'+ttl+'</h1></div>'+dvPage(true)+(window.bbVaccins?window.bbVaccins(st):'')}
+document.addEventListener('click',e=>{if(e.target.closest('#tabs [data-v="suivi"]'))S.devSel=null},true);
 if(typeof pSuivi==='function'){const _ps=pSuivi;pSuivi=function(){if(S.sub==='dev')return dvPage();try{const st=stage();if(st.k==='pp'&&!S.sub)return dvSuivi(st)}catch(e){}return _ps.apply(this,arguments)}}
 document.addEventListener('click',e=>{const g=e.target.closest('[data-dvgo]');if(g){e.stopPropagation();S.vue=null;S.tab='suivi';S.sub='dev';S.devSel=null;scrollTo(0,0);render();dvCentrer();return}
   const b=e.target.closest('[data-dv]');if(!b)return;e.stopPropagation();S.devSel=+b.dataset.dv;render();dvCentrer()},true);
 function dvCentrer(){setTimeout(()=>{try{const s=document.querySelector('.dv-bande [aria-selected=true]');if(s)s.scrollIntoView({inline:'center',block:'nearest'})}catch(e){}},30)}
-const _rDV=render;render=function(){const x=_rDV.apply(this,arguments);try{if(S.tab==='suivi'&&S.sub==='dev'&&!document.querySelector('.dv-bande').dataset.c){document.querySelector('.dv-bande').dataset.c='1';dvCentrer()}}catch(e){}return x};
+const _rDV=render;render=function(){const x=_rDV.apply(this,arguments);try{if(S.tab==='suivi'&&(S.sub==='dev'||!S.sub)&&document.querySelector('.dv-bande')&&!document.querySelector('.dv-bande').dataset.c){document.querySelector('.dv-bande').dataset.c='1';dvCentrer()}}catch(e){}return x};
 (function(){const st=document.createElement('style');st.textContent=
   '.dv-bande{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding:4px 2px 14px;scroll-snap-type:x proximity}.dv-bande::-webkit-scrollbar{display:none}'+
   '.dv-bande button{flex:none;min-width:62px;scroll-snap-align:center;display:flex;flex-direction:column;align-items:center;gap:0;border:0;border-radius:16px;padding:8px 10px;background:var(--card);color:var(--muted);box-shadow:0 1px 3px rgba(70,45,30,.08);cursor:pointer;position:relative}'+
@@ -59,8 +57,9 @@ const _rDV=render;render=function(){const x=_rDV.apply(this,arguments);try{if(S.
   '.dv-bande button[aria-selected=true]{background:var(--accent);color:#fff}.dv-bande button[aria-selected=true] b{color:#fff}'+
   '.li .tx .pill{white-space:normal;display:inline-block;max-width:100%;margin-top:4px;line-height:1.3;text-align:left}'+
   '.dvx-num{display:flex;align-items:center;gap:14px;margin:0 0 14px}.dvx-num i{flex:1;height:2px;background:var(--accent);opacity:.35;border-radius:2px}.dvx-num div{display:flex;flex-direction:column;align-items:center;line-height:1}.dvx-num b{font-size:1.5rem;color:var(--accent);font-weight:700}.dvx-num span{font-size:.7rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin-top:4px}'+
-  '.dvx-row{display:grid;grid-template-columns:1.25fr 1fr;gap:12px;margin-bottom:14px}.dvx-img{position:relative;aspect-ratio:1;border-radius:20px;overflow:hidden;background:linear-gradient(150deg,#f6e3d8,#e8cdbf);display:grid;place-items:center;font-size:3.2rem}.dvx-img img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}'+
-  '.dvx-mes{display:flex;flex-direction:column;justify-content:center;gap:12px;padding:12px 14px;border-radius:20px;background:var(--soft)}.dvx-mes div{display:flex;flex-direction:column;gap:2px}.dvx-mes small{font-size:.74rem;color:var(--muted)}.dvx-mes b{font-size:1rem;line-height:1.2}.dvx-mes p{margin:0;font-size:.66rem;color:var(--muted)}'+
+  '.dvx-row{display:grid;grid-template-columns:1.1fr 1fr;gap:12px;margin-bottom:14px}.dvx-img{position:relative;aspect-ratio:3/4;border-radius:22px;overflow:hidden;background:linear-gradient(150deg,#f6e3d8,#e8cdbf);display:grid;place-items:center;font-size:3.2rem}.dvx-img img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}.dvx-img small{position:absolute;right:8px;bottom:6px;font-size:.55rem;color:#fff;opacity:.75;text-shadow:0 1px 3px rgba(0,0,0,.5)}'+
+  '.dvx-mes{display:flex;flex-direction:column;justify-content:center;gap:4px;padding:14px;border-radius:22px;background:var(--card);box-shadow:var(--shadow);min-width:0}.dvx-t{font-family:var(--f-display);font-size:1.3rem;line-height:1.15}.dvx-d{font-size:.8rem;color:var(--muted);margin-bottom:6px}'+
+  '.dvx-m{display:flex;flex-direction:column;padding:6px 0;border-top:1px solid var(--line)}.dvx-m small{font-size:.68rem;color:var(--muted)}.dvx-m b{font-size:.92rem}.dvx-p{align-self:flex-start;margin-top:6px;font-size:.7rem;white-space:normal;max-width:100%;line-height:1.3}'+
   '.dv-quand{font-size:.82rem;color:var(--muted);margin:-4px 2px 14px}.dv-quand b{color:var(--ink)}'+
   '.dvs-haut{display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:stretch;margin-bottom:12px}.dvs-num{display:flex;flex-direction:column;justify-content:center;align-items:center;min-width:96px;border-radius:20px;background:var(--accent);color:#fff;padding:12px}.dvs-num span{font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;opacity:.9}.dvs-num b{font-size:3rem;line-height:1;font-family:var(--f-display)}'+
   '.dvs-img{border-radius:20px;overflow:hidden;min-height:120px;max-height:170px;background:linear-gradient(150deg,#f6e3d8,#e8cdbf);display:grid;place-items:center;font-size:3rem}.dvs-img img{width:100%;height:100%;object-fit:cover}'+

@@ -26,7 +26,7 @@ const _r=render;render=function(){const x=_r.apply(this,arguments);try{
     const prep=app.querySelector(':scope>.mod-prep');if(prep&&cal&&cal.nextElementSibling!==prep)cal.after(prep);
     /* les vaccins de bébé tout en haut, avant le calendrier */
     const vac=[...app.querySelectorAll(':scope>.card')].find(c=>{const e=c.querySelector('.eyebrow');return e&&/^vaccins de bébé$/i.test(e.textContent.trim())});
-    if(vac&&!app.querySelector(':scope>.dvs-sem')){const seg=app.querySelector(':scope>.seg');if(seg){if(seg.nextElementSibling!==vac)seg.after(vac)}else if(app.firstElementChild!==vac)app.prepend(vac)}}
+    if(vac&&!app.querySelector(':scope>.dv-bande')){const seg=app.querySelector(':scope>.seg');if(seg){if(seg.nextElementSibling!==vac)seg.after(vac)}else if(app.firstElementChild!==vac)app.prepend(vac)}}
   /* Accueil : bébé tout en haut (grossesse et après la naissance), puis les raccourcis */
   if(S.role==='parent'&&!S.vue&&(S.tab||'accueil')==='accueil'){const bc=app&&(app.querySelector(':scope>.b3h-carte')||app.querySelector(':scope>.bebe-carte'));
     if(bc){const sh=app.querySelector(':scope>.sh');if(sh)sh.remove();if(app.firstElementChild!==bc)app.prepend(bc);const q=app.querySelector(':scope>.quick');if(q&&bc.nextElementSibling!==q)bc.after(q);
