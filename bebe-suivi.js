@@ -78,6 +78,7 @@ function vacs(){return S.parent.vacBebe||(S.parent.vacBebe={})}
 function dateVac(b,m){const d=new Date(b);d.setMonth(d.getMonth()+m);return d}
 window.bbPER=PER;
 window.bbVaccins=function(st){try{return vaccins(st)}catch(e){return ''}};
+window.bbVacListe=function(){try{return {L:vacListe(),V:vacs()}}catch(e){return {L:[],V:{}}}};
 window.bbCroissance=function(st){try{return croissance(st)}catch(e){return ''}};
 window.vacPrevus=function(){try{const b=parseD(S.parent.naissance.date);if(!b)return[];VAC=vacListe();return VAC.filter(v=>!vacs()[v[0]]&&v[2]>0).map(v=>({d:dateVac(b,v[2]),txt:'Vaccins de '+v[1]+' (prévus)'}))}catch(e){return[]}};
 function vaccins(st){VAC=vacListe();const V=vacs(),now=new Date(),reg=vacRegion();
