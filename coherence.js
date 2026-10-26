@@ -15,14 +15,29 @@ const SG=['{p}, prenez un moment aujourd\'hui pour poser vos mains sur votre ven
 if(typeof motDuJour==='function'){const _m=motDuJour;motDuJour=function(){if(!sansDoula())return _m.apply(this,arguments);try{const st=etape(),p=S.parent,n=Math.floor(Date.now()/864e5);const L=st.k==='pp'?SP:(st.k==='preg'&&st.g.w>=37)?SF:SG;
   return L[n%L.length].replace(/\{p\}/g,p.prenom||'').replace(/\{b\}/g,(p.naissance||{}).prenomBebe||'bébé').replace(/^, /,'').replace(/^([a-zà-ÿ])/,c=>c.toUpperCase())}catch(e){return _m.apply(this,arguments)}}}
 /* remplacements de texte quand il n'y a pas de doula */
-const SANS=[['— ta doula','— L\'équipe Sérénaissance'],['puis en parler avec la doula','puis en parler ensemble'],[', à revoir avec la doula et votre professionnel',', à revoir avec votre professionnel'],['à revoir avec la doula et votre','à revoir avec votre'],[' : votre doula les voit et ils apparaissent',' : ils apparaissent'],['Notez-le ici : votre doula le voit pour mieux vous accompagner.','Notez-le ici : si vous êtes accompagnée par une doula, elle le verra.']];
+const SANS=[['— ta doula','— L\'équipe Sérénaissance'],['puis à en parler.','puis à en parler ensemble.'],['puis en parler avec la doula','puis en parler ensemble'],[', à revoir avec la doula et votre professionnel',', à revoir avec votre professionnel'],['à revoir avec la doula et votre','à revoir avec votre'],[' : votre doula les voit et ils apparaissent',' : ils apparaissent'],['Notez-le ici : votre doula le voit pour mieux vous accompagner.','Notez-le ici : si vous êtes accompagnée par une doula, elle le verra.']];
 function textes(root,paires){const w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT),L=[];while(w.nextNode())L.push(w.currentNode);L.forEach(n=>{let v=n.nodeValue,o=v;paires.forEach(([a,b])=>{if(typeof a==='string'){if(v.includes(a))v=v.split(a).join(b)}else v=v.replace(a,b)});if(v!==o)n.nodeValue=v})}
+/* sans doula : tout ce qui parle de « votre doula » disparaît (sauf ce qui sert à en trouver une) */
+const GARDER='.foot,[data-en-reg],[data-act="mcCherche"],.md-grille,.cc-carte,[data-keepdoula],#tabs';
+const PETIT='button,a,li,label,.chip,.tile,.qbtn,.md-carre,.pill,option,summary,.li';
+const ENUM=[[/,\s*(?:à |avec |ou à |ou )?(?:votre|ta|ma|la|sa) doula(?=\s*[,:.;)!?]|\s+(?:ou|et)\b)/gi,''],[/\s+(?:ou|et) (?:à |avec )?(?:votre|ta|ma|la|sa) doula(?=\s*[,:.;)!?])/gi,''],[/(?:à |avec )?(?:votre|ta|ma|la|sa) doula,\s*/gi,''],[/\s+avec (?:votre|ta|la) doula(?=\s*[,:.;)!?])/gi,'']];
+function sansDoulaNettoyer(root){try{const w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT),L=[];while(w.nextNode()){const n=w.currentNode;if(/doula/i.test(n.nodeValue)&&!/©|@la\.doula/.test(n.nodeValue)&&!n.parentElement.closest(GARDER))L.push(n)}
+  L.forEach(n=>{if(!n.isConnected)return;let v=n.nodeValue;ENUM.forEach(([re,b])=>{v=v.replace(re,b)});if(!/doula/i.test(v)){n.nodeValue=v;return}
+    const pe=n.parentElement,pt=pe.closest(PETIT);if(pt&&!pt.closest(GARDER)&&pt.textContent.length<140){pt.remove();return}
+    v=v.replace(/[^.!?]*\bdoulas?\b[^.!?]*[.!?]?\s*/gi,'').trim();if(v){n.nodeValue=v;return}
+    const bloc=pe.closest('p,small,span,div,b,h2,h3,.eyebrow');if(bloc&&!bloc.closest(GARDER)&&bloc.textContent.trim()===n.nodeValue.trim())bloc.remove();else n.nodeValue=''});
+  /* une carte qui ne parlait que de la doula, vide maintenant : on l'enlève */
+  if(L.length)root.querySelectorAll('.card,.soft,details').forEach(c=>{if(!c.closest(GARDER)&&!c.textContent.trim()&&!c.querySelector('input,textarea,select,img,svg,canvas'))c.remove()})}catch(e){}}
+window.sansDoulaNettoyer=sansDoulaNettoyer;
+/* les fenêtres (feuilles) aussi */
+new MutationObserver(()=>{if(sansDoula()){const l=document.getElementById('layer');if(l&&l.innerHTML&&/doula/i.test(l.textContent))sansDoulaNettoyer(l)}}).observe(document.getElementById('layer')||document.body,{childList:true,subtree:true});
 const _r=render;render=function(){const x=_r.apply(this,arguments);try{if(S.role!=='parent')return x;const app=document.getElementById('app'),st=etape();
   /* onglet Journal selon l'étape */
   const tj=document.querySelector('#tabs [data-v="journal"]');if(tj&&!(window.ftMode&&window.ftMode())){const lab=st.k==='preg'?'Mon journal':'Journal bébé',ic=st.k==='preg'?'fa-book-open':'fa-baby';const sp=tj.querySelector('span');if(sp&&sp.textContent!==lab){sp.textContent=lab;tj.setAttribute('aria-label',lab);const i=tj.querySelector('i');if(i)i.className='fa-solid '+ic}}
+  const tm=document.querySelector('#tabs [data-v="madoula"]');if(tm){const sd=sansDoula(),lab=sd?'Doulas':'Ma doula';const sp=tm.querySelector('span');if(sp&&sp.textContent!==lab){sp.textContent=lab;tm.setAttribute('aria-label',sd?'Trouver une doula':lab);const i=tm.querySelector('i');if(i)i.className='fa-solid '+(sd?'fa-magnifying-glass':'fa-comments')}}
   if(S.vue&&S.vue!=='params')return x;
   /* sans doula */
-  if(sansDoula()){textes(app,SANS);app.querySelectorAll('.stat span').forEach(s=>{if(/garde de la doula/.test(s.textContent)){s.textContent='38 SA'}});
+  if(sansDoula()){app.querySelectorAll('.env-doula').forEach(c=>c.remove());if(S.tab!=='madoula'||S.vue)sansDoulaNettoyer(app);textes(app,SANS);app.querySelectorAll('.stat span').forEach(s=>{if(/garde de la doula/.test(s.textContent)){s.textContent='38 SA'}});
     app.querySelectorAll('.card').forEach(c=>{if(/Effacer ma conversation avec ma doula/.test(c.textContent))c.remove()})}
   /* notes propres à la France */
   if(region()!=='FR')textes(app,[[/(^|[.!?]\s+)France\s*:\s*[^.]*\.\s*/g,'$1']]);
