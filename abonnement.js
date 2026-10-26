@@ -2,7 +2,7 @@
    Le statut vient de fam_doulas (rempli par le webhook Stripe). La propriétaire n'est jamais suspendue. */
 if(window.ESPACE==='doula'){
 const ABO_LIENS={mensuel:'https://buy.stripe.com/aFabIUaPC7J6doM7jsffy0m',annuel:'https://buy.stripe.com/3cI8wI4regfCgAY47gffy0n'};
-const aboLien=k=>ABO_LIENS[k]+'?client_reference_id='+encodeURIComponent(ME_DOULA.id)+'&prefilled_email='+encodeURIComponent(ME_DOULA.courriel||'');
+const aboLien=k=>((PRIX.info('doula').liens||{})[k]||ABO_LIENS[k])+'?client_reference_id='+encodeURIComponent(ME_DOULA.id)+'&prefilled_email='+encodeURIComponent(ME_DOULA.courriel||'');
 function aboStatut(){const D=ME_DOULA;if(!D)return {ok:true,type:'inconnu'};
   if(MOI&&MOI.admin)return {ok:true,type:'proprio'};
   if(D.acces_gratuit)return {ok:true,type:'offert'};
@@ -12,7 +12,7 @@ function aboStatut(){const D=ME_DOULA;if(!D)return {ok:true,type:'inconnu'};
   const debut=new Date(D.created_at||Date.now()),fin=new Date(debut);fin.setMonth(fin.getMonth()+6);
   const jours=Math.ceil((fin-Date.now())/864e5);
   return jours>0?{ok:true,type:'essai',jours,fin}:{ok:false,type:'expire',fin}}
-const aboBoutons=()=>'<a class="btn" style="width:100%;text-align:center;margin:6px 0;text-decoration:none" target="_blank" rel="noopener" href="'+aboLien('mensuel')+'">8 $ par mois</a><a class="btn ghost" style="width:100%;text-align:center;margin:6px 0;text-decoration:none" target="_blank" rel="noopener" href="'+aboLien('annuel')+'">90 $ par an <span class="xs">(économisez 6 $)</span></a><p class="xs muted">Taxes en sus. Paiement sécurisé par Stripe. Annulable en tout temps.</p>';
+const aboBoutons=()=>{const aboI=PRIX.info('doula');return '<a class="btn" style="width:100%;text-align:center;margin:6px 0;text-decoration:none" target="_blank" rel="noopener" href="'+aboLien('mensuel')+'">'+aboI.fmt(aboI.p.m)+' par mois</a><a class="btn ghost" style="width:100%;text-align:center;margin:6px 0;text-decoration:none" target="_blank" rel="noopener" href="'+aboLien('annuel')+'">'+aboI.fmt(aboI.p.a)+' par an <span class="xs">(économisez '+aboI.fmt(aboI.p.e)+')</span></a><p class="xs muted">'+(aboI.reg==='CA'?'Taxes en sus':'Taxes éventuelles en sus')+'. Paiement sécurisé par Stripe. Annulable en tout temps.'+(aboI.note?' '+aboI.note:'')+'</p>';}
 function aboVerifier(){['ecranAbo','bandeauAbo'].forEach(i=>document.getElementById(i)?.remove());
   const s=aboStatut();if(s.ok&&s.type==='essai'&&s.jours<=30){const b=document.createElement('div');b.id='bandeauAbo';b.className='bandeau-maj';
     b.innerHTML='<span>Il vous reste <b>'+s.jours+' jour'+(s.jours>1?'s':'')+'</b> gratuits : votre 7e mois commence le '+new Date(s.fin).toLocaleDateString('fr-CA',{day:'numeric',month:'long'})+'.</span><button class="btn sm" data-act="aboVoir">S\'abonner</button>';document.body.appendChild(b);return}

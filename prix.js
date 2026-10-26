@@ -1,0 +1,19 @@
+/* Sérénaissance — prix des abonnements selon le pays (Canada $ CA, France €, États-Unis $ US).
+   Les liens Stripe FR/US restent à null tant que les prix en € et en US$ ne sont pas créés dans Stripe :
+   en attendant, les boutons utilisent le lien en $ CA et le disent clairement. */
+(function(){
+const P={
+  CA:{doula:{m:8,a:90,e:6},maman:{m:4,a:40,e:8},fmt:n=>n+' $',liens:true},
+  FR:{doula:{m:5,a:57,e:3},maman:{m:3,a:26,e:10},fmt:n=>n+' €',liens:{doula:null,maman:null}},
+  US:{doula:{m:6,a:64,e:8},maman:{m:3,a:28,e:8},fmt:n=>n+' $ US',liens:{doula:null,maman:null}}
+};
+const NOMS={'France':'FR','FR':'FR','États-Unis':'US','Etats-Unis':'US','US':'US','USA':'US'};
+function reg(){try{let r='';if(window.ESPACE==='doula'){r=(typeof ME_DOULA!=='undefined'&&ME_DOULA&&ME_DOULA.region)||(S.doula&&S.doula.region)||''}else{r=(S.parent&&S.parent.region)||(typeof FAM!=='undefined'&&FAM&&FAM.region)||''}return NOMS[r]||'CA'}catch(e){return 'CA'}}
+/* type = 'doula' | 'maman' ; k = 'mensuel' | 'annuel' ; retourne {texte, ext, lien, devise} */
+function info(type){const r=reg(),c=P[r],lk=c.liens&&c.liens!==true?c.liens[type]:null;
+  const ok=r==='CA'||(lk&&lk.mensuel&&lk.annuel),use=ok?c:P.CA,p=use[type];
+  return {reg:r,ok,p,fmt:use.fmt,liens:ok&&r!=='CA'?lk:null,note:(!ok&&r!=='CA')?'Pour le moment, le paiement se fait en dollars canadiens : votre banque convertit le montant.':''}}
+window.PRIX={reg,info,
+  tous(type){return ['CA','FR','US'].map(r=>P[r].fmt(P[r][type].m)+'/mois ou '+P[r].fmt(P[r][type].a)+'/an')},
+  phrase(type){const i=info(type);return '<b>'+i.fmt(i.p.m)+' par mois</b> ou <b>'+i.fmt(i.p.a)+' par an</b>'}};
+})();

@@ -21,7 +21,7 @@ function tropInactif(){try{const t=+localStorage.getItem(CLE_ACT);if(!t)return f
 let PLACES=null;
 async function chargerPlaces(){try{const {data,error}=await sb.rpc('fam_places_doulas');if(!error&&data&&typeof data==='object')PLACES=data}catch(e){}}
 const inscriptionsFermees=()=>false; /* l'inscription reste ouverte : sans place gratuite, la doula choisit un abonnement */
-const noteTarif=()=>'<div class="banner acc">'+icon('fa-gift')+'<div class="small"><b>Vous avez reçu un code promo ?</b> Entrez-le ci-dessous : 6 mois gratuits. Sans code : <b>8 $ par mois</b> ou <b>90 $ par an</b>.</div></div>';
+const noteTarif=()=>'<div class="banner acc">'+icon('fa-gift')+'<div class="small"><b>Vous avez reçu un code promo ?</b> Entrez-le ci-dessous : 6 mois gratuits. Sans code : '+PRIX.phrase('doula')+'.</div></div>';
 const MSG_COMPLET=()=>'<b>Les inscriptions sont complètes.</b> Les '+((PLACES&&PLACES.max)||10)+' places de la période de test sont prises. Écrivez à l\'Académie Sérénaissance pour être avisée à l\'ouverture des prochaines places.';
 let S={role:null,tab:'accueil',sub:'',dtab:'accueil',dsub:'',parent:blankParent(),doula:{},logs:[],clients:[],timer:null,kick:null,contrActive:null,showContr:false};
 const OWNER_EMAIL='sc@academiesere.ca';

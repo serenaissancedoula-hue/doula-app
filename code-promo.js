@@ -59,8 +59,8 @@ if(window.ESPACE!=='parent'){
 /* =============== ESPACE FAMILLE =============== */
 if(window.ESPACE==='parent'){
   const LIENS={mensuel:'https://buy.stripe.com/3cIfZa2j63sQ98w1Z8ffy0t',annuel:'https://buy.stripe.com/00w28k7Dq3sQgAY5bkffy0u'};
-  const lien=k=>LIENS[k]+'?client_reference_id='+encodeURIComponent((FAM&&FAM.id)||'')+'&prefilled_email='+encodeURIComponent((FAM&&FAM.courriel)||'');
-  const boutons=()=>'<a class="btn" style="width:100%;text-align:center;margin:6px 0;text-decoration:none" target="_blank" rel="noopener" href="'+lien('mensuel')+'">4 $ par mois</a><a class="btn ghost" style="width:100%;text-align:center;margin:6px 0;text-decoration:none" target="_blank" rel="noopener" href="'+lien('annuel')+'">40 $ par année <span class="xs">(économisez 8 $)</span></a><p class="xs muted">Taxes en sus. Paiement sécurisé par Stripe. Annulable en tout temps.</p>';
+  const lien=k=>((PRIX.info('maman').liens||{})[k]||LIENS[k])+'?client_reference_id='+encodeURIComponent((FAM&&FAM.id)||'')+'&prefilled_email='+encodeURIComponent((FAM&&FAM.courriel)||'');
+  const boutons=()=>{const pI=PRIX.info('maman');return '<a class="btn" style="width:100%;text-align:center;margin:6px 0;text-decoration:none" target="_blank" rel="noopener" href="'+lien('mensuel')+'">'+pI.fmt(pI.p.m)+' par mois</a><a class="btn ghost" style="width:100%;text-align:center;margin:6px 0;text-decoration:none" target="_blank" rel="noopener" href="'+lien('annuel')+'">'+pI.fmt(pI.p.a)+' par année <span class="xs">(économisez '+pI.fmt(pI.p.e)+')</span></a><p class="xs muted">'+(pI.reg==='CA'?'Taxes en sus':'Taxes éventuelles en sus')+'. Paiement sécurisé par Stripe. Annulable en tout temps.'+(pI.note?' '+pI.note:'')+'</p>';}
   window.cpBoutonsFamille=boutons;
   let ACC=null;
   async function verifier(){if(!FAM||typeof sb==='undefined')return;
