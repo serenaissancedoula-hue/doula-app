@@ -60,7 +60,6 @@ function carteAine(){const A=ages(),ant=((S.parent.grossesseInfos||{}).ant||{});
 function carteAvant(){const I=S.parent.grossesseInfos||{},a=I.ant||{},T=[];
   if(+a.cesar)T.push('<b>Après une césarienne</b> : un accouchement vaginal après césarienne (AVAC) réussit dans 50 à 85 % des cas selon la SOGC. Parlez-en tôt avec votre équipe : la raison de la césarienne, le type de cicatrice et le lieu de naissance comptent.');
   if(+a.prema)T.push('<b>Vous avez eu un bébé prématuré</b> : dites-le dès le premier rendez-vous, un suivi particulier peut être proposé. Avant 37 semaines, contractions régulières, pression dans le bassin, perte de liquide ou saignement : appelez tout de suite.');
-  if(+a.fc)T.push('<b>Après une ou des fausses couches</b>, l\'inquiétude du début est fréquente. Vous pouvez demander à être vue tôt, et en parler : vous n\'avez pas à attendre la 12e semaine pour avoir du soutien.');
   if(+a.vaginal)T.push('<b>Un accouchement après un premier accouchement vaginal</b> est souvent plus rapide : revoyez avec votre équipe quand partir, et organisez la garde des enfants d\'avance.');
   if(!T.length)return '';return '<div class="card gp-avant"><span class="eyebrow acc">Selon mes grossesses d\'avant</span>'+ul(T)+(+a.cesar?'<p class="xs muted">Source : '+L('SOGC, accouchement vaginal après césarienne','https://www.pregnancyinfo.ca/wp-content/uploads/2017/04/Guidelines-for-Vaginal-Birth-After-Previous-Caesarean-Birth-.pdf')+'</p>':'')+'</div>'}
 /* ---------- branchements ---------- */
