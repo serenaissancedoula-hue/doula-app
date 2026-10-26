@@ -43,11 +43,13 @@ function enTete(d){
   const fv=d.id&&favs().includes(d.id);
   return '<div class="row" style="gap:14px;align-items:center">'+ph+'<div style="min-width:0;flex:1"><b style="font-size:17px">'+nom+'</b>'+(d.id&&d.prenom&&A.liste&&A.liste.some(x=>x.id===d.id)?'<button class="an-fav'+(fv?' on':'')+'" data-an-fav="'+esc(d.id)+'" aria-label="'+(fv?'Retirer de mes favorites':'Ajouter à mes favorites')+'">'+(fv?'♥':'♡')+'</button>':'')+(d.avis_n?'<div class="small">'+etoiles(d)+'</div>':'')+(d.entreprise?'<div class="small muted">'+esc(d.entreprise)+'</div>':'')+(lieu?'<div class="small" style="margin-top:2px">'+icon('fa-location-dot')+' '+esc(lieu)+'</div>':'')+(d._km!=null&&d._km>0?'<div class="xs muted">À environ '+d._km+' km de vous</div>':'')+'</div></div>'}
 const moisCible=()=>{try{if(window.ESPACE!=='parent'||!S.parent)return '';const st=stage();if(st.k!=='preg'||!st.g||!st.g.dpa)return '';const x=new Date(st.g.dpa);return x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')}catch(e){return ''}};
+const QLIB={doula:'Doula certifiée',ibclc:'Consultante en lactation (IBCLC)',marraine:'Marraine d\'allaitement',deuil:'Deuil périnatal',aide:'Relation d\'aide',yoga:'Yoga prénatal / postnatal',rcr:'Premiers soins / RCR'};
+const qualHtml=d=>{const q=String(d.qualifs||'').split(',').map(k=>QLIB[k.trim()]).filter(Boolean);return q.length?'<p class="xs" style="margin:6px 0 0"><b>Formations :</b> '+q.join(' · ')+'</p>':''};
 function carte(d,bouton){
   const mo=moisDe(d),mc=moisCible(),dispo=mc&&mo.length?(mo.includes(mc)?'<div class="xs" style="margin-top:6px;color:#2f855a;font-weight:700">'+icon('fa-circle-check')+' Disponible pour votre mois prévu ('+moisLib(mc)+')</div>':'<div class="xs muted" style="margin-top:6px">'+icon('fa-circle-info')+' Pas de place indiquée pour '+moisLib(mc)+' : écrivez-lui quand même, ça peut changer.</div>'):'';
   return '<div class="card">'+enTete(d)
     +(servDe(d).length?'<div class="an-serv">'+servDe(d).map(k=>'<span class="pill line">'+esc((SERV.find(x=>x[0]===k)||[0,k])[1])+'</span>').join('')+'</div>':'')
-    +(d.prix_min?'<div class="xs" style="margin-top:6px">'+icon('fa-tag')+' Forfaits à partir de <b>'+(+d.prix_min).toLocaleString('fr-CA')+' $</b></div>':'')
+    +qualHtml(d)    +(d.prix_min?'<div class="xs" style="margin-top:6px">'+icon('fa-tag')+' Forfaits à partir de <b>'+(+d.prix_min).toLocaleString('fr-CA')+' $</b></div>':'')
     +(d.bio?'<p class="small" style="margin:10px 0 0">'+esc(court(d.bio,150))+'</p>':'')
     +dispo+(mo.length?'<div class="xs" style="margin-top:8px">'+icon('fa-calendar-check')+' <b>Places pour des naissances :</b> '+esc(mo.slice(0,4).map(moisLib).join(' · '))+(mo.length>4?' …':'')+'</div>':'')
     +(bouton?'<div class="row" style="gap:8px;margin-top:12px"><button class="btn sm ghost" style="flex:1" data-act="anPlus" data-id="'+esc(d.id)+'">En savoir plus</button><button class="btn sm" style="flex:1" data-act="anEcrire" data-id="'+esc(d.id)+'">'+icon('fa-calendar-plus')+'Prendre rendez-vous</button></div>':'')+'</div>'}
@@ -65,7 +67,8 @@ function ficheSheet(id){const d=(A.liste||[]).find(x=>x.id===id);if(!d)return;co
 async function chargerAnnuaire(){
   let r5=null;try{r5=await sb.rpc('fam_annuaire5',{p_q:null});if(r5&&r5.error)r5=null}catch(e){r5=null}
   const [r,m]=await Promise.all([r5?Promise.resolve(r5):sb.rpc('fam_annuaire4',{p_q:null}),sb.from('fam_demandes').select('*').order('created_at',{ascending:false}).limit(30).then(x=>x,()=>({data:[]}))]);
-  A.liste=r.data||[];A.dem=(m&&m.data)||[];A.charge=true}
+  A.liste=r.data||[];A.dem=(m&&m.data)||[];A.charge=true;
+  try{const {data:q}=await sb.rpc('fam_annuaire_qualifs');if(Array.isArray(q)){const Q={};q.forEach(x=>{Q[x.id]=x.qualifs});A.liste.forEach(d=>{d.qualifs=Q[d.id]||null})}}catch(e){}}
 function filtrer(){return filtrer0().filter(d=>{const F=A.f||{};if(F.fav&&!favs().includes(d.id))return false;if(F.langue&&!norm(d.langues).includes(norm(F.langue)))return false;if((F.serv||[]).length&&!F.serv.every(k=>servDe(d).includes(k)))return false;return true})}
 function filtrer0(){if(A.pos){const L=[];A.liste.forEach(d=>{if(d.lat==null)return;const x=Math.round(dist(A.pos,{lat:d.lat,lng:d.lng}));if(x<=(d.rayon_km||50))L.push(Object.assign({},d,{_km:x}))});return L.sort((a,b)=>a._km-b._km)}
   const q=norm(A.q);if(!q)return A.liste;const c=coord(A.q);
@@ -123,6 +126,7 @@ const _cd=chargerDoula;
 chargerDoula=async function(){await _cd.apply(this,arguments);await chargerApprob();try{if(localStorage.getItem('an-vu'))ME_DOULA.annuaire_vu=true}catch(x){}await chargerDemandes()};
 
 let MSEL=null;const moisInit=()=>{if(MSEL===null)MSEL=moisDe(brouillon())};
+window.anSetMois=L=>{MSEL=L.slice();const el=document.getElementById('pfMois');if(el)el.innerHTML=moisHtml()};
 function moisHtml(){moisInit();return moisProchains().map(k=>'<button type="button" class="pill '+(MSEL.includes(k)?'acc':'line')+'" style="cursor:pointer;border:0;font:inherit" data-act="anMois" data-v="'+k+'">'+(MSEL.includes(k)?icon('fa-check')+' ':'')+esc(moisLib(k))+'</button>').join('')}
 const AUT=[
  'J\'autorise Sérénaissance à afficher publiquement mon prénom, l\'initiale de mon nom, ma photo, ma présentation, mes villes, mon site web et mes disponibilités dans l\'annuaire « Trouver ma doula ».',
