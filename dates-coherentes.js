@@ -13,7 +13,7 @@ const DDR=[-301,0,'La date des dernières règles doit être dans le passé, il 
   NAISS=[-6*366,0,'La date de naissance de bébé doit être aujourd\'hui ou dans le passé.'],
   ENF=[-30*366,0,'La date de naissance doit être dans le passé.'],
   PASSE=[-6*366,0,'Cette date ne peut pas être dans le futur.'];
-const PAR_ID={pf_ddr:DDR,ft_d:REG,ft_p1:REG,ft_p2:REG,pf_dpa:DPA,deDpa:DPA,agDpa:DPA,pf_bd:NAISS,ft_nd:NAISS,b_date:NAISS,en_d:ENF,dt_d:PASSE,vcD:PASSE};
+const PAR_ID={pf_ed:ECHO,pf_ddr:DDR,ft_d:REG,ft_p1:REG,ft_p2:REG,pf_dpa:DPA,deDpa:DPA,agDpa:DPA,pf_bd:NAISS,ft_nd:NAISS,b_date:NAISS,en_d:ENF,dt_d:PASSE,vcD:PASSE};
 function regle(t){if(!t||t.type!=='date')return null;if(PAR_ID[t.id])return PAR_ID[t.id];const p=t.dataset.p||'';
   if(/(^|\.)ddr$/.test(p))return DDR;if(/echoDate$/.test(p))return ECHO;if(/(dpaEquipe|calc\.dpa|tmp\.dpa)$/.test(p))return DPA;
   if(/naissance\.date$|\.naiss$/.test(p))return NAISS;if(/firsts\./.test(p))return PASSE;return null}
