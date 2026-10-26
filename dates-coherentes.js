@@ -29,7 +29,7 @@ window.addEventListener('change',e=>{const t=e.target,r=regle(t);if(!r||!t.value
   /* date prévue et dernières règles qui ne concordent pas : on prévient, sans bloquer */
   try{const P=(typeof S!=='undefined'&&S&&S.parent)||{};const p=t.dataset.p||t.id;let ddr=null,dpa=null;
     if(/ddr$/.test(p)){ddr=v;dpa=lire(P.dpaEquipe||(document.getElementById('pf_dpa')||{}).value)}else if(/dpa/i.test(p)){dpa=v;ddr=lire(P.ddr||(document.getElementById('pf_ddr')||{}).value)}
-    if(ddr&&dpa){const att=ddr+280*J,ec=Math.round((dpa-att)/J);if(Math.abs(ec)>21)setTimeout(()=>msg('Attention : d\'après vos dernières règles, la date prévue serait vers le '+fd(att)+' ('+Math.abs(ec)+' jours d\'écart). Vérifiez vos dates.'),300)}}catch(x){}},true);
+    if(ddr&&dpa){const att=ddr+280*J,ec=Math.round((dpa-att)/J);if(Math.abs(ec)>21)setTimeout(()=>msg('D\'après vos dernières règles, la date prévue serait vers le '+fd(att)+' ('+Math.abs(ec)+' jours d\'écart). Si cette date vient de votre échographie ou de votre équipe, c\'est elle que l\'appli utilisera.'),300)}}catch(x){}},true);
 /* semaines à l'échographie : entre 4 et 42 */
 window.addEventListener('change',e=>{const t=e.target;if(!t||!/echoSA$/.test(t.dataset.p||''))return;const n=+t.value;if(t.value!==''&&(!(n>=4&&n<=42)||n!==Math.round(n))){e.stopImmediatePropagation();t.value='';msg('Le nombre de semaines à l\'échographie doit être entre 4 et 42.')}},true);
 /* avant d'enregistrer une fenêtre : toutes ses dates doivent être possibles */

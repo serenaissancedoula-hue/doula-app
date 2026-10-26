@@ -18,7 +18,12 @@ window.pfActif=actif;window.pfSuivis=suivis;
 {const _rM=render;render=function(){const x=_rM.apply(this,arguments);try{if(S.role!=='parent'||S.vue||S.sub)return x;const app=document.getElementById('app'),a=actif();if(app.querySelector('.pf-mod'))return x;
   let bt='';if(S.tab==='suivi'&&a==='grossesse'&&grossesseActive())bt='<button class="pf-mod" data-pf-gr="edit">'+icon('fa-pen')+'Modifier mes dates (règles, échographie, date prévue)</button>';
   else if((S.tab==='suivi'||S.tab==='journal')&&a==='bebe'&&bebeActif()&&S.sub!=='devE')bt='<button class="pf-mod" data-pf-bb="edit">'+icon('fa-pen')+'Modifier la date de naissance'+(nbBebe()>1?' ou les prénoms':'')+'</button>';
-  if(bt){const sh=app.querySelector(':scope>.sh, :scope>.jb-tete');const t=document.createElement('template');t.innerHTML=bt;if(sh)sh.append(t.content)}}catch(e){}return x}}
+  if(bt){const sh=app.querySelector(':scope>.sh, :scope>.jb-tete');const t=document.createElement('template');t.innerHTML=bt;if(sh)sh.append(t.content)}
+  /* grossesse calculée seulement avec les dernières règles : on l'invite à mettre la date de son échographie */
+  const p=S.parent,g=(a==='grossesse'&&grossesseActive())?(()=>{try{return stage().g}catch(e){return null}})():null;
+  if(g&&!p.echoDate&&!p.dpaEquipe&&g.w>=6&&g.w<=24&&(S.tab==='suivi'||(S.tab||'accueil')==='accueil')&&!app.querySelector('.pf-echo')){const t=document.createElement('template');
+    t.innerHTML='<div class="card pf-echo" data-dk="1" data-dt="1"><span class="pf-echo-ic">🩻</span><div><b>Votre date est calculée selon vos dernières règles</b><p class="small" style="margin:4px 0 8px">'+(g.w<11?'L\'échographie de datation se fait souvent entre 7 et 14 semaines. ':'')+'Après votre échographie, entrez ce qu\'on vous a dit : l\'appli ajuste votre semaine et votre date prévue.</p><div class="row" style="gap:8px;flex-wrap:wrap"><button class="btn sm" data-pf-echo="echo">J\'ai eu mon échographie</button><button class="btn sm ghost" data-pf-echo="dpa">On m\'a donné une date prévue</button></div></div></div>';
+    const ref=app.querySelector(':scope>.sh');if(ref)ref.after(t.content);else app.prepend(t.content)}}catch(e){}return x}}
 /* stage() suit l'onglet choisi */
 const _st=stage;stage=function(){const r=_st.apply(this,arguments);try{if(S.role!=='parent')return r;const a=actif();
   if(a==='cycle')return {k:'none'};if(a==='grossesse'){const g=grossesseActive();if(g)return {k:'preg',g}}if(a==='bebe'&&bebeActif())return r;}catch(e){}return r};
@@ -58,7 +63,7 @@ function fBebe(edit){const n=edit?(P().naissance||{}):{};const L=edit?(n.prenoms
   sheet(edit?'Mon bébé':'Bébé est né 💗','<label class="f">Date de naissance<input type="date" id="pf_bd" max="'+iso(new Date())+'" value="'+esc(edit?(n.date||''):iso(new Date()))+'"></label>'+nbSel('pfb_nb',nb)+noms('pfb',L,nb)+
    '<label class="f">Sexe'+(nb>1?' (du premier bébé)':'')+'<select id="pf_bs"><option value="">—</option>'+['Fille','Garçon'].map(x=>'<option'+((n.sexe||'')===x?' selected':'')+'>'+x+'</option>').join('')+'</select></label>'+
    (!edit&&bebeActif()?'<p class="xs muted">'+esc((P().naissance||{}).prenomBebe||'Votre premier enfant')+' reste dans vos souvenirs : le suivi passe au nouveau bébé.</p>':'')+'<button class="btn" data-pf-bsave="'+(edit?1:0)+'">Enregistrer</button>')}
-(function(){const st=document.createElement('style');st.textContent='.pf-mod{display:inline-flex;align-items:center;gap:6px;margin-top:8px;padding:6px 12px;border:1px solid var(--line,#e6d9d0);border-radius:999px;background:var(--card);color:var(--accent);font:600 .78rem var(--f-body);cursor:pointer}';document.head.appendChild(st)})();
+(function(){const st=document.createElement('style');st.textContent='.pf-echo{display:flex;gap:12px;align-items:flex-start;background:linear-gradient(135deg,#fdf0e6,#fde8ee)!important;color:#4a2c25}.pf-echo b{color:#7a3b2e}.pf-echo p{color:#5b3a30}.pf-echo-ic{font-size:2rem;line-height:1}.pf-mod{display:inline-flex;align-items:center;gap:6px;margin-top:8px;padding:6px 12px;border:1px solid var(--line,#e6d9d0);border-radius:999px;background:var(--card);color:var(--accent);font:600 .78rem var(--f-body);cursor:pointer}';document.head.appendChild(st)})();
 function lireNoms(pref,n){return [0,1,2].slice(0,n).map(i=>(($('#'+pref+'_n'+i)||{}).value||'').trim())}
 /* ---------- jumeaux / triplés après la naissance : un journal par bébé ---------- */
 const TYPES_BB=['sein','biberon','tirage','couche','sommeil','poids','solide'];
@@ -95,6 +100,7 @@ document.addEventListener('click',e=>{const g=s=>e.target.closest(s);let b;
   if(b=g('[data-pf]')){e.stopPropagation();S.parent.profil=b.dataset.pf;sauver();S.sub='';render();scrollTo(0,0);return}
   if(b=g('[data-pf-sel]')){e.stopPropagation();S.bbSel=+b.dataset.pfSel;render();return}
   if(b=g('[data-pf-cycle]')){e.stopPropagation();const on=b.dataset.pfCycle==='1';S.parent.suiviCycle=on;if(!on&&S.parent.parcours==='conception')S.parent.parcours=bebeActif()?'bebe':grossesseActive()?'grossesse':'';if(on)S.parent.profil='cycle';sauver();render();toast(on?'Suivi du cycle activé':'Suivi du cycle retiré');return}
+  if(b=g('[data-pf-echo]')){e.stopPropagation();fGrossesse(true);setTimeout(()=>{if(b.dataset.pfEcho==='echo'){const d=document.querySelector('#layer details');if(d)d.open=true;const i=$('#pf_ed');if(i){i.scrollIntoView({block:'center'});i.focus()}}else{const i=$('#pf_dpa');if(i)i.focus()}},50);return}
   if(b=g('[data-pf-gr]')){e.stopPropagation();fGrossesse(b.dataset.pfGr==='edit');return}
   if(b=g('[data-pf-bb]')){e.stopPropagation();fBebe(b.dataset.pfBb==='edit');return}
   if(b=g('[data-pf-gsave]')){e.stopPropagation();const ddr=$('#pf_ddr').value,dpa=$('#pf_dpa').value,edit=b.dataset.pfGsave==='1',ed=($('#pf_ed')||{}).value||'',es=($('#pf_es')||{}).value,ej=($('#pf_ej')||{}).value;
