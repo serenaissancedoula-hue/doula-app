@@ -30,7 +30,7 @@ Deno.serve(async (req) => {
     // Abonnement Stripe : annulé automatiquement si la clé restreinte (secret STRIPE_CLE_ANNULATION) est installée
     const subId = dl?.stripe_sub || (fa as { stripe_sub?: string } | null)?.stripe_sub || "";
     let abonnementAnnule = false;
-    const cleStripe = Deno.env.get("STRIPE_CLE_ANNULATION") ?? "";
+    const cleStripe = (Deno.env.get("STRIPE_CLE_ANNULATION") ?? Deno.env.get("Stripe_cle_annulation") ?? "").trim();
     if (subId && cleStripe) {
       try {
         const r = await fetch("https://api.stripe.com/v1/subscriptions/" + encodeURIComponent(subId), { method: "DELETE", headers: { Authorization: "Bearer " + cleStripe } });
