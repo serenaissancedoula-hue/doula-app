@@ -1,8 +1,10 @@
 /* Sérénaissance — inscription et connexion avec un CODE reçu par courriel (au lieu d'un lien) :
    la personne reste dans l'appli, entre le code à 6 chiffres, et son espace s'ouvre. Fonctionne aussi dans l'appli installée sur l'écran d'accueil. */
 (function(){
-let DEM=null;
-window.ecranCode=function(courriel,corps){DEM={courriel:String(courriel||'').trim().toLowerCase(),corps};
+let DEM=null;const CLE='sere-code-attente';
+const garder=d=>{try{if(d)localStorage.setItem(CLE,JSON.stringify(Object.assign({t:Date.now()},d)));else localStorage.removeItem(CLE)}catch(e){}};
+const attente=()=>{try{const d=JSON.parse(localStorage.getItem(CLE)||'null');return d&&Date.now()-d.t<3*3600e3?d:null}catch(e){return null}};
+window.ecranCode=function(courriel,corps){DEM={courriel:String(courriel||'').trim().toLowerCase(),corps};garder(DEM);
   try{$('#tabs').innerHTML='';const g=$('#gear');if(g)g.hidden=true}catch(e){}
   $('#app').innerHTML='<div class="card cc-carte" style="max-width:480px;margin:0 auto;width:100%"><span class="script">Presque fini</span><h2>Entrez votre code</h2>'+
     '<p class="small">Un code vient de partir à <b>'+esc(DEM.courriel)+'</b>. Ouvrez vos courriels (regardez aussi les indésirables) et entrez-le ici. Pas besoin de toucher de lien.</p>'+
@@ -13,13 +15,22 @@ window.ecranCode=function(courriel,corps){DEM={courriel:String(courriel||'').tri
   i.addEventListener('input',()=>{i.value=i.value.replace(/\D/g,'');if(i.value.length>=6&&i.value.length===(+i.dataset.n||6))valider()});
   i.addEventListener('keydown',e=>{if(e.key==='Enter')valider()});
   $('#ccOk').onclick=valider;
-  $('#ccRetour').onclick=()=>{DEM=null;try{ecranConnexion('')}catch(e){location.reload()}};
+  $('#ccRetour').onclick=()=>{DEM=null;garder(null);try{ecranConnexion('')}catch(e){location.reload()}};
   $('#ccRenv').onclick=async()=>{const b=$('#ccRenv');b.disabled=true;const {data}=await sb.functions.invoke('fam-acces',{body:DEM.corps});$('#ccMsg').textContent=data&&data.ok?'Un nouveau code est parti. Utilisez le plus récent.':((data&&data.erreur)||'Réessayez dans un moment');setTimeout(()=>{b.disabled=false},20000)}};
 async function valider(){const i=$('#ccCode'),b=$('#ccOk'),m=$('#ccMsg'),code=(i.value||'').replace(/\D/g,'');if(code.length<6){m.textContent='Le code a 6 chiffres.';return}
   if(b.disabled)return;b.disabled=true;b.textContent='Vérification…';m.textContent='';let ok=null;
   for(const type of ['invite','magiclink','email','signup']){try{const {data,error}=await sb.auth.verifyOtp({email:DEM.courriel,token:code,type});if(!error&&data&&data.session){ok=type;break}}catch(e){}}
   if(!ok){b.disabled=false;b.textContent='Valider';m.textContent='Ce code ne fonctionne pas ou a expiré. Vérifiez les chiffres, ou touchez « Renvoyer un code ».';i.select();return}
-  S.nouveauCompte=ok==='invite'||ok==='signup';DEM=null;$('#app').innerHTML='<p class="small muted" style="text-align:center;padding:40px">Ouverture de votre espace…</p>';
+  S.nouveauCompte=ok==='invite'||ok==='signup';DEM=null;garder(null);$('#app').innerHTML='<p class="small muted" style="text-align:center;padding:40px">Ouverture de votre espace…</p>';
   try{await demarrer()}catch(e){location.reload()}}
-const st=document.createElement('style');st.textContent='.cc-carte{display:flex;flex-direction:column;gap:10px}.cc-code{font:700 1.9rem/1 ui-monospace,Menlo,monospace!important;letter-spacing:.45em;text-align:center;padding:14px 8px!important;border-radius:16px!important}';document.head.appendChild(st);
+/* si l'appli s'est refermée pendant qu'elle lisait ses courriels : on revient directement à l'écran du code;
+   et sur l'écran de connexion, un bouton « J'ai reçu un code » est toujours là */
+if(typeof ecranConnexion==='function'){const _ec=ecranConnexion;ecranConnexion=function(){const d=attente();if(d&&!window.__ccSauter){window.ecranCode(d.courriel,d.corps);return}window.__ccSauter=false;const x=_ec.apply(this,arguments);
+  try{const app=document.getElementById('app');if(app&&!app.querySelector('.cc-ai')){const t=document.createElement('div');t.className='cc-ai';t.innerHTML='<button class="btn ghost" type="button">'+(typeof icon==='function'?icon('fa-key'):'')+'J\'ai reçu un code par courriel</button>';
+      const f=app.querySelector('#fLogin')||app.querySelector('.card');if(f)f.after(t);else app.prepend(t);
+      t.querySelector('button').onclick=()=>{const em=((document.getElementById('lCourriel')||{}).value||(document.getElementById('fCourriel')||{}).value||'').trim();
+        if(!/^\S+@\S+\.\S+$/.test(em)){toast('Entrez d\'abord votre courriel, puis touchez ce bouton');const c=document.getElementById('lCourriel')||document.getElementById('fCourriel');if(c)c.focus();return}
+        window.ecranCode(em,{type:'lien',courriel:em,app:window.ESPACE==='parent'?'parents':'doula'})}}}catch(e){}return x}}
+const _r0=window.ecranCode;window.ecranCode=function(){_r0.apply(this,arguments);const r=document.getElementById('ccRetour');if(r){const o=r.onclick;r.onclick=()=>{window.__ccSauter=true;o()}}};
+const st=document.createElement('style');st.textContent='.cc-ai{margin:12px auto 0;max-width:480px;width:100%}.cc-ai .btn{width:100%}.cc-carte{display:flex;flex-direction:column;gap:10px}.cc-code{font:700 1.9rem/1 ui-monospace,Menlo,monospace!important;letter-spacing:.45em;text-align:center;padding:14px 8px!important;border-radius:16px!important}';document.head.appendChild(st);
 })();

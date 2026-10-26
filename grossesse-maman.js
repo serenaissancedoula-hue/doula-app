@@ -60,7 +60,7 @@ if(window.ESPACE==='parent'){
   function fPese(){sheet('Me peser','<label class="f">Poids (kg)<input type="number" id="gm_kg" inputmode="decimal" step="0.1" placeholder="Ex. : 66,4"></label>'+W()+'<p class="xs muted">Le matin, au même moment, de préférence. En livres : divisez par 2,2.</p><button class="btn" data-gm-pese-save="1">Enregistrer</button>')}
   /* particularités et antécédents */
   function resume(I){const a=I.ant||{},L=[];const n=(k,s,pl)=>+a[k]?L.push(a[k]+' '+(+a[k]>1?pl:s)):0;
-    n('grossesses','grossesse avant','grossesses avant');n('vaginal','accouchement vaginal','accouchements vaginaux');n('cesar','césarienne','césariennes');n('fc','fausse couche ou perte','fausses couches ou pertes');n('prema','bébé prématuré','bébés prématurés');return L}
+    n('grossesses','grossesse avant','grossesses avant');n('vaginal','accouchement vaginal','accouchements vaginaux');n('cesar','césarienne','césariennes');n('fc','fausse couche','fausses couches');n('prema','bébé prématuré','bébés prématurés');return L}
   function carteInfos(){const I=infos(),C=(I.conds||[]).map(k=>(COND.find(c=>c[0]===k)||[0,k])[1]),A=resume(I),vide=!C.length&&!A.length&&!I.compl&&!I.notes;
     let h='<div class="card gm-inf"><div class="row between"><span class="eyebrow acc">Ma grossesse : particularités</span><button class="btn sm" data-gm-inf="1">'+icon(vide?'fa-plus':'fa-pen')+(vide?'Ajouter':'Modifier')+'</button></div>';
     if(vide)return h+'<p class="small muted" style="margin:6px 0 0">Votre grossesse a des particularités ? Vos grossesses précédentes, une césarienne, une condition de santé, une peur, autre chose d\'important ? Notez-le ici : votre doula le voit pour mieux vous accompagner.</p></div>';
@@ -71,7 +71,7 @@ if(window.ESPACE==='parent'){
     return h+'<p class="xs muted" style="margin-top:8px">Visible par votre doula. Votre médecin ou sage-femme reste la référence pour votre suivi médical.</p></div>'}
   function fInfos(){const I=infos(),a=I.ant||{},num=(k,l)=>'<label class="f">'+l+'<input type="number" min="0" max="20" inputmode="numeric" id="gm_'+k+'" value="'+esc(a[k]||'')+'" placeholder="0"></label>';
     sheet('Ma grossesse','<span class="eyebrow acc">Cette grossesse</span><p class="xs muted" style="margin:2px 0 6px">Cochez ce qui s\'applique (selon ce que votre professionnel vous a dit).</p><div class="stack" style="gap:6px">'+COND.map(([k,l])=>'<label class="check"><input type="checkbox" data-gm-c="'+k+'" '+((I.conds||[]).includes(k)?'checked':'')+'><span>'+l+'</span></label>').join('')+'</div>'+
-      '<span class="eyebrow acc" style="display:block;margin-top:14px">Mes grossesses précédentes</span><div class="grid2">'+num('grossesses','Grossesses avant celle-ci')+num('vaginal','Accouchements vaginaux')+num('cesar','Césariennes')+num('fc','Fausses couches ou pertes')+num('prema','Bébés prématurés')+'</div>'+
+      '<span class="eyebrow acc" style="display:block;margin-top:14px">Mes grossesses précédentes</span><div class="grid2">'+num('grossesses','Grossesses avant celle-ci')+num('vaginal','Accouchements vaginaux')+num('cesar','Césariennes')+num('fc','Fausse(s) couche(s)')+num('prema','Bébés prématurés')+'</div>'+
       '<label class="f">Ce qui s\'est passé avant et qui compte pour vous (accouchement difficile, hémorragie, allaitement, dépression post-partum…)<textarea id="gm_compl" style="min-height:70px">'+esc(I.compl||'')+'</textarea></label>'+
       '<label class="f">Autre chose d\'important (allergies, médicaments, souhaits, craintes…)<textarea id="gm_notes" style="min-height:70px">'+esc(I.notes||'')+'</textarea></label>'+
       '<button class="btn" data-gm-inf-save="1">Enregistrer</button>')}
@@ -93,12 +93,14 @@ if(window.ESPACE==='parent'){
     if(e.target.closest('[data-gm-pese-save]')){e.stopPropagation();const kg=parseFloat(($('#gm_kg').value||'').replace(',','.'));if(!(kg>30&&kg<250)){toast('Entrez votre poids en kg');return}
       await addLog({type:'maman',kg,t:getT()});if(!S.parent.poidsAvant)setTimeout(fBase,300);return}
     if(e.target.closest('[data-gm-inf-save]')){e.stopPropagation();const I={conds:[...document.querySelectorAll('[data-gm-c]')].filter(c=>c.checked).map(c=>c.dataset.gmC),ant:{},compl:$('#gm_compl').value.trim(),notes:$('#gm_notes').value.trim()};
-      ['grossesses','vaginal','cesar','fc','prema'].forEach(k=>{const v=+$('#gm_'+k).value;if(v>0)I.ant[k]=v});S.parent.grossesseInfos=I;sauver();close();render();toast('Enregistré 💗');return}},true);
+      ['grossesses','vaginal','cesar','fc','prema'].forEach(k=>{const v=Math.round(+$('#gm_'+k).value);if(v>0)I.ant[k]=v});
+      {const a=I.ant,fin=(a.vaginal||0)+(a.cesar||0)+(a.fc||0);if(a.prema&&a.prema>(a.vaginal||0)+(a.cesar||0)){toast('Le nombre de bébés prématurés dépasse le nombre d\'accouchements');return}
+        if(fin&&!a.grossesses)a.grossesses=fin;else if(a.grossesses&&fin>a.grossesses){toast('Les accouchements et fausses couches ('+fin+') dépassent le nombre de grossesses ('+a.grossesses+'). Vérifiez, ou ajoutez des jumeaux dans « Ce qui s\'est passé avant ».');return}}S.parent.grossesseInfos=I;sauver();close();render();toast('Enregistré 💗');return}},true);
   (function(){const st=document.createElement('style');st.textContent='.gm-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.gm-det{margin-top:8px}.gm-det summary{cursor:pointer;font-weight:600;color:var(--accent);padding:6px 0}.gm-poids .jb-stat b{white-space:nowrap}';document.head.appendChild(st)})();
 }
 /* ---------- côté doula : ce que la famille a noté sur sa grossesse ---------- */
 if(window.ESPACE!=='parent'&&typeof cSuivi==='function'){const _cs=cSuivi;cSuivi=function(c){const h=_cs.apply(this,arguments);try{const p=(c&&c.parent_data)||{},I=infos(p),b=imc(p);
-    const C=(I.conds||[]).map(k=>(COND.find(x=>x[0]===k)||[0,k])[1]),a=I.ant||{},A=[];[['grossesses','grossesse(s) avant'],['vaginal','accouchement(s) vaginal(aux)'],['cesar','césarienne(s)'],['fc','fausse(s) couche(s) ou perte(s)'],['prema','bébé(s) prématuré(s)']].forEach(([k,l])=>{if(+a[k])A.push(a[k]+' '+l)});
+    const C=(I.conds||[]).map(k=>(COND.find(x=>x[0]===k)||[0,k])[1]),a=I.ant||{},A=[];[['grossesses','grossesse avant','grossesses avant'],['vaginal','accouchement vaginal','accouchements vaginaux'],['cesar','césarienne','césariennes'],['fc','fausse couche','fausses couches'],['prema','bébé prématuré','bébés prématurés']].forEach(([k,l,pl])=>{if(+a[k])A.push(a[k]+' '+(+a[k]>1?pl:l))});
     if(!C.length&&!A.length&&!I.compl&&!I.notes&&!b)return h;
     let x='<div class="card"><span class="eyebrow acc">Sa grossesse : particularités et antécédents</span>';
     if(b){const k=cat(b),n=nbB(p);x+='<p class="small" style="margin:6px 0 0"><b>Poids d\'avant :</b> '+f1(+p.poidsAvant)+' kg · '+p.taille+' cm · IMC '+f1(b)+' ('+k[2].toLowerCase()+'). Prise de poids recommandée : '+(n>1?(k[7]?k[7][0]+' à '+k[7][1]+' kg':'à voir avec son professionnel'):cm(k[3])+' à '+cm(k[4])+' kg')+'.</p>'}

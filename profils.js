@@ -23,7 +23,7 @@ function joindre(L){L=L.filter(Boolean);return L.length<2?(L[0]||''):L.slice(0,-
 function nbGrossesse(){return Math.max(1,Math.min(3,+P().nbBebesGrossesse||1))}
 function nbBebe(){return Math.max(1,Math.min(3,+(P().naissance||{}).nb||1))}
 function nomGrossesse(){const n=nbGrossesse(),L=(P().prenomsGrossesse||[]).slice(0,n).filter(Boolean);return L.length?joindre(L):n===2?'Vos jumeaux':n===3?'Vos triplés':'Bébé'}
-window.pfNbGrossesse=nbGrossesse;window.pfNbBebe=nbBebe;
+window.pfNbGrossesse=nbGrossesse;setTimeout(()=>{window.pfFormGrossesse=fGrossesse;window.pfFormBebe=fBebe},0);window.pfNbBebe=nbBebe;
 function nbAffiche(){const a=actif();return a==='grossesse'?nbGrossesse():a==='bebe'?nbBebe():1}
 /* ---------- onglets en haut ---------- */
 function bandeau(){const L=suivis();if(L.length<2)return '';const a=actif(),nb=esc(((P().naissance||{}).prenomBebe||'').trim()||'Bébé');

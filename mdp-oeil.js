@@ -9,7 +9,11 @@ const NOMS=['','Trop court','Faible','Bon','Excellent'],COUL=['','#c0503c','#d99
 function ameliorer(i){if(i.dataset.oeil||i.type!=='password')return;i.dataset.oeil='1';
   const w=document.createElement('span');w.className='pw-wrap';i.parentNode.insertBefore(w,i);w.appendChild(i);
   const b=document.createElement('button');b.type='button';b.className='pw-eye';b.setAttribute('aria-label',T('Voir le mot de passe'));b.setAttribute('data-notr','1');b.innerHTML=OEIL;w.appendChild(b);
-  b.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();const v=i.type==='password';i.type=v?'text':'password';b.innerHTML=v?BARRE:OEIL;b.setAttribute('aria-label',T(v?'Cacher le mot de passe':'Voir le mot de passe'));i.focus()});
+  /* sur iPhone, le clic se perdait quand le clavier se fermait : on réagit dès le toucher, sans enlever le curseur du champ */
+  let tch=0;const bascule=()=>{const v=i.type==='password',f=document.activeElement===i,a=i.selectionStart,z=i.selectionEnd;i.type=v?'text':'password';b.innerHTML=v?BARRE:OEIL;b.setAttribute('aria-label',T(v?'Cacher le mot de passe':'Voir le mot de passe'));b.setAttribute('aria-pressed',v?'true':'false');if(f){try{i.focus();i.setSelectionRange(a,z)}catch(x){}}};
+  b.addEventListener('touchstart',e=>{e.preventDefault();e.stopPropagation();tch=Date.now();bascule()},{passive:false});
+  b.addEventListener('mousedown',e=>e.preventDefault());
+  b.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();if(Date.now()-tch<800)return;bascule()});
   if((i.getAttribute('autocomplete')||'')==='new-password'&&!/2$|conf/i.test(i.id)){
     const f=document.createElement('div');f.className='pw-force';f.innerHTML='<div class="pw-barre"><i></i><i></i><i></i><i></i></div><span class="xs"></span>';w.insertAdjacentElement('afterend',f);
     const maj=()=>{const n=force(i.value),segs=f.querySelectorAll('i');segs.forEach((s,k)=>{s.style.background=k<n?COUL[n]:''});const t=f.querySelector('span');t.textContent=i.value?T(NOMS[n]):'';t.style.color=COUL[n]||''};

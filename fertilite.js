@@ -226,7 +226,7 @@ function choixParcours(){const nm=S.parent.prenom&&S.parent.prenom!=='Exemple'?'
    [['conception','🌱','Essais bébé','Préconception ou parcours de fertilité : suivi du cycle, ovulation, conseils'],['grossesse','🤰','Je suis enceinte','Suivi de grossesse semaine par semaine, préparation à la naissance'],['bebe','👶','Bébé est né','Journal bébé, développement, vaccins, jusqu\'à 5 ans']].map(c=>'<button class="ft-ch" data-ft-parcours="'+c[0]+'"><span>'+c[1]+'</span><b>'+c[2]+'</b><small>'+c[3]+'</small></button>').join('')+'</div>'}
 function choisir(v){S.parent.parcours=v;sauver();
   if(v==='conception'){S.vue=null;S.tab='accueil';render();return}
-  if(v==='grossesse'){S.vue=null;S.tab='suivi';render();return}
+  if(v==='grossesse'){S.vue=null;S.tab='suivi';render();if(window.pfFormGrossesse)setTimeout(()=>window.pfFormGrossesse(false),200);return}
   sheet('Bébé est né 💗','<label class="f">Date de naissance<input type="date" id="ft_nd" max="'+dateAuj()+'" value="'+dateAuj()+'"></label><label class="f">Prénom de bébé<input id="ft_np" value="'+esc((S.parent.naissance||{}).prenomBebe||'')+'"></label><label class="f">Sexe<select id="ft_ns"><option value="">—</option><option>Fille</option><option>Garçon</option></select></label><button class="btn" data-ft-bebe="1">Commencer</button>')}
 /* ---------- toucher une date du calendrier : voir la journée et choisir quoi ajouter ---------- */
 function menuJour(t){const C=cycle(),auj=j0(Date.now()),futur=t>auj,L=(S.logs||[]).filter(l=>j0(l.t)===t&&LOGMETA[l.type]).sort((a,b)=>a.t-b.t),sg=C.vide?'':suggestion(t,C),st=C.vide?'':statut(t,C);
