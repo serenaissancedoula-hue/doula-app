@@ -37,7 +37,7 @@ const _r=render;render=function(){const x=_r.apply(this,arguments);try{if(S.role
   const tm=document.querySelector('#tabs [data-v="madoula"]');if(tm){const sd=sansDoula(),lab=sd?'Doulas':'Ma doula';const sp=tm.querySelector('span');if(sp&&sp.textContent!==lab){sp.textContent=lab;tm.setAttribute('aria-label',sd?'Trouver une doula':lab);const i=tm.querySelector('i');if(i)i.className='fa-solid '+(sd?'fa-magnifying-glass':'fa-comments')}}
   if(S.vue&&S.vue!=='params')return x;
   /* sans doula */
-  if(sansDoula()){app.querySelectorAll('.env-doula').forEach(c=>c.remove());if(S.tab!=='madoula'||S.vue)sansDoulaNettoyer(app);textes(app,SANS);app.querySelectorAll('.stat span').forEach(s=>{if(/garde de la doula/.test(s.textContent)){s.textContent='38 SA'}});
+  if(sansDoula()){app.querySelectorAll('.env-doula').forEach(c=>c.remove());app.querySelectorAll('.stat span').forEach(s=>{if(/garde de la doula/.test(s.textContent)){s.textContent='38 SA'}});textes(app,SANS);if(S.tab!=='madoula'||S.vue)sansDoulaNettoyer(app);
     app.querySelectorAll('.card').forEach(c=>{if(/Effacer ma conversation avec ma doula/.test(c.textContent))c.remove()})}
   /* notes propres à la France */
   if(region()!=='FR')textes(app,[[/(^|[.!?]\s+)France\s*:\s*[^.]*\.\s*/g,'$1']]);
