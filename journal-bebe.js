@@ -43,7 +43,7 @@ pJournal=function(){const st=stage();if(st.k!=='pp')return _pJ.apply(this,argume
   const B=new Date(st.birth),N=new Date();let mo=(N.getFullYear()-B.getFullYear())*12+N.getMonth()-B.getMonth();if(N.getDate()<B.getDate())mo--;mo=Math.max(0,mo);
   const pl=(x,u,us)=>x+' '+(x>1?us:u);
   const sx=((S.parent.naissance||{}).sexe||''),ae=/^f/i.test(sx)?'arrivée':/^g/i.test(sx)?'arrivé':'arrivé(e)';const titre=d===0?esc(n)+' est '+ae+' aujourd\'hui 🩷':d<90?esc(n)+' a '+pl(d,'jour','jours'):mo<24?esc(n)+' a '+mo+' mois':esc(n)+' a '+pl(Math.floor(mo/12),'an','ans')+(mo%12?' et '+mo%12+' mois':'');
-  const sous=d<7?'':d<90?pl(s,'semaine','semaines')+(j?' et '+pl(j,'jour','jours'):''):pl(d,'jour','jours')+' de vie';
+  const sous=d<7?'':d<90?pl(s,'semaine','semaines')+(j?' et '+pl(j,'jour','jours'):''):pl(d+1,'jour','jours')+' de vie';
   let h='<div class="sh jb-tete">'+(sous?'<span class="eyebrow acc">'+sous+'</span>':'')+'<h1>'+titre+'</h1><p class="sub">Repas, couches, sommeil et croissance</p></div>';
   h+='<div class="jb-tabs" role="tablist">'+JB_TABS.map(t=>'<button role="tab" aria-selected="'+(t===tab)+'" data-jb="'+t[0]+'">'+icon(t[1])+'<span>'+t[2]+'</span></button>').join('')+'</div>';
   h+=typeof timerCard==='function'?timerCard():'';

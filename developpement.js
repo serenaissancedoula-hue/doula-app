@@ -81,10 +81,10 @@ const _rDV=render;render=function(){const x=_rDV.apply(this,arguments);try{if(S.
   '.dv-h{display:flex;align-items:center;gap:8px;font-family:var(--f-body);font-size:1rem;margin:4px 0 2px;color:var(--accent)}.dv-l{list-style:none;padding-left:0;margin-left:0}.dv-l li{padding:5px 0 5px 20px;position:relative;list-style:none}.dv-l li::before{content:"";position:absolute;left:4px;top:13px;width:7px;height:7px;border-radius:50%;background:var(--accent-lt,#f2c9b9)}';
   document.head.appendChild(st)})();
 /* Accueil après la naissance : un court résumé de la semaine (le détail complet est dans Suivi) */
-if(typeof carteBebePP==='function')carteBebePP=function(day){try{setTimeout(()=>dvPrecharger(dvIndex(day)),800);const I=dvInfoPP(day)||[],nom=esc(((S.parent.naissance||{}).prenomBebe||'').trim()||'Bébé'),sem=Math.floor(day/7)+1;
+if(typeof carteBebePP==='function')carteBebePP=function(day){try{setTimeout(()=>dvPrecharger(dvIndex(day)),800);const I=dvInfoPP(DV[dvIndex(day)].d0)||[],nom=esc(((S.parent.naissance||{}).prenomBebe||'').trim()||'Bébé'),sem=Math.floor(day/7)+1;
   const txt=String(I[3]||''),un=(txt.match(/^.*?[.!?](\s|$)/)||[txt])[0].trim();
   return '<div class="card bebe-carte dv-resume" data-dvsu="1" role="button" tabindex="0"><div class="row between"><span class="eyebrow acc">'+nom+' · '+(day<84?'semaine '+sem+' de vie':esc(I[2]||''))+'</span>'+icon('fa-chevron-right')+'</div>'+
-    '<h3 style="margin:6px 0 4px">'+esc(I[2]||'')+'</h3><p class="small" style="margin:0">'+un+'</p><p class="xs" style="margin:8px 0 0;color:var(--accent);font-weight:600">Tout savoir sur cette semaine dans Suivi</p></div>'}catch(e){return ''}};
+    '<h3 style="margin:6px 0 4px">'+esc(I[2]||'')+'</h3><p class="small" style="margin:0">'+un+'</p><p class="xs" style="margin:8px 0 0;color:var(--accent);font-weight:600">Tout savoir sur '+(day<84?'cette semaine':'cette période')+' dans Suivi</p></div>'}catch(e){return ''}};
 document.addEventListener('click',e=>{if(!e.target.closest('[data-dvsu]'))return;e.stopPropagation();S.vue=null;S.tab='suivi';S.sub='';S.devSel=null;scrollTo(0,0);render()},true);
 window.dvOuvrir=()=>{S.vue=null;S.tab='suivi';S.sub='dev';S.devSel=null;scrollTo(0,0);render();dvCentrer()};
 })();

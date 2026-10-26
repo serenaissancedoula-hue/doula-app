@@ -36,7 +36,7 @@ function fiche(id){const d=DENTS.find(x=>x.id===id);if(!d)return;const D=dents()
 /* onglet */
 const _pJ=pJournal;
 pJournal=function(){let st;try{st=stage()}catch(e){}if(!st||st.k!=='pp')return _pJ.apply(this,arguments);
-  if(S.jbTab!=='dents')return onglet(_pJ.apply(this,arguments),false);
+  if(S.jbTab!=='dents'){const h0=_pJ.apply(this,arguments);if(moisBebe()<3&&!Object.keys(dents()).length)return h0;return onglet(h0,false)}
   S.jbTab='repas';let h;try{h=_pJ.apply(this,arguments)}finally{S.jbTab='dents'}
   const t=document.createElement('template');t.innerHTML=onglet(h,true);const keep=[...t.content.children].filter(n=>n.classList.contains('jb-tete')||n.classList.contains('jb-tabs'));
   return keep.map(n=>n.outerHTML).join('')+page()};

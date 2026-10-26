@@ -88,7 +88,7 @@ function pAccueil(){const st=stage(),p=S.parent;let h='';const nm=p.prenom&&p.pr
      '<div class="stack" style="gap:8px"><span class="eyebrow acc">'+(day<=40?'Mois d\'or · jour '+day+' sur 40':day<=90?'4e trimestre · jour '+day+' sur 90':'Après le 4e trimestre')+'</span><h2>'+(bb?esc(bb):'Bébé')+' a '+(day<14?day+' jour'+(day>1?'s':''):Math.floor(day/7)+' semaines'+(day%7?' et '+day%7+' j':''))+'</h2><p class="small">'+info[2]+'</p><p class="xs muted"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--gold);opacity:.7"></span> 40 premiers jours &nbsp; <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--accent)"></span> 90 jours</p></div></div></div>';
     h+=timerCard();
     h+='<div class="quick">'+[['feed','fa-person-breastfeeding','Tétée'],['biberon','fa-bottle-droplet','Biberon'],['tirage','fa-pump-medical','Tirage'],['couche','fa-droplet','Couche'],['sommeil','fa-moon','Sommeil'],['humeur','fa-face-smile','Mon moral']].map(q=>'<button class="qbtn" data-act="'+q[0]+'">'+icon(q[1])+q[2]+'</button>').join('')+'</div>';
-    h+=dayStats(day);
+    h+=dayStats(day+1);
     if(day<=60)h+=moralCard();
   }
   h+=doulaCard();
@@ -110,7 +110,7 @@ function dayStats(day){const feeds=last24(['sein','biberon']),cou=last24(['couch
   const lastF=S.logs.filter(l=>l.type==='sein'||l.type==='biberon').sort((a,b)=>b.t-a.t)[0];const lastS=S.logs.filter(l=>l.type==='sein').sort((a,b)=>b.t-a.t)[0];
   const bib=last24(['biberon']).reduce((s,l)=>s+(+l.ml||0),0),tir=last24(['tirage']).reduce((s,l)=>s+(+l.ml||0),0);
   let h='<div class="card"><div class="row between"><span class="eyebrow acc">Dernières 24 heures</span>'+(lastF?'<span class="pill acc">Dernier boire '+ago(lastF.t)+(lastS?' · prochain : sein '+(lastS.side==='G'?'droit':'gauche'):'')+'</span>':'')+'</div><div class="grid3">'+
-   '<div class="stat '+(feeds.length>=8?'ok':'warn')+'"><b>'+feeds.length+'</b><span>boires (8+ attendus)</span></div><div class="stat '+(wet>=g[0]?'ok':'warn')+'"><b>'+wet+'</b><span>couches mouillées ('+g[0]+'+ au jour '+Math.max(1,day)+')</span></div><div class="stat '+(sol>=g[1]?'ok':'warn')+'"><b>'+sol+'</b><span>selles ('+g[1]+'+ attendues)</span></div></div>';
+   (day<=42?'<div class="stat '+(feeds.length>=8?'ok':'warn')+'"><b>'+feeds.length+'</b><span>boires (8+ attendus)</span></div><div class="stat '+(wet>=g[0]?'ok':'warn')+'"><b>'+wet+'</b><span>couches mouillées ('+g[0]+'+ au jour '+day+' de vie)</span></div><div class="stat '+(sol>=g[1]?'ok':'warn')+'"><b>'+sol+'</b><span>selles ('+g[1]+'+ attendues)</span></div></div>':'<div class="stat"><b>'+feeds.length+'</b><span>boires</span></div><div class="stat '+(wet>=6||!S.logs.length?'':'warn')+'"><b>'+wet+'</b><span>couches mouillées (6+ par jour)</span></div><div class="stat"><b>'+sol+'</b><span>selles</span></div></div>');
   if(bib||tir)h+='<div class="grid2"><div class="stat"><b>'+bib+' ml</b><span>au biberon</span></div><div class="stat"><b>'+tir+' ml</b><span>tirés</span></div></div>';
   if(day<=42&&S.logs.length&&(wet<g[0]||sol<g[1]||feeds.length<8))h+='<p class="xs muted">Moins que le repère ? Notez bien chaque boire et chaque couche. Si ça se confirme, appelez le 811 ou votre professionnel le jour même.</p>';
   return h+'</div>'}
