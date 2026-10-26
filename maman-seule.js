@@ -4,7 +4,7 @@ const P=window.ESPACE==='parent';
 /* ---- Ma doula : pas encore de doula ---- */
 if(P&&typeof pMaDoula==='function'){const _m=pMaDoula;pMaDoula=function(){
   if(typeof FAM!=='undefined'&&FAM&&!FAM.doula_id)return sh('Ma doula','Trouvez la doula qui vous accompagnera')+
-   '<div class="card"><span class="eyebrow acc">Pas encore de doula</span><p class="small">Votre espace est déjà prêt : suivi de grossesse, journal, bilan du moral, bébé après la naissance… Quand vous trouverez votre doula, donnez-lui <b>le courriel de votre compte</b> ('+esc((typeof MOI!=='undefined'&&MOI&&MOI.courriel)||'')+'). Elle vous ajoute, et vos deux espaces se jumellent : <b>rien de ce que vous avez noté n’est effacé</b>.</p><button class="btn" data-act="mcCherche">'+icon('fa-magnifying-glass')+'Trouver ma doula</button></div>';
+   '<div class="card"><span class="eyebrow acc">Pas encore de doula</span><p class="small">Votre espace est déjà prêt : suivi de grossesse, journal, bilan du moral, bébé après la naissance… Quand vous trouverez votre doula, donnez-lui <b>le courriel de votre compte</b> ('+esc((typeof MOI!=='undefined'&&MOI&&MOI.courriel)||'')+'). Elle vous ajoute, et vos deux espaces se jumellent : <b>rien de ce que vous avez noté n’est effacé</b>.</p></div>'+(window.anDansApp?window.anDansApp():'<button class="btn" data-act="mcCherche">'+icon('fa-magnifying-glass')+'Trouver ma doula</button>');
   return _m.apply(this,arguments)}}
 /* ---- Avis de jumelage (une fois) ---- */
 function jumelage(){try{if(!P||!FAM||!FAM.doula_id||!S.parent.jumelage||S.parent.jumelage.vu||document.querySelector('#layer .sheet'))return;
@@ -18,7 +18,7 @@ function texteSuppr(){if(!P)return '<p class="small">Votre accès de doula sera 
   if(typeof FAM!=='undefined'&&FAM&&FAM.doula_id)return '<p class="small">Votre accès sera fermé. Votre dossier reste chez votre doula, qui doit le conserver (contrat, paiements) pendant la durée prévue. Votre doula n’aura plus accès à votre espace en direct.</p>';
   return '<p class="small">Votre espace, votre journal, votre suivi et vos données seront <b>supprimés définitivement</b>. Il n’y a aucun moyen de les récupérer.</p>'}
 document.addEventListener('click',async e=>{const b=e.target.closest('[data-act="cptSuppr"],[data-act="cptSupprOk"],[data-act="mcCherche"]');if(!b)return;e.stopPropagation();e.preventDefault();const a=b.dataset.act;
-  if(a==='mcCherche'){S.vueCx='annuaire';S.retourEspace=true;await ecranChercheuse(false);return}
+  if(a==='mcCherche'){S.vue=null;S.tab='madoula';render();scrollTo(0,0);return}
   if(a==='cptSuppr'){sheet('Supprimer mon compte','<div class="stack" style="gap:10px">'+texteSuppr()+'<label class="f">Pour confirmer, écrivez SUPPRIMER<input type="text" id="cptTxt" autocomplete="off" autocapitalize="characters"></label><button class="btn danger" data-act="cptSupprOk">'+icon('fa-trash')+'Supprimer définitivement</button><button class="btn ghost" data-act="closeSheet">Annuler</button></div>');return}
   if(a==='cptSupprOk'){if(($('#cptTxt').value||'').trim().toUpperCase()!=='SUPPRIMER'){toast('Écrivez SUPPRIMER pour confirmer');return}
     b.disabled=true;const {error}=await sb.rpc('fam_supprimer_mon_compte');

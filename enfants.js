@@ -12,7 +12,7 @@ if(window.ESPACE==='parent'){
   function carte(){const L=liste(S.parent);
     return '<div class="card en-set"><div class="row between"><span class="eyebrow acc">Mes enfants</span><button class="btn sm" data-en-add="1">'+icon('fa-plus')+'Ajouter</button></div><p class="small muted" style="margin:4px 0 8px">Vos autres enfants. Si vous êtes accompagnée par une doula, elle voit ces informations pour mieux vous accompagner.</p>'+
       (L.length?'<div class="list">'+L.map((e,i)=>'<div class="li"><div class="ic">'+(e.sexe==='Fille'?'👧':e.sexe==='Garçon'?'👦':'🧒')+'</div><div class="tx"><b>'+esc(nomE(e))+(e.date?' · '+age(e.date):'')+'</b><span>'+(e.date?'Né'+(e.sexe==='Fille'?'e':'')+' le '+fdt(e.date):'')+(e.notes?' · '+esc(e.notes):'')+'</span></div><button class="icon-btn" data-en-edit="'+i+'" aria-label="Modifier">'+icon('fa-pen')+'</button></div>').join('')+'</div>':'<p class="small muted">Aucun enfant inscrit pour l\'instant.</p>')+'</div>'+
-      '<div class="card"><span class="eyebrow acc">Registre des doulas</span><p class="small muted" style="margin:4px 0 8px">Trouvez les doulas près de chez vous et écrivez-leur directement depuis votre compte.</p><button class="btn ghost" data-en-reg="1">'+icon('fa-magnifying-glass')+'Voir les doulas près de moi</button></div>'}
+      (typeof FAM!=='undefined'&&FAM&&FAM.doula_id?'':'<div class="card"><span class="eyebrow acc">Registre des doulas</span><p class="small muted" style="margin:4px 0 8px">Trouvez les doulas près de chez vous et écrivez-leur directement depuis votre compte.</p><button class="btn ghost" data-en-reg="1">'+icon('fa-magnifying-glass')+'Voir les doulas près de moi</button></div>')}
   function fiche(i){const L=S.parent.enfants||[],e=i!=null?L[i]||{}:{};
     sheet(i!=null?'Modifier · '+esc(nomE(e)):'Ajouter un enfant','<label class="f">Prénom<input id="en_p" value="'+esc(e.prenom||e.prenomBebe||'')+'"></label><label class="f">Date de naissance<input type="date" id="en_d" max="'+iso(new Date())+'" value="'+esc(e.date||'')+'"></label>'+
       '<label class="f">Sexe<select id="en_s"><option value="">—</option>'+['Fille','Garçon'].map(x=>'<option'+(e.sexe===x?' selected':'')+'>'+x+'</option>').join('')+'</select></label>'+
@@ -33,10 +33,10 @@ if(window.ESPACE==='parent'){
       const sw=app.querySelector(':scope>.pf-sw');if(sw)sw.after(t.content);else app.prepend(t.content)}catch(e){}return x};
   if(typeof pParametres==='function'){const _pp=pParametres;pParametres=function(){const h=_pp.apply(this,arguments);if(S.role!=='parent')return h;return h+carte()}}
   /* une tuile « Doulas près de moi » dans Ma doula */
-  const _r=render;render=function(){const x=_r.apply(this,arguments);try{if(S.role==='parent'&&S.tab==='madoula'&&!S.vue){const g=document.querySelector('#app .md-grille');if(g&&!g.querySelector('[data-en-reg]')){const t=document.createElement('template');
+  const _r=render;render=function(){const x=_r.apply(this,arguments);try{if(S.role==='parent'&&S.tab==='madoula'&&!S.vue&&!(typeof FAM!=='undefined'&&FAM&&FAM.doula_id)){const g=document.querySelector('#app .md-grille');if(g&&!g.querySelector('[data-en-reg]')){const t=document.createElement('template');
       t.innerHTML='<button class="md-carre" data-en-reg="1"><span class="md-ic" data-dk="1" data-dt="1" style="background:#e3ecd9">'+icon('fa-location-dot')+'</span><b>Doulas près de moi</b><small>Le registre des doulas de votre région</small></button>';g.append(t.content)}}}catch(e){}return x};
   document.addEventListener('click',e=>{let b;
-    if(e.target.closest('[data-en-reg]')){e.stopPropagation();e.preventDefault();S.vueCx='annuaire';S.retourEspace=true;try{ecranChercheuse(false)}catch(x){toast('Registre indisponible')}return}
+    if(e.target.closest('[data-en-reg]')){e.stopPropagation();e.preventDefault();try{close()}catch(x){}S.vue=null;S.tab='madoula';S.sub='';render();scrollTo(0,0);return}
     if(b=e.target.closest('[data-en-dev]')){e.stopPropagation();const v=+b.dataset.enDev;S.devSel=null;if(v<0){S.sub='';S.devEnfant=null}else{S.sub='devE';S.devEnfant=v}scrollTo(0,0);render();return}
     if(e.target.closest('[data-en-add]')){e.stopPropagation();fiche(null);return}
     if(b=e.target.closest('[data-en-edit]')){e.stopPropagation();fiche(+b.dataset.enEdit);return}

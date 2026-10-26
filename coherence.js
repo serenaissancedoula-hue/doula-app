@@ -18,7 +18,7 @@ if(typeof motDuJour==='function'){const _m=motDuJour;motDuJour=function(){if(!sa
 const SANS=[['— ta doula','— L\'équipe Sérénaissance'],['puis à en parler.','puis à en parler ensemble.'],['puis en parler avec la doula','puis en parler ensemble'],[', à revoir avec la doula et votre professionnel',', à revoir avec votre professionnel'],['à revoir avec la doula et votre','à revoir avec votre'],[' : votre doula les voit et ils apparaissent',' : ils apparaissent'],['Notez-le ici : votre doula le voit pour mieux vous accompagner.','Notez-le ici : si vous êtes accompagnée par une doula, elle le verra.']];
 function textes(root,paires){const w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT),L=[];while(w.nextNode())L.push(w.currentNode);L.forEach(n=>{let v=n.nodeValue,o=v;paires.forEach(([a,b])=>{if(typeof a==='string'){if(v.includes(a))v=v.split(a).join(b)}else v=v.replace(a,b)});if(v!==o)n.nodeValue=v})}
 /* sans doula : tout ce qui parle de « votre doula » disparaît (sauf ce qui sert à en trouver une) */
-const GARDER='.foot,[data-en-reg],[data-act="mcCherche"],.md-grille,.cc-carte,[data-keepdoula],#tabs';
+const GARDER='.foot,[data-en-reg],[data-act="mcCherche"],.md-grille,.cc-carte,[data-keepdoula],#tabs,.an-app,#anListeApp,.an-sheet';
 const PETIT='button,a,li,label,.chip,.tile,.qbtn,.md-carre,.pill,option,summary,.li';
 const ENUM=[[/,\s*(?:à |avec |ou à |ou )?(?:votre|ta|ma|la|sa) doula(?=\s*[,:.;)!?]|\s+(?:ou|et)\b)/gi,''],[/\s+(?:ou|et) (?:à |avec )?(?:votre|ta|ma|la|sa) doula(?=\s*[,:.;)!?])/gi,''],[/(?:à |avec )?(?:votre|ta|ma|la|sa) doula,\s*/gi,''],[/\s+avec (?:votre|ta|la) doula(?=\s*[,:.;)!?])/gi,'']];
 function sansDoulaNettoyer(root){try{const w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT),L=[];while(w.nextNode()){const n=w.currentNode;if(/doula/i.test(n.nodeValue)&&!/©|@la\.doula/.test(n.nodeValue)&&!n.parentElement.closest(GARDER))L.push(n)}
@@ -30,7 +30,7 @@ function sansDoulaNettoyer(root){try{const w=document.createTreeWalker(root,Node
   if(L.length)root.querySelectorAll('.card,.soft,details').forEach(c=>{if(!c.closest(GARDER)&&!c.textContent.trim()&&!c.querySelector('input,textarea,select,img,svg,canvas'))c.remove()})}catch(e){}}
 window.sansDoulaNettoyer=sansDoulaNettoyer;
 /* les fenêtres (feuilles) aussi */
-new MutationObserver(()=>{if(sansDoula()){const l=document.getElementById('layer');if(l&&l.innerHTML&&/doula/i.test(l.textContent))sansDoulaNettoyer(l)}}).observe(document.getElementById('layer')||document.body,{childList:true,subtree:true});
+new MutationObserver(()=>{if(sansDoula()){const l=document.getElementById('layer');if(l&&l.innerHTML&&/doula/i.test(l.textContent)&&!l.querySelector('[data-act^="an"],#deNom,.an-sheet'))sansDoulaNettoyer(l)}}).observe(document.getElementById('layer')||document.body,{childList:true,subtree:true});
 const _r=render;render=function(){const x=_r.apply(this,arguments);try{if(S.role!=='parent')return x;const app=document.getElementById('app'),st=etape();
   /* onglet Journal selon l'étape */
   const tj=document.querySelector('#tabs [data-v="journal"]');if(tj&&!(window.ftMode&&window.ftMode())){const lab=st.k==='preg'?'Mon journal':'Journal bébé',ic=st.k==='preg'?'fa-book-open':'fa-baby';const sp=tj.querySelector('span');if(sp&&sp.textContent!==lab){sp.textContent=lab;tj.setAttribute('aria-label',lab);const i=tj.querySelector('i');if(i)i.className='fa-solid '+ic}}
