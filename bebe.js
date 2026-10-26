@@ -54,7 +54,7 @@ pAccueil=function(){let h=_pAccB();const st=stage();
   return h};
 /* Le suivi garde l'explorateur semaine par semaine / jour par jour ; la carte de bébé du jour est seulement à l'accueil (pas de doublon). */
 const _pSuiviB=pSuivi;
-pSuivi=function(){S.wkSel=null;S.ppSel=null;return _pSuiviB()};
+pSuivi=function(){if(!S._svVu){S.wkSel=null;S.ppSel=null;S._svVu=true}return _pSuiviB()};
 
 /* Le cœur qu'on entend (son synthétisé : un « toum-toum » doux et un souffle, comme au doppler) */
 let AUD=null;

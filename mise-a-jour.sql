@@ -148,3 +148,29 @@ begin
     execute format('grant execute on function %s to authenticated', r.f);
   end loop;
 end $$;
+
+-- Supprimer mon compte (appli doula et famille).
+-- Famille sans doula : tout son espace est supprimé. Famille avec doula : son accès est retiré; le dossier reste chez la doula (durée prévue au contrat).
+-- Doula : son accès est fermé, ses familles archivées (conservées au moins 1 an), son profil retiré de l'annuaire.
+-- Le compte de connexion est supprimé aussi, sauf s'il sert à l'Académie (formations).
+create or replace function public.fam_supprimer_mon_compte() returns json
+language plpgsql security definer set search_path=public as $$
+declare u uuid := auth.uid(); academie boolean := false;
+begin
+  if u is null then raise exception 'Connectez-vous d''abord'; end if;
+  if public.est_admin() then raise exception 'Le compte propriétaire ne peut pas être supprimé ici'; end if;
+  perform set_config('sere.fam', '1', true);
+  delete from fam_familles where parent_user = u and doula_id is null;
+  update fam_familles set parent_user = null where parent_user = u;
+  update fam_familles set statut = 'archivee' where doula_id in (select id from fam_doulas where user_id = u) and coalesce(statut,'') not in ('archivee','non_retenue');
+  update fam_doulas set actif = false, annuaire = false, annuaire_pub = null, user_id = null where user_id = u;
+  begin
+    select exists(select 1 from ententes where user_id = u) or exists(select 1 from doula_tentatives where user_id = u)
+        or exists(select 1 from suivis_marraine where user_id = u) or exists(select 1 from examens_planifies where user_id = u) into academie;
+  exception when others then academie := true;
+  end;
+  if not academie then delete from auth.users where id = u; end if;
+  return json_build_object('ok', true);
+end; $$;
+revoke execute on function public.fam_supprimer_mon_compte() from anon, public;
+grant execute on function public.fam_supprimer_mon_compte() to authenticated;

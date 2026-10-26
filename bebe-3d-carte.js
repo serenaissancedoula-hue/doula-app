@@ -31,7 +31,10 @@ function b3cTaille(){const t=B3C.ren&&B3C.ren.domElement,p=t&&t.parentNode;if(!p
 function b3cDessiner(){if(B3C.ren&&B3C.ren.domElement.parentNode)B3C.ren.render(B3C.scene,B3C.cam)}
 function b3cMatiere(o){o.traverse(n=>{if(n.isMesh){const a=n.material;
   const m=new THREE.MeshStandardMaterial({map:a.map,normalMap:a.normalMap,metalness:0,roughness:.7,emissive:a.map?new THREE.Color(.05,.016,.012):new THREE.Color(0,0,0),emissiveMap:a.map||null,side:THREE.DoubleSide});
-  if(!a.map)m.color.set('#e8b09c');n.material=m}})}
+  if(!a.map)m.color.set('#e8b09c');
+  /* retirer la coquille sombre (le sac reconstruit autour de bébé) : les parties presque noires de la texture ne sont pas dessinées */
+  if(a.map)m.onBeforeCompile=sh=>{sh.fragmentShader=sh.fragmentShader.replace('#include <map_fragment>','#include <map_fragment>\n if(dot(diffuseColor.rgb,vec3(.299,.587,.114))<0.075) discard;')};
+  n.material=m}})}
 function b3cCentrer(o,taille){const box=new THREE.Box3().setFromObject(o),sz=box.getSize(new THREE.Vector3()),c=box.getCenter(new THREE.Vector3());
   const g=new THREE.Group();o.position.sub(c);g.add(o);g.scale.setScalar(taille/Math.max(sz.x,sz.y,sz.z));return g}
 function b3cCharger(w){const f=b3cFichier(w),cle=f||'sphere-04';if(B3C.cache[cle])return B3C.cache[cle];
