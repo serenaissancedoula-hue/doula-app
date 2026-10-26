@@ -34,8 +34,7 @@ async function carteInscriptions(){const el=$('#placesCard');if(!el)return;
   const [{data:CP},{data:UT},{data:DL},{data:FM}]=await Promise.all([sb.from('fam_coupons').select('code,pour,max_utilisations,utilisations'),sb.from('fam_coupons_util').select('compte'),sb.from('fam_doulas').select('id,test'),sb.from('fam_familles').select('id,doula_id,test')]);
   const mxD=((CP||[]).find(c=>c.pour==='doula')||{}).max_utilisations||10,mxM=((CP||[]).find(c=>c.pour==='famille')||{}).max_utilisations||10;
   const prD=(DL||[]).filter(d=>!d.test).length,deja=new Set((UT||[]).map(x=>x.compte));
-  const dTest=new Set((DL||[]).filter(d=>d.test).map(d=>d.id));
-  const prM=(FM||[]).filter(f=>!f.test&&!dTest.has(f.doula_id)&&(deja.has(f.id)||f.doula_id)).length;
+  const prM=(FM||[]).filter(f=>!f.test&&(deja.has(f.id)||f.doula_id)).length;
   const barre=(n,m)=>'<div style="height:10px;border-radius:10px;background:var(--soft2);margin:6px 0 12px"><div style="height:10px;border-radius:10px;background:var(--accent);width:'+Math.min(100,Math.round(100*n/m))+'%"></div></div>';
   const ligne=(t,n,m)=>'<div class="row between"><b>'+t+' : '+n+' sur '+m+'</b><span class="pill '+(n<m?'ok':'')+'">'+(n<m?'Places libres':'Complètes')+'</span></div>'+barre(n,m);
   el.innerHTML='<span class="eyebrow acc">Places d\'essai gratuit</span>'+ligne('Doulas',prD,mxD)+ligne('Mamans',prM,mxM)+'<p class="xs muted">Une doula qui s\'inscrit et ajoute sa maman prend une place doula et une place maman. Votre compte et les comptes test ne sont pas comptés.</p>'}

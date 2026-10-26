@@ -40,7 +40,7 @@ if(window.ESPACE!=='parent'){
   async function listeAdmin(){const el=document.getElementById('cpListe');if(!el||el.dataset.ok)return;el.dataset.ok='1';
     const [{data:C,error},{data:U},{data:FM},{data:DT}]=await Promise.all([sb.from('fam_coupons').select('*').order('created_at'),sb.from('fam_coupons_util').select('*').order('le',{ascending:false}),sb.from('fam_familles').select('id,prenom,nom,doula_id,test'),sb.from('fam_doulas').select('id,test')]);
     /* une maman ajoutée par une doula prend une place maman, en plus de la place de la doula (sans compter deux fois celles qui ont aussi utilisé le code) */
-    const dejaC=new Set((U||[]).map(x=>x.compte)),dT=new Set((DT||[]).filter(d=>d.test).map(d=>d.id)),viaDoula=(FM||[]).filter(f=>f.doula_id&&!f.test&&!dT.has(f.doula_id)&&!dejaC.has(f.id));
+    const dejaC=new Set((U||[]).map(x=>x.compte)),viaDoula=(FM||[]).filter(f=>f.doula_id&&!f.test&&!dejaC.has(f.id));
     if(error){el.innerHTML='<p class="small muted">Les codes promo ne sont pas encore installés (fichier mise-a-jour.sql à coller dans Supabase).</p>';return}
     const base=location.origin+location.pathname.replace(/parents\/?$/,'').replace(/[^/]*$/,'');
     el.innerHTML=(C||[]).map(c=>{const u=(U||[]).filter(x=>x.code===c.code),lien=base+(c.pour==='famille'?'parents/':'')+'?code='+encodeURIComponent(c.code);
