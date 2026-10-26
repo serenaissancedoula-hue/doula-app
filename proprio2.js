@@ -30,11 +30,15 @@ DSUB.avisTab=function(){if(!MOI||!MOI.admin)return '<p class="small">Réservé �
 const _dOutAT=dOutils;dOutils=function(){if(MOI&&MOI.admin&&!DOUT.find(x=>x[0]==='avisTab'))DOUT.splice(1,0,['avisTab','fa-star','Avis des doulas (propriétaire)','Notes, prix et témoignages']);return _dOutAT()};
 
 /* ---------- Places des testeuses (propriétaire) ---------- */
-function carteInscriptions(){const el=$('#placesCard');if(!el)return;const P=PLACES;
-  if(!P){el.innerHTML='<span class="eyebrow acc">Places d\'essai gratuit des doulas</span><p class="small muted">Limite non installée. Exécutez le SQL « places-modifiables » dans Supabase pour pouvoir la changer ici.</p>';return}
-  const pr=P.prises||0,mx=P.max||10;
-  el.innerHTML='<span class="eyebrow acc">Places d\'essai gratuit des doulas</span><div class="row between"><b>'+pr+' sur '+mx+' places prises</b><span class="pill '+(P.ouvert?'ok':'')+'">'+(P.ouvert?'Places libres':'Complètes')+'</span></div><div style="height:10px;border-radius:10px;background:var(--soft2);margin:8px 0"><div style="height:10px;border-radius:10px;background:var(--accent);width:'+Math.min(100,Math.round(100*pr/mx))+'%"></div></div>'+
-    '<label class="f">Nombre de places gratuites au total<input type="number" id="placesMax" min="'+pr+'" value="'+mx+'"></label><div class="row" style="gap:8px;flex-wrap:wrap"><button class="btn sm" data-act="placesSave">Enregistrer</button><button class="btn sm ghost" data-act="placesFermer">Terminer les places gratuites</button></div><p class="xs muted">Votre propre espace compte parmi les places. Quand elles sont prises, les nouvelles doulas peuvent s\'inscrire mais doivent choisir un abonnement.</p>'}
+async function carteInscriptions(){const el=$('#placesCard');if(!el)return;
+  const [{data:CP},{data:UT},{data:DL},{data:FM}]=await Promise.all([sb.from('fam_coupons').select('code,pour,max_utilisations,utilisations'),sb.from('fam_coupons_util').select('compte'),sb.from('fam_doulas').select('id,test'),sb.from('fam_familles').select('id,doula_id,test')]);
+  const mxD=((CP||[]).find(c=>c.pour==='doula')||{}).max_utilisations||10,mxM=((CP||[]).find(c=>c.pour==='famille')||{}).max_utilisations||10;
+  const prD=(DL||[]).filter(d=>!d.test).length,deja=new Set((UT||[]).map(x=>x.compte));
+  const dTest=new Set((DL||[]).filter(d=>d.test).map(d=>d.id));
+  const prM=(FM||[]).filter(f=>!f.test&&!dTest.has(f.doula_id)&&(deja.has(f.id)||f.doula_id)).length;
+  const barre=(n,m)=>'<div style="height:10px;border-radius:10px;background:var(--soft2);margin:6px 0 12px"><div style="height:10px;border-radius:10px;background:var(--accent);width:'+Math.min(100,Math.round(100*n/m))+'%"></div></div>';
+  const ligne=(t,n,m)=>'<div class="row between"><b>'+t+' : '+n+' sur '+m+'</b><span class="pill '+(n<m?'ok':'')+'">'+(n<m?'Places libres':'Complètes')+'</span></div>'+barre(n,m);
+  el.innerHTML='<span class="eyebrow acc">Places d\'essai gratuit</span>'+ligne('Doulas',prD,mxD)+ligne('Mamans',prM,mxM)+'<p class="xs muted">Une doula qui s\'inscrit et ajoute sa maman prend une place doula et une place maman. Votre compte et les comptes test ne sont pas comptés.</p>'}
 const _pp2=DSUB.proprio;DSUB.proprio=function(){const h=_pp2();if(!MOI||!MOI.admin)return h;setTimeout(async()=>{await chargerPlaces();carteInscriptions();boiteSupport()},0);return h.replace('<div class="card" id="statsProprio">','<div class="card" id="boiteSup"><p class="small muted">Chargement…</p></div><div class="card" id="placesCard"><p class="small muted">Chargement…</p></div><div class="card" id="statsProprio">')};
 async function boiteSupport(){const el=$('#boiteSup');if(!el)return;
   const [r1,r2]=await Promise.all([sb.from('fam_support').select('*').eq('de_admin',false).order('created_at',{ascending:false}).limit(15),sb.rpc('fam_admin_stats')]);
