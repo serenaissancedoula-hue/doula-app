@@ -26,9 +26,9 @@ async function recuPdf(c,p,k,corrige){await chargerScript('lib/pdf-lib.min.js');
   const prix=cPrice(c),paye=(c.paie||[]).slice(0,k).reduce((s,x)=>s+(+x.montant||0),0),solde=Math.max(0,prix-paye);
   y-=30;const bx=W-M-240;if(mod==='classique')pg.drawRectangle({x:bx,y:y-62,width:240,height:80,color:clair});else if(mod==='doux')pg.drawRectangle({x:bx,y:y-62,width:240,height:80,color:tint(.9)});else pg.drawLine({start:{x:bx,y:y-41},end:{x:W-M,y:y-41},thickness:.8,color:A});
   const ligne=(l,v,yy,b)=>{T(l,bx+12,yy,b?11:9.5,b?FB:F,b?encre:gris);TR(v,W-M-12,yy,b?13:9.5,b?FB:F,b?A:encre)};
-  ligne('Prix du forfait',mnt(prix),y,false);ligne('Total payé à ce jour',mnt(paye),y-16,false);ligne('Solde restant',mnt(solde),y-32,false);ligne('Montant reçu',mnt(p.montant),y-54,true);
+  const VT=window.taxesVentiler?window.taxesVentiler(p.montant):{inscrite:false,total:+p.montant,avant:+p.montant,lignes:[]};ligne('Prix du forfait'+(VT.inscrite?' (avant taxes)':''),mnt(prix),y,false);ligne('Total payé à ce jour',mnt(paye),y-16,false);ligne('Solde restant',mnt(solde),y-32,false);ligne(VT.inscrite?'Total reçu':'Montant reçu',mnt(VT.total),y-54,true);
   T('Mode de paiement',M,y,8,FB,gris);T(p.mode||'—',M,y-14,11,F);
-  T('TVH',M,y-40,8,FB,gris);T(D.tvh?'No de TVH : '+D.tvh:'Non inscrite à la TVH (aucune taxe perçue)',M,y-54,10,F);
+  T('TAXES',M,y-40,8,FB,gris);if(VT.inscrite){let yy=y-54;T('Montant avant taxes : '+mnt(VT.avant),M,yy,9.5,F);VT.lignes.forEach(l=>{yy-=13;T(l.k+' ('+String(l.p).replace('.',',')+' %) : '+mnt(l.montant)+(l.no?'  ·  No '+l.no:''),M,yy,9.5,F)})}else T(window.taxesTexte?window.taxesTexte():'Non inscrite aux taxes (aucune taxe perçue)',M,y-54,10,F);
   y-=120;T(RC.merci||'Merci de votre confiance',M,y,13,TI,A);y-=16;String(RC.note||'Ce reçu confirme la réception du paiement ci-dessus. Conservez-le pour vos dossiers.').split('\n').slice(0,6).forEach(l=>{T(l,M,y,9,F,gris);y-=12});
   pg.drawLine({start:{x:M,y:50},end:{x:W-M,y:50},thickness:.5,color:filet});T([I.ent,I.nom,I.tel,I.courriel].filter(Boolean).filter((v,i,a)=>a.indexOf(v)===i).join(' · '),M,36,8,F,gris);
   return await pdf.save()}

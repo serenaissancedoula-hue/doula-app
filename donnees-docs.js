@@ -64,8 +64,8 @@ Date limite du dernier versement | 36 semaines de grossesse : {{date36}}
 - Les versements suivants se calculent à partir de la date de signature, chaque semaine, aux 2 semaines ou chaque mois, selon le choix de la famille.
 - Le montant total doit être payé en totalité avant 36 semaines de grossesse.
 ## Modalités
-No de TVH (ou « non inscrite ») | 
-- Prix en dollars canadiens. TVH de 15 % ajoutée seulement si la Doula est inscrite (voir ci-dessous).
+Taxes (TPS, TVH, TVQ) | {{doula_taxes}}
+- Prix en dollars canadiens, avant taxes. Les taxes applicables (TPS, TVH, TVQ) s'ajoutent seulement si la Doula est inscrite aux taxes; ses numéros sont indiqués ci-dessus et sur chaque reçu.
 - Paiement par virement Interac à {{doula_courriel}} ou autre mode convenu avec la Doula.
 - Aucuns frais de crédit ni intérêts.
 - Un rappel est envoyé aux Parents 48 heures avant chaque échéance (dans l'appli et par courriel).
