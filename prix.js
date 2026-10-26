@@ -1,11 +1,10 @@
 /* Sérénaissance — prix des abonnements selon le pays (Canada $ CA, France €, États-Unis $ US).
-   Les liens Stripe FR/US restent à null tant que les prix en € et en US$ ne sont pas créés dans Stripe :
-   en attendant, les boutons utilisent le lien en $ CA et le disent clairement. */
+   Liens Stripe créés le 2026-10-26 (EUR et USD). Si un lien manquait, repli sur le lien en $ CA. */
 (function(){
 const P={
   CA:{doula:{m:8,a:90,e:6},maman:{m:4,a:40,e:8},fmt:n=>n+' $',liens:true},
-  FR:{doula:{m:5,a:57,e:3},maman:{m:3,a:26,e:10},fmt:n=>n+' €',liens:{doula:null,maman:null}},
-  US:{doula:{m:6,a:64,e:8},maman:{m:3,a:28,e:8},fmt:n=>n+' $ US',liens:{doula:null,maman:null}}
+  FR:{doula:{m:5,a:57,e:3},maman:{m:3,a:26,e:10},fmt:n=>n+' €',liens:{doula:{mensuel:'https://buy.stripe.com/6oUaEQ3na9RefwUgU2ffy0B',annuel:'https://buy.stripe.com/14A00c2j6fby84seLUffy0C'},maman:{mensuel:'https://buy.stripe.com/6oUcMYaPCfby84s1Z8ffy0F',annuel:'https://buy.stripe.com/fZu9AM3na7J670o0V4ffy0G'}}},
+  US:{doula:{m:6,a:64,e:8},maman:{m:3,a:28,e:8},fmt:n=>n+' $ US',liens:{doula:{mensuel:'https://buy.stripe.com/fZudR28Hu0gE84s7jsffy0D',annuel:'https://buy.stripe.com/cNi4gsf5S1kIdoM8nwffy0E'},maman:{mensuel:'https://buy.stripe.com/3cI9AMf5S2oM5Wk7jsffy0H',annuel:'https://buy.stripe.com/9B66oA2j68NackIfPYffy0I'}}}
 };
 const NOMS={'France':'FR','FR':'FR','États-Unis':'US','Etats-Unis':'US','US':'US','USA':'US'};
 function reg(){try{let r='';if(window.ESPACE==='doula'){r=(typeof ME_DOULA!=='undefined'&&ME_DOULA&&ME_DOULA.region)||(S.doula&&S.doula.region)||''}else{r=(S.parent&&S.parent.region)||(typeof FAM!=='undefined'&&FAM&&FAM.region)||''}return NOMS[r]||'CA'}catch(e){return 'CA'}}
