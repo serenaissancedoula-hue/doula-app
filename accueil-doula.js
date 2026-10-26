@@ -11,7 +11,7 @@ dAccueil=function(){const D=S.doula,L=S.clients||[];const prenom=esc(String(D.no
   const total=L.reduce((s,c)=>s+cPrice(c),0),paid=L.reduce((s,c)=>s+cPaid(c),0);
   const next=L.filter(c=>cStage(c).k==='preg').sort((a,b)=>parseD(a.dpa)-parseD(b.dpa)).slice(0,3);
   const rdvs=L.flatMap(c=>(c.rdv||[]).filter(r=>r.prochaine&&diffD(parseD(r.prochaine),new Date())>=0).map(r=>[c,r.prochaine])).sort((a,b)=>a[1].localeCompare(b[1])).slice(0,3);
-  const nonlus=Object.values(NONLUS||{}).reduce((a,b)=>a+(+b||0),0),att=window._pvAtt.n||0,susp=L.filter(c=>c.suivi_suspendu);
+  const nonlus=Object.values(NONLUS||{}).reduce((a,b)=>a+(+b||0),0),att=(v=>typeof v==='number'?v:0)((window._pvAtt||{}).n),susp=L.filter(c=>c.suivi_suspendu);
   adChargerAtt();
   const nbF=L.filter(c=>c.statut==='active'||c.statut==='invitee'||!c.statut).length;
   const proche=L.filter(c=>cStage(c).k==='preg'&&cStage(c).left>=0).sort((a,b)=>cStage(a).left-cStage(b).left)[0];
