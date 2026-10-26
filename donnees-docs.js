@@ -65,7 +65,7 @@ Date limite du dernier versement | 36 semaines de grossesse : {{date36}}
 - Le montant total doit être payé en totalité avant 36 semaines de grossesse.
 ## Modalités
 Taxes (TPS, TVH, TVQ) | {{doula_taxes}}
-- Prix en dollars canadiens, avant taxes. Les taxes applicables (TPS, TVH, TVQ) s'ajoutent seulement si la Doula est inscrite aux taxes; ses numéros sont indiqués ci-dessus et sur chaque reçu.
+- Prix en dollars canadiens, taxes incluses lorsque la Doula est inscrite aux taxes (TPS, TVH, TVQ); ses numéros sont indiqués ci-dessus et sur chaque reçu. Sinon, aucune taxe n'est perçue.
 - Paiement par virement Interac à {{doula_courriel}} ou autre mode convenu avec la Doula.
 - Aucuns frais de crédit ni intérêts.
 - Un rappel est envoyé aux Parents 48 heures avant chaque échéance (dans l'appli et par courriel).

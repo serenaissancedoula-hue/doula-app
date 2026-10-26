@@ -1,7 +1,7 @@
 /* Sérénaissance — taxes de la doula : inscrite ou non à la TPS / TVH / TVQ, ses numéros, et le détail sur ses reçus.
    Taux (Agence du revenu du Canada, depuis le 1er avril 2025) : TVH N.-B. 15 %, T.-N.-L. 15 %, Î.-P.-É. 15 %, N.-É. 14 %, Ont. 13 %;
    TPS 5 % ailleurs; Québec : TPS 5 % + TVQ 9,975 % (calculée sur le prix avant taxes).
-   Les montants notés dans l'appli sont AVANT taxes : le reçu ajoute les taxes. Une doula sous le seuil du petit fournisseur (30 000 $) n'a pas à s'inscrire. */
+   Les montants notés dans l'appli sont TAXES INCLUSES : le reçu en tire le montant avant taxes et chaque taxe. Une doula sous le seuil du petit fournisseur (30 000 $) n'a pas à s'inscrire. */
 (function(){
 if(window.ESPACE==='parent')return;
 const norm=t=>String(t||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/[^a-z]+/g,'');
@@ -15,10 +15,12 @@ function info(){let D={};try{D=S.doula||{}}catch(e){}const prov=codeProv(D.regio
   const inscrite=!!t.inscrite&&taux.length>0&&!!String(D.tvh||'').trim();
   const lignes=taux.map(([k,p])=>({k,p,no:k==='TVQ'?(t.tvq||''):(D.tvh||'')}));
   return {prov,taux,inscrite,lignes,aTaxes:taux.length>0}}
-/* Montant noté (avant taxes) → avant taxes, chaque taxe, total reçu */
-function ventiler(avant){const I=info(),b=+avant||0;if(!I.inscrite)return {avant:b,lignes:[],total:b,inscrite:false};
-  const L=I.lignes.map(l=>({k:l.k,p:l.p,no:l.no,montant:cents(b*l.p/100)}));
-  const total=cents(b+L.reduce((s,x)=>s+x.montant,0));return {avant:b,lignes:L,total,inscrite:true}}
+/* Montant noté (TAXES INCLUSES) → montant avant taxes + chaque taxe; le total reçu reste le montant noté */
+function ventiler(total){const I=info(),t=cents(+total||0);if(!I.inscrite)return {avant:t,lignes:[],total:t,inscrite:false};
+  const r=I.lignes.reduce((s,l)=>s+l.p,0),avant=cents(t/(1+r/100));
+  const L=I.lignes.map(l=>({k:l.k,p:l.p,no:l.no,montant:cents(avant*l.p/100)}));
+  const reste=cents(t-avant-L.reduce((s,x)=>s+x.montant,0));if(L.length)L[L.length-1].montant=cents(L[L.length-1].montant+reste);
+  return {avant:cents(t-L.reduce((s,x)=>s+x.montant,0)),lignes:L,total:t,inscrite:true}}
 function texte(){const I=info();if(!I.inscrite)return 'Non inscrite aux taxes (aucune taxe perçue)';return I.lignes.map(l=>(l.k==='TVQ'?'No de TVQ : ':'No de '+l.k+' : ')+l.no).join(' · ')}
 window.taxesInfo=info;window.taxesVentiler=ventiler;window.taxesTexte=texte;
 /* ---------- formats : espaces et casse corrigés, jamais inventés ---------- */
@@ -33,7 +35,7 @@ function carte(){const I=info(),t=T(),D=S.doula||{};
   if(insc){h+='<p class="xs muted">Taux appliqués sur vos reçus : '+I.taux.map(([k,p])=>k+' '+pct(p)).join(' + ')+'.</p>'+
     '<label class="f">No de '+nomA+' (ex. 123456789 RT0001)<input type="text" id="txTps" inputmode="text" autocomplete="off" value="'+esc(D.tvh||'')+'" placeholder="123456789 RT0001"></label>'+
     (I.taux.some(x=>x[0]==='TVQ')?'<label class="f">No de TVQ (ex. 1234567890 TQ0001)<input type="text" id="txTvq" autocomplete="off" value="'+esc(t.tvq||'')+'" placeholder="1234567890 TQ0001"></label>':'')+
-    '<p class="xs muted">Les montants que vous notez pour vos versements sont <b>avant taxes</b> : le reçu ajoute les taxes et affiche vos numéros.</p>'}
+    '<p class="xs muted">Les montants que vous notez pour vos versements sont <b>taxes incluses</b> : le reçu sépare le montant avant taxes et chaque taxe, et affiche vos numéros.</p>'}
   else h+='<p class="xs muted">Vos reçus indiqueront « non inscrite aux taxes (aucune taxe perçue) ».</p>';
   return h+'</div>'}
 async function sauver(patchT,tvh){const D=S.doula;const m=Object.assign({},ME_DOULA.modeles||{}),t=Object.assign({},m.taxes||{},patchT);m.taxes=t;ME_DOULA.modeles=m;if(tvh!==undefined)D.tvh=tvh;
