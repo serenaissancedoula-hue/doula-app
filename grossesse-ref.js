@@ -122,6 +122,7 @@ function afficherMot(){try{
 const _r=render;
 render=function(){const r=_r.apply(this,arguments);try{remettreEnOrdre();setTimeout(afficherMot,700);requestAnimationFrame(()=>{const s=document.getElementById('grStrip'),o=s&&s.querySelector('.on');if(s&&o&&!s.dataset.ok){s.dataset.ok=1;s.scrollLeft=o.offsetLeft-s.clientWidth/2+o.offsetWidth/2}})}catch(e){}return r};
 
+document.addEventListener('click',e=>{const s=e.target.closest&&e.target.closest('.bebe-carte details>summary');if(!s)return;e.preventDefault();e.stopPropagation();s.parentElement.open=!s.parentElement.open},true);
 document.addEventListener('click',async e=>{const b=e.target.closest&&e.target.closest('[data-gr]');if(!b||b.disabled)return;e.stopPropagation();e.preventDefault();
   const a=b.dataset.gr;
   if(a==='sem')feuilleSemaine(+b.dataset.w);
