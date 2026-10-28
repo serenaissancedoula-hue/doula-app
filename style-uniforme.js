@@ -167,4 +167,16 @@ const css=document.createElement('style');css.textContent=`
 .ab-row{border-radius:18px!important}
 :root[data-theme=dark] .su-pastel{background:#2c2523!important}
 `;document.head.appendChild(css);
+
+/* ---------- bulle de messages déplaçable, comme les bulles de Messenger ---------- */
+(function(){const K='sere-fab';let pos=null;try{pos=JSON.parse(localStorage.getItem(K)||'null')}catch(e){}
+  function place(f){if(!pos||!f)return;const w=f.offsetWidth||56,h=f.offsetHeight||56;pos.x=Math.max(4,Math.min(innerWidth-w-4,pos.x));pos.y=Math.max(60,Math.min(innerHeight-h-80,pos.y));
+    ['left:'+pos.x+'px','top:'+pos.y+'px','right:auto','bottom:auto'].forEach(x=>{const a=x.split(':');f.style.setProperty(a[0],a[1],'important')});f.style.setProperty('touch-action','none')}
+  let d=null,moved=false;
+  document.addEventListener('pointerdown',e=>{const f=e.target.closest&&e.target.closest('#chatFab');if(!f)return;const r=f.getBoundingClientRect();d={x:e.clientX,y:e.clientY,l:r.left,t:r.top,f,w:r.width,h:r.height};moved=false;f.style.setProperty('touch-action','none')},true);
+  document.addEventListener('pointermove',e=>{if(!d)return;const dx=e.clientX-d.x,dy=e.clientY-d.y;if(!moved&&Math.hypot(dx,dy)<8)return;moved=true;e.preventDefault();pos={x:d.l+dx,y:d.t+dy};place(d.f)},true);
+  document.addEventListener('pointerup',()=>{if(!d)return;if(moved){pos.x=pos.x+d.w/2<innerWidth/2?8:innerWidth-d.w-8;place(d.f);try{localStorage.setItem(K,JSON.stringify(pos))}catch(e){}}d=null},true);
+  document.addEventListener('click',e=>{if(moved&&e.target.closest&&e.target.closest('#chatFab')){e.stopImmediatePropagation();e.preventDefault();moved=false}},true);
+  setInterval(()=>{const f=document.getElementById('chatFab');if(f&&pos)place(f)},1200);
+})();
 })();
