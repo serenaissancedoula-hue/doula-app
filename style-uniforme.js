@@ -74,14 +74,31 @@ function feuilleRegle(){const m=moisBebe(),J=window.JALONS||[];const n=prenomB()
 function carteRegle(){const m=moisBebe(),J=window.JALONS||[];if(m==null||!J.length)return '';const now=J.filter(j=>m>=j[2]&&m<=j[3]).slice(0,3);
   return '<div class="gr-insw gr-regle"><div class="gr-ins-h">Ce que bébé apprend en ce moment</div><button class="su-reglebtn" data-su="regle">'+(now.length?now.map(j=>'<span>'+j[0]+' '+E(j[1])+'</span>').join(''):'<span>Voir tous les repères</span>')+'<em>Voir la règle complète ›</em></button></div>'}
 
+
+function carteRelev(day){const j=Math.min(40,day+1),pct=Math.round(j/40*100);
+  return '<div class="card gr-relev"><div class="row between"><span class="eyebrow acc">🫖 Mes relevailles</span><span class="xs muted">Jour '+j+' sur 40</span></div><div class="su-rbar"><i style="width:'+pct+'%"></i></div><p class="small" style="margin:8px 0">Ces semaines sont faites pour vous reposer et récupérer, pendant que quelqu\'un prend soin de la maison. Acceptez l\'aide et demandez-la.</p><div class="row" style="gap:8px;flex-wrap:wrap"><button class="btn sm" data-act="baOuvre" data-v="relev">Lire les relevailles</button><button class="btn sm ghost" data-act="baDemande">Demander à ma doula</button></div></div>'}
+
+
+/* ---------- « Ma grossesse » : sorti des Paramètres, accessible depuis le journal ---------- */
+function carteGross(){return '<div class="gr-insw"><div class="gr-ins-h">Ma grossesse</div><button class="su-reglebtn" data-su="gross"><span>📅 Mes dates, ma date prévue</span><span>🩺 Les particularités de ma grossesse</span><em>Modifier ›</em></button></div>'}
+function rangerParams(){try{const app=document.getElementById('app');if(!app||S.vue!=='params'){window.__soloGross=false;return false}
+  const kids=[...app.children];const isG=c=>(c.matches('details')&&/^\s*Ma grossesse et mes dates/i.test(c.innerText||''))||c.classList.contains('gm-inf');
+  kids.forEach(c=>{if(c.classList.contains('foot'))return;
+    if(window.__soloGross){const garde=isG(c)||c.classList.contains('sh')||(c.classList.contains('flat'));c.classList.toggle('su-hide',!garde)}
+    else c.classList.toggle('su-hide',isG(c))});
+  if(window.__soloGross){const sh=app.querySelector(':scope>.sh');if(sh){const h=sh.querySelector('h1,h2,b');if(h)h.textContent='Ma grossesse';const sm=sh.querySelector('p,.small');if(sm)sm.textContent='Vos dates et les particularités de votre grossesse.';const d=app.querySelector(':scope>details');if(d)d.open=true}}
+  return true}catch(e){return false}}
+
 /* ---------- branchements ---------- */
 const _pA=pAccueil;
-pAccueil=function(){let h=_pA.apply(this,arguments);try{const st=stg();
+pAccueil=function(){let h=_pA.apply(this,arguments);try{if(S.tab&&S.tab!=='accueil')return h;const st=stg();
   if(st.k==='none'&&h.indexOf('class="card ft-hero"')>=0&&h.indexOf('Pour commencer')<0&&h.indexOf('gr-insft')<0)h+=insightsFT();
   if(st.k==='pp')h+=friseEtapes(st.day)}catch(e){}return h};
 if(typeof pJournal==='function'){const _pJ=pJournal;pJournal=function(){let h=_pJ.apply(this,arguments);try{
-  if(S.role==='parent'&&stg().k==='preg'&&!S.sub&&S.vue!=='params'){const i=h.indexOf('</div>');if(i>=0)h=h.slice(0,i+6)+resumeJournal()+h.slice(i+6)}}catch(e){}return h}}
+  if(S.role==='parent'&&stg().k==='preg'&&!S.sub&&S.vue!=='params'){const i=h.indexOf('</div>');if(i>=0)h=h.slice(0,i+6)+resumeJournal()+carteGross()+h.slice(i+6)}}catch(e){}return h}}
 function ranger(){try{
+  if(rangerParams())return;
+  if(S.tab&&S.tab!=='accueil'){document.querySelectorAll('.gr-frpp,.gr-regle,.gr-relev,.gr-expl,.gr-insft,.gr-frft').forEach(e=>{if(!e.closest('.sheet'))e.remove()});return}
   let ft=document.querySelector('.gr-insft');const hero=document.querySelector('.card.ft-hero');
   if(!ft&&hero&&stg().k==='none'&&!/Pour commencer/.test(hero.innerText||'')){const d=document.createElement('div');d.innerHTML=insightsFT();ft=d.firstElementChild;hero.after(ft)}
   if(ft&&hero&&hero.nextElementSibling!==ft)hero.after(ft);
@@ -93,18 +110,23 @@ function ranger(){try{
   try{if(stg().k==='pp'){document.querySelectorAll('#app .card,#app section').forEach(c=>{if(c.classList.contains('su-hide')||c.closest('.sheet'))return;const t=(c.innerText||'').trim().slice(0,60);if(/^(NOLAN|BÉBÉ|[A-ZÉ][\wÉéèï-]+)\s*·\s*SEMAINE\s+\d+\s+DE VIE/i.test(t)||/^TROUVEZ DES RÉPONSES/i.test(t))c.classList.add('su-hide')})}}catch(e){}
   const rg=document.querySelector('.gr-regle'),fz=document.querySelector('.gr-frpp');if(rg&&fz&&fz.nextElementSibling!==rg)fz.after(rg);
   const fp=document.querySelector('.gr-frpp'),top=document.querySelector('.ab-top');
-  if(fp&&top&&top.nextElementSibling!==fp)top.after(fp);
-  {const rg2=document.querySelector(".gr-regle"),fz2=document.querySelector(".gr-frpp");if(rg2&&fz2&&fz2.nextElementSibling!==rg2)fz2.after(rg2)}
+  const hr=top&&top.querySelector('.ab-hero');
+  if(fp&&hr&&hr.nextElementSibling!==fp)hr.after(fp);
+  else if(fp&&top&&!hr&&top.nextElementSibling!==fp)top.after(fp);
+  {const st=stg();if(st.k==='pp'&&st.day<=45&&!document.querySelector('.gr-relev')&&!document.querySelector('.gr-frpp')?.closest('.sheet')&&document.querySelector('.gr-frpp')){const d=document.createElement('div');d.innerHTML=carteRelev(st.day);if(d.firstElementChild)document.querySelector('.gr-frpp').after(d.firstElementChild)}
+   const rl=document.querySelector('.gr-relev'),fz3=document.querySelector('.gr-frpp');if(rl&&fz3&&fz3.nextElementSibling!==rl)fz3.after(rl)}
+  {const rg2=document.querySelector(".gr-regle"),fz2=document.querySelector(".gr-relev")||document.querySelector(".gr-frpp");if(rg2&&fz2&&fz2.nextElementSibling!==rg2)fz2.after(rg2)}
   document.querySelectorAll('.card:not(.su-pastel),.tile:not(.su-pastel)').forEach(c=>{const t=(c.innerText||'').trim().slice(0,40);if(/Mon livre souvenir/.test(t))c.classList.add('su-pastel')});
   const s=document.querySelector('.gr-frpp .gr-strip'),o=s&&s.querySelector('.on');if(s&&o&&!s.dataset.ok){s.dataset.ok=1;s.scrollLeft=o.offsetLeft-s.clientWidth/2+o.offsetWidth/2}
 }catch(e){}}
 const _r=render;render=function(){const r=_r.apply(this,arguments);try{ranger();requestAnimationFrame(ranger)}catch(e){}return r};
-document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-su="etape"],[data-su="phase"],[data-su="regle"]');if(!b)return;e.stopPropagation();e.preventDefault();if(b.dataset.su==='regle'){feuilleRegle();return}b.dataset.su==='phase'?feuillePhase(+b.dataset.i):feuilleEtape(+b.dataset.i)},true);
+document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-su="etape"],[data-su="phase"],[data-su="regle"],[data-su="gross"]');if(!b)return;e.stopPropagation();e.preventDefault();if(b.dataset.su==='gross'){window.__soloGross=true;S.vue='params';render();return}if(b.dataset.su==='regle'){feuilleRegle();return}b.dataset.su==='phase'?feuillePhase(+b.dataset.i):feuilleEtape(+b.dataset.i)},true);
 
 const css=document.createElement('style');css.textContent=`
 .gr-et{width:104px!important;padding:10px 6px!important;gap:4px!important}.gr-et i{font-size:1.5rem}.gr-et b{font-size:.74rem!important;line-height:1.15;font-family:inherit!important;text-align:center}
 .su-exp{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.su-ex{border:0;border-radius:18px;padding:12px 6px;display:grid;justify-items:center;gap:2px;color:#3b2a24;font:inherit;cursor:pointer;box-shadow:0 3px 10px rgba(120,70,50,.08)}.su-ex span{font-size:1.5rem}.su-ex b{font-size:.86rem}.su-ex small{font-size:.66rem;opacity:.75;text-align:center}
 .su-ex:nth-child(6n+1){background:#e3f3e6}.su-ex:nth-child(6n+2){background:#fdf3d6}.su-ex:nth-child(6n+3){background:#fde8e0}.su-ex:nth-child(6n+4){background:#e6eefc}.su-ex:nth-child(6n+5){background:#f3e6f6}.su-ex:nth-child(6n+6){background:#fbe0e6}
+.su-rbar{height:8px;border-radius:6px;background:#f1e7e2;overflow:hidden}.su-rbar i{display:block;height:100%;background:linear-gradient(90deg,#f6c9b8,#e08f77)}
 .su-hide{display:none!important}.su-exp .su-ex:last-child:nth-child(3n+1){grid-column:span 3}
 .su-jl{margin:10px 0;display:grid;gap:3px}.su-jl.pas{opacity:.55}.su-jl.now .su-jt b{color:var(--accent,#a85743)}.su-jt{display:flex;gap:8px;align-items:center;font-size:.88rem}.su-jt span{font-size:1.2rem}.su-jr{position:relative;height:12px;border-radius:8px;background:#f1e7e2}.su-jr i{position:absolute;top:0;bottom:0;border-radius:8px;background:linear-gradient(90deg,#f6c9b8,#e9a58f)}.su-jl.now .su-jr i{background:linear-gradient(90deg,#8fc9a0,#5fae7c)}.su-jr u{position:absolute;top:-3px;bottom:-3px;width:3px;background:#3b6fd6;border-radius:2px;text-decoration:none}.su-jl small{font-size:.7rem;opacity:.7}
 .su-axe{display:flex;justify-content:space-between;font-size:.68rem;opacity:.65;margin-top:6px}
@@ -121,6 +143,6 @@ const css=document.createElement('style');css.textContent=`
 .ft-b{border-radius:20px!important}.ft-g{border-radius:22px!important;box-shadow:0 4px 14px rgba(120,70,50,.08)}
 .ft-g:nth-child(1){background:linear-gradient(135deg,#fde8e0,#f9d3c6)!important}.ft-g:nth-child(2){background:linear-gradient(135deg,#e3f3e6,#cbe8d1)!important}.ft-g b,.ft-g small{color:#3b2a24!important}
 .ab-row{border-radius:18px!important}
-@media (prefers-color-scheme:dark){:root:not([data-theme=light]) .su-pastel{background:#2c2523!important}}:root[data-theme=dark] .su-pastel{background:#2c2523!important}
+:root[data-theme=dark] .su-pastel{background:#2c2523!important}
 `;document.head.appendChild(css);
 })();

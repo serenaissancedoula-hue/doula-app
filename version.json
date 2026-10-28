@@ -1,6 +1,6 @@
 {
-  "version": "2026.10.28-249",
-  "nouveautes": "Accueils plus épurés : repères du développement sous la frise, doublons retirés, menu Explorer en bas.",
+  "version": "2026.10.28-250",
+  "nouveautes": "Correctif : plus de frise ni de repères dans le Fil. Relevailles visibles, Ma grossesse déplacée dans le Journal, cartes plus haut sur l'accueil.",
   "maintenance": {
     "debut": "2026-10-28T17:55",
     "fin": "2026-10-28T20:30",
