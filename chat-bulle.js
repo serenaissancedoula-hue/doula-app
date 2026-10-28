@@ -48,7 +48,7 @@ function cbDessiner(garderTexte){let p=document.getElementById('chatPan');if(!CB
   const enListe=S.role==='doula'&&!CB.fid;
   if(!p){p=document.createElement('div');p.id='chatPan';p.setAttribute('role','dialog');p.setAttribute('aria-label','Chat');document.body.appendChild(p)}
   const ta=p.querySelector('textarea'),brouillon=garderTexte&&ta?ta.value:'',foc=ta&&document.activeElement===ta;
-  p.innerHTML='<div class="cb-tete">'+(S.role==='doula'&&CB.fid?'<button class="cb-ic" data-cb="retour" aria-label="Toutes les familles">'+icon('fa-arrow-left')+'</button>':'<span class="cb-ic cb-logo">'+icon('fa-comments')+'</span>')+
+  p.innerHTML='<div class="cb-tete">'+(S.role==='doula'&&CB.fid?'<button class="cb-ic" data-cb="retour" aria-label="Toutes les familles">'+icon('fa-arrow-left')+'</button>':(S.role==='parent'&&window.__cmPeut&&window.__cmPeut()?'<button class="cb-ic" data-cb="inbox" aria-label="Tous mes messages">'+icon('fa-arrow-left')+'</button>':'<span class="cb-ic cb-logo">'+icon('fa-comments')+'</span>'))+
     '<b>'+esc(cbTitre())+'</b><button class="cb-ic" data-cb="fermer" aria-label="Fermer le chat">'+icon('fa-xmark')+'</button></div>'+
     (enListe?cbListeFamilles():'<div class="cb-fil" id="cbFil">'+cbFil()+'</div><div class="cb-bas"><label class="cb-ic cb-pj" aria-label="Joindre une photo ou un fichier">'+icon('fa-paperclip')+'<input type="file" id="cbFichier" accept="image/*,application/pdf,.doc,.docx,.txt" hidden></label><textarea id="cbTxt" rows="1" placeholder="Votre message…"></textarea><button class="cb-env" data-cb="envoyer" aria-label="Envoyer">'+icon('fa-paper-plane')+'</button></div>');
   const t=p.querySelector('textarea');if(t){t.value=brouillon;if(foc)try{t.focus({preventScroll:true})}catch(e){}}
