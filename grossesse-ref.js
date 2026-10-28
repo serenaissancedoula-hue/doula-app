@@ -81,7 +81,8 @@ function remettreEnOrdre(){try{const hero=document.querySelector('.bebe-carte');
   if(!hero.dataset.gr){hero.dataset.gr=1;const h2=hero.querySelector('.bb2-h');if(h2){const d=document.createElement('details');d.className='gr-det';d.innerHTML='<summary>Tout lire sur cette semaine</summary>';let n=h2;const lot=[];while(n){lot.push(n);n=n.nextElementSibling}lot.forEach(x=>d.appendChild(x));hero.appendChild(d)}}
   const ins=box.querySelector('.gr-insw'),fr=box.querySelector('.gr-fr');
   const prem=[...box.children].find(x=>x!==hero&&/(^|\s)card(\s|$)/.test(x.className));if(prem&&prem!==hero&&!(hero.compareDocumentPosition(prem)&4))box.insertBefore(hero,prem);
-  if(ins&&hero.nextElementSibling!==ins)hero.after(ins);
+  const mot=box.querySelector('.card.mot');let ancre=hero;if(mot){if(hero.nextElementSibling!==mot)hero.after(mot);ancre=mot}
+  if(ins&&ancre.nextElementSibling!==ins)ancre.after(ins);
   if(fr&&ins&&ins.nextElementSibling!==fr)ins.after(fr)}catch(e){}}
 const _r=render;
 render=function(){const r=_r.apply(this,arguments);try{remettreEnOrdre();requestAnimationFrame(()=>{const s=document.getElementById('grStrip'),o=s&&s.querySelector('.on');if(s&&o&&!s.dataset.ok){s.dataset.ok=1;s.scrollLeft=o.offsetLeft-s.clientWidth/2+o.offsetWidth/2}})}catch(e){}return r};
