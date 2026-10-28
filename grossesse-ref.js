@@ -42,10 +42,15 @@ function guides(){let F=[];try{F=FICHES}catch(e){}if(!F.length)return '';const p
 function feuilleCat(c){const m=CATS[c]||['📖',c];sheet(m[0]+' '+E(m[1]),'<div class="list">'+FICHES.filter(f=>f.cat===c).map(f=>'<button class="li" data-gr="fiche" data-id="'+E(f.id)+'" style="background:none;border-left:0;border-right:0;border-top:0;width:100%;text-align:left;cursor:pointer;color:inherit"><div class="ic">'+icon(f.ic)+'</div><div class="tx"><b>'+E(f.t)+'</b><span>Fiche '+E(f.id)+'</span></div>'+icon('fa-chevron-right','var(--muted)')+'</button>').join('')+'</div><p class="xs muted">Fiches d\'information générale appuyées sur des sources reconnues. Elles ne remplacent pas l\'avis de votre équipe de soins.</p>')}
 function aller(sub){try{close()}catch(e){}S.tab='infos';S.sub=sub||'';try{scrollTo(0,0)}catch(e){}render()}
 
+/* ---------- gros boutons en tuiles pastel ---------- */
+const TUILES={kickStart:['👣','Mouvements','#fde8e0','#f9d3c6'],contr:['⏱️','Contractions','#e6eefc','#d3e2f8'],humeur:['😊','Humeur','#fdf3d6','#f8e7ab'],symptome:['🩺','Symptômes','#e3f3e6','#cbe8d1']};
+function tuiles(h){const i=h.indexOf('<div class="quick">');if(i<0)return h;const j=h.indexOf('</div>',i);if(j<0)return h;
+  const bloc=h.slice(i,j+6),acts=[...bloc.matchAll(/data-act="([a-zA-Z]+)"/g)].map(m=>m[1]);if(!acts.length||acts.some(a=>!TUILES[a]))return h;
+  return h.slice(0,i)+'<div class="gr-tuiles">'+acts.map(a=>{const t=TUILES[a];return '<button data-act="'+a+'" style="background:linear-gradient(145deg,'+t[2]+','+t[3]+')"><span>'+t[0]+'</span><b>'+t[1]+'</b></button>'}).join('')+'</div>'+h.slice(j+6)}
 /* ---------- accueil ---------- */
 const _pA=pAccueil;
 pAccueil=function(){let h=_pA.apply(this,arguments);try{const w=cur(),st=stage();
-  if(w!=null){const i=h.indexOf('<div class="quick">');if(i>=0)h=h.slice(0,i)+frise(w)+h.slice(i)}
+  if(w!=null){h=tuiles(h);const i=h.indexOf('<div class="gr-tuiles">');if(i>=0)h=h.slice(0,i)+frise(w)+h.slice(i)}
   if(st.k==='preg'||st.k==='pp'){const k='<button class="btn ghost" data-act="go" data-v="infos|alertes">',j=h.indexOf(k);if(j>=0)h=h.slice(0,j)+guides()+h.slice(j)}
  }catch(e){}return h};
 const _r=render;
@@ -64,6 +69,14 @@ document.addEventListener('click',async e=>{const b=e.target.closest&&e.target.c
 },true);
 
 const css=document.createElement('style');css.textContent=`
+.gr-tuiles{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:4px 0 12px}.gr-tuiles button{border:0;border-radius:22px;padding:16px 14px;display:flex;align-items:center;gap:12px;cursor:pointer;color:#3b2a24;font:inherit;text-align:left;box-shadow:0 4px 14px rgba(120,70,50,.10);min-height:68px}
+.gr-tuiles button span{font-size:1.9rem;line-height:1}.gr-tuiles button b{font-size:.92rem}.gr-tuiles button:active{transform:scale(.97)}
+.gr-fr{background:linear-gradient(135deg,#fdf0e6,#fbe6ec)!important;border:0!important}.gr-gd{background:linear-gradient(135deg,#f3f7ee,#eef3fb)!important;border:0!important}
+.gr-cat:nth-child(1){background:linear-gradient(135deg,#fde8e0,#f9d3c6)}.gr-cat:nth-child(2){background:linear-gradient(135deg,#fdf3d6,#f8e7ab)}.gr-cat:nth-child(3){background:linear-gradient(135deg,#e6eefc,#d3e2f8)}.gr-cat:nth-child(4){background:linear-gradient(135deg,#f6e4f3,#ecd0e8)}
+.gr-cat b,.gr-cat small{color:#3b2a24}.gr-cat small{opacity:.7}.gr-cat{border-radius:22px!important;box-shadow:0 4px 14px rgba(120,70,50,.08)}
+.gr-w{border-radius:18px!important;background:#fff!important}.gr-w.on{background:var(--accent,#a85743)!important}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]) .gr-fr,:root:not([data-theme=light]) .gr-gd{background:#2c2523!important}:root:not([data-theme=light]) .gr-w{background:#3a2f2c!important}}:root[data-theme=dark] .gr-fr,:root[data-theme=dark] .gr-gd{background:#2c2523!important}:root[data-theme=dark] .gr-w{background:#3a2f2c!important}
+
 .gr-strip{display:flex;gap:8px;overflow-x:auto;padding:10px 2px 6px;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch;scrollbar-width:none}.gr-strip::-webkit-scrollbar{display:none}
 .gr-w{flex:0 0 auto;width:58px;border:1px solid var(--line,#e6d9d0);background:var(--card,#fffaf6);border-radius:16px;padding:8px 4px;display:grid;justify-items:center;gap:1px;cursor:pointer;color:inherit;font:inherit;scroll-snap-align:center}
 .gr-w small{font-size:.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}.gr-w b{font-size:1.15rem;font-family:var(--serif,inherit)}.gr-w i{font-style:normal;font-size:1.3rem}
