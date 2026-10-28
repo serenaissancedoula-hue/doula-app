@@ -27,6 +27,7 @@ function feuilleEtape(i){const L=etapes(),x=L[i];if(!x)return;const c=(()=>{cons
    '<h3 class="gr-h">'+E(n)+' à cette étape</h3>'+par(x[3])+
    (x[4]?'<h3 class="gr-h">Vous à cette étape</h3>'+par(x[4]):'')+
    (x[5]?'<div class="banner sage" style="margin:6px 0 0"><div class="small"><b>Petit conseil :</b> '+E(nom(x[5]))+'</div></div>':'')+
+   (()=>{const a=x[0]/30.44,b=x[1]/30.44,J=(window.JALONS||[]).filter(j=>j[2]<=b+0.01&&j[3]>=a);return J.length?'<h3 class="gr-h">À cet âge, souvent</h3><ul class="gr-ul">'+J.map(j=>'<li>'+j[0]+' '+E(nom(j[1]))+' <small class="muted">('+fmt(j[2])+' à '+fmt(j[3])+')</small></li>').join('')+'</ul><button class="btn sm ghost" data-su="regle">📏 Voir la règle du développement</button>':''})()+
    (()=>{const P=(window.ETAPE_PLUS||[])[i];return P?'<div class="gr-sav">💡 <b>Le saviez-vous ?</b> '+E(nom(P[0]))+'</div>'+(P[1]?'<div class="gr-dem">🗣️ <b>À demander à mon équipe :</b> '+E(P[1])+'</div>':''):''})()+
    '<p class="xs muted" style="margin:10px 0 0">Information générale : chaque bébé a son rythme. En cas de doute, parlez-en à votre professionnel de la santé ou appelez le 811 (France : 15).</p></div>');
   setTimeout(()=>{const s=document.getElementById('suSel'),o=s&&s.querySelector('.on');if(s&&o)s.scrollLeft=o.offsetLeft-s.clientWidth/2+o.offsetWidth/2},30)}
@@ -57,6 +58,22 @@ const EXP={suivi:['📅','Suivi','Rendez-vous, tâches'],journal:['📖','Journa
 function explorer(){let T=[];try{T=PTABS2.filter(t=>EXP[t[0]])}catch(e){}if(!T.length)return '';
   return '<div class="gr-insw gr-expl"><div class="gr-ins-h">Explorer</div><div class="su-exp">'+T.map(t=>{const e=EXP[t[0]];return '<button class="su-ex" data-act="tab" data-v="'+t[0]+'"><span>'+e[0]+'</span><b>'+e[1]+'</b><small>'+e[2]+'</small></button>'}).join('')+'</div></div>'}
 
+
+/* ---------- bébé né : règle des repères du développement ---------- */
+const MAX_M=24;
+function moisBebe(){const st=stg();return st.k==='pp'?st.day/30.44:null}
+function fmt(m){return m<2?Math.round(m*4.345)+' sem.':Math.round(m)+' mois'}
+function barre(j,m){const a=j[2]/MAX_M*100,b=Math.min(MAX_M,j[3])/MAX_M*100;const dedans=m!=null&&m>=j[2]&&m<=j[3];const pas=m!=null&&m>j[3];
+  return '<div class="su-jl'+(dedans?' now':'')+(pas?' pas':'')+'"><div class="su-jt"><span>'+j[0]+'</span><b>'+E(nom(j[1]))+'</b></div><div class="su-jr"><i style="left:'+a+'%;width:'+Math.max(2,b-a)+'%"></i>'+(m!=null&&m<=MAX_M?'<u style="left:'+(m/MAX_M*100)+'%"></u>':'')+'</div><small>'+fmt(j[2])+' à '+fmt(j[3])+'</small></div>'}
+function feuilleRegle(){const m=moisBebe(),J=window.JALONS||[];const n=prenomB()||'Bébé';
+  const now=J.filter(j=>m!=null&&m>=j[2]&&m<=j[3]);
+  sheet('Ce que bébé peut apprendre','<div class="gr-sem">'+(m!=null?'<p class="gr-p">'+E(n)+' a '+(m<2?Math.round(m*4.345)+' semaines':Math.round(m)+' mois')+'. Le trait bleu montre où vous êtes sur la règle.</p>':'')+
+   (now.length?'<div class="gr-sav">⭐ <b>En ce moment, il peut commencer à :</b> '+now.map(j=>E(j[1].toLowerCase())).join(' · ')+'</div>':'')+
+   '<div class="su-axe"><span>0</span><span>6 mois</span><span>1 an</span><span>18 mois</span><span>2 ans</span></div>'+J.map(j=>barre(j,m)).join('')+
+   '<p class="xs muted" style="margin:10px 0 0">Chaque barre montre la période où la plupart des enfants y arrivent. Arriver avant ou après est très courant. Si un repère tarde beaucoup ou si vous avez un doute, parlez-en à votre professionnel de la santé : plus on observe tôt, mieux on accompagne. Sources : CDC, Société canadienne de pédiatrie, Naître et grandir.</p></div>')}
+function carteRegle(){const m=moisBebe(),J=window.JALONS||[];if(m==null||!J.length)return '';const now=J.filter(j=>m>=j[2]&&m<=j[3]).slice(0,3);
+  return '<div class="gr-insw gr-regle"><div class="gr-ins-h">Ce que bébé apprend en ce moment</div><button class="su-reglebtn" data-su="regle">'+(now.length?now.map(j=>'<span>'+j[0]+' '+E(j[1])+'</span>').join(''):'<span>Voir tous les repères</span>')+'<em>Voir la règle complète ›</em></button></div>'}
+
 /* ---------- branchements ---------- */
 const _pA=pAccueil;
 pAccueil=function(){let h=_pA.apply(this,arguments);try{const st=stg();
@@ -72,18 +89,22 @@ function ranger(){try{
   const fc=document.querySelector('.gr-frft .gr-strip'),fo=fc&&fc.querySelector('.on');if(fc&&fo&&!fc.dataset.ok){fc.dataset.ok=1;fc.scrollLeft=fo.offsetLeft-fc.clientWidth/2+fo.offsetWidth/2}
   const anc=document.querySelector('.gr-frft')||document.querySelector('.gr-frpp')||document.querySelector('.gr-fr')||document.querySelector('.bebe-carte')||hero;
   if(!document.querySelector('.gr-expl')&&S.role==='parent'&&S.tab==='accueil'&&!S.vue&&anc&&!anc.closest('.sheet')&&!/Pour commencer/.test((hero&&hero.innerText)||'')){const d=document.createElement('div');d.innerHTML=explorer();const e=d.firstElementChild;if(e){const box=anc.parentElement;box.appendChild(e)}}
+  const fq=document.querySelector('.gr-frpp');if(fq&&!document.querySelector('.gr-regle')&&!fq.closest('.sheet')){const d=document.createElement('div');d.innerHTML=carteRegle();if(d.firstElementChild)fq.after(d.firstElementChild)}
   const fp=document.querySelector('.gr-frpp'),top=document.querySelector('.ab-top');
   if(fp&&top&&top.nextElementSibling!==fp)top.after(fp);
   document.querySelectorAll('.card:not(.su-pastel),.tile:not(.su-pastel)').forEach(c=>{const t=(c.innerText||'').trim().slice(0,40);if(/Mon livre souvenir/.test(t))c.classList.add('su-pastel')});
   const s=document.querySelector('.gr-frpp .gr-strip'),o=s&&s.querySelector('.on');if(s&&o&&!s.dataset.ok){s.dataset.ok=1;s.scrollLeft=o.offsetLeft-s.clientWidth/2+o.offsetWidth/2}
 }catch(e){}}
 const _r=render;render=function(){const r=_r.apply(this,arguments);try{ranger();requestAnimationFrame(ranger)}catch(e){}return r};
-document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-su="etape"],[data-su="phase"]');if(!b)return;e.stopPropagation();e.preventDefault();b.dataset.su==='phase'?feuillePhase(+b.dataset.i):feuilleEtape(+b.dataset.i)},true);
+document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-su="etape"],[data-su="phase"],[data-su="regle"]');if(!b)return;e.stopPropagation();e.preventDefault();if(b.dataset.su==='regle'){feuilleRegle();return}b.dataset.su==='phase'?feuillePhase(+b.dataset.i):feuilleEtape(+b.dataset.i)},true);
 
 const css=document.createElement('style');css.textContent=`
 .gr-et{width:104px!important;padding:10px 6px!important;gap:4px!important}.gr-et i{font-size:1.5rem}.gr-et b{font-size:.74rem!important;line-height:1.15;font-family:inherit!important;text-align:center}
 .su-exp{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.su-ex{border:0;border-radius:18px;padding:12px 6px;display:grid;justify-items:center;gap:2px;color:#3b2a24;font:inherit;cursor:pointer;box-shadow:0 3px 10px rgba(120,70,50,.08)}.su-ex span{font-size:1.5rem}.su-ex b{font-size:.86rem}.su-ex small{font-size:.66rem;opacity:.75;text-align:center}
 .su-ex:nth-child(6n+1){background:#e3f3e6}.su-ex:nth-child(6n+2){background:#fdf3d6}.su-ex:nth-child(6n+3){background:#fde8e0}.su-ex:nth-child(6n+4){background:#e6eefc}.su-ex:nth-child(6n+5){background:#f3e6f6}.su-ex:nth-child(6n+6){background:#fbe0e6}
+.su-jl{margin:10px 0;display:grid;gap:3px}.su-jl.pas{opacity:.55}.su-jl.now .su-jt b{color:var(--accent,#a85743)}.su-jt{display:flex;gap:8px;align-items:center;font-size:.88rem}.su-jt span{font-size:1.2rem}.su-jr{position:relative;height:12px;border-radius:8px;background:#f1e7e2}.su-jr i{position:absolute;top:0;bottom:0;border-radius:8px;background:linear-gradient(90deg,#f6c9b8,#e9a58f)}.su-jl.now .su-jr i{background:linear-gradient(90deg,#8fc9a0,#5fae7c)}.su-jr u{position:absolute;top:-3px;bottom:-3px;width:3px;background:#3b6fd6;border-radius:2px;text-decoration:none}.su-jl small{font-size:.7rem;opacity:.7}
+.su-axe{display:flex;justify-content:space-between;font-size:.68rem;opacity:.65;margin-top:6px}
+.su-reglebtn{width:100%;border:0;border-radius:18px;padding:12px;background:linear-gradient(135deg,#e3f3e6,#cbe8d1);color:#3b2a24;font:inherit;text-align:left;display:grid;gap:4px;cursor:pointer}.su-reglebtn span{font-size:.9rem}.su-reglebtn em{font-style:normal;font-weight:700;font-size:.8rem;color:var(--accent,#a85743)}
 .gr-selt{font-size:.8rem;white-space:nowrap}
 .su-res{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.su-res div{border-radius:18px;padding:10px 4px;display:grid;justify-items:center;gap:1px;color:#3b2a24}.su-res span{font-size:1.4rem}.su-res b{font-size:1.4rem;font-family:var(--serif,inherit)}.su-res small{font-size:.66rem;opacity:.75;text-align:center}
 .su-pastel{background:linear-gradient(135deg,#fdf0e6,#fbe6ec)!important;border:0!important}

@@ -91,4 +91,28 @@ window.PHASES_FT=[
   v:['Un test positif : prenez rendez-vous avec un médecin ou une sage-femme pour commencer le suivi.','Prenez chaque jour de l\'acide folique (0,4 mg), idéalement dès avant la conception.'],
   sv:'Les règles qui arrivent aussi, c\'est un cycle de plus à apprendre : vous n\'avez rien fait de mal.',q:'Quand consulter si ça tarde ? (12 mois si moins de 35 ans, 6 mois si 35 ans ou plus, tout de suite à 40 ans et plus.)'}
 ];
+
+/* Repères du développement : [emoji, texte, début (mois), fin (mois)] — fourchettes larges et prudentes, d'après les repères du CDC (2022),
+   de la Société canadienne de pédiatrie et de Naître et grandir. Chaque enfant a son rythme : un repère n'est jamais un test. */
+window.JALONS=[
+['👀','Suit un visage ou un objet des yeux',0.5,3],
+['😊','Premiers sourires en réponse à vous',1,3],
+['🗣️','Roucoule et gazouille (« aaa », « ooo »)',1,5],
+['💪','Tient sa tête droite quand on le porte',1.5,4],
+['😄','Rit aux éclats',3,5],
+['🤲','Attrape un jouet et le porte à sa bouche',3,6],
+['🔄','Se retourne du ventre au dos, puis du dos au ventre',4,7],
+['🪑','S\'assoit sans soutien',6,9],
+['🗨️','Babille (« ba-ba », « ma-ma »)',4,9],
+['😳','Se méfie des inconnus',6,10],
+['🐛','Se déplace : ramper, quatre pattes',6,11],
+['🤏','Pince entre le pouce et l\'index',8,12],
+['🧍','Se met debout en s\'appuyant',8,12],
+['👋','Fait « coucou » ou « bye-bye »',9,13],
+['☝️','Pointe du doigt ce qu\'il veut',9,15],
+['🚶','Premiers pas seul',9,18],
+['💬','Premiers mots avec un sens',10,16],
+['🏃','Court et monte quelques marches avec aide',14,24],
+['🧩','Combine deux mots (« encore lait »)',18,26]
+];
 })();
