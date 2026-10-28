@@ -75,8 +75,23 @@ function carteRegle(){const m=moisBebe(),J=window.JALONS||[];if(m==null||!J.leng
   return '<div class="gr-insw gr-regle"><div class="gr-ins-h">Ce que bébé apprend en ce moment</div><button class="su-reglebtn" data-su="regle">'+(now.length?now.map(j=>'<span>'+j[0]+' '+E(j[1])+'</span>').join(''):'<span>Voir tous les repères</span>')+'<em>Voir la règle complète ›</em></button></div>'}
 
 
-function carteRelev(day){const j=Math.min(40,day+1),pct=Math.round(j/40*100);
-  return '<div class="card gr-relev"><div class="row between"><span class="eyebrow acc">🫖 Mes relevailles</span><span class="xs muted">Jour '+j+' sur 40</span></div><div class="su-rbar"><i style="width:'+pct+'%"></i></div><p class="small" style="margin:8px 0">Ces semaines sont faites pour vous reposer et récupérer, pendant que quelqu\'un prend soin de la maison. Acceptez l\'aide et demandez-la.</p><div class="row" style="gap:8px;flex-wrap:wrap"><button class="btn sm" data-act="baOuvre" data-v="relev">Lire les relevailles</button><button class="btn sm ghost" data-act="baDemande">Demander à ma doula</button></div></div>'}
+function carteRelev(){return '<div class="card gr-relev"><span class="eyebrow acc">🫖 Relevailles</span><b style="display:block;margin:4px 0">Besoin de souffler ?</b><p class="small" style="margin:0 0 8px">Une doula peut venir s\'occuper de bébé, de jour ou de nuit, pendant que vous vous reposez ou faites vos commissions.</p><button class="btn sm" data-su="relevForm">Demander des relevailles</button></div>'}
+function feuilleRelev(){const n=prenomB()||'bébé';
+  const ch=(nom,L)=>L.map((x,i)=>'<label class="su-ch"><input type="'+(nom==='raison'?'checkbox':'radio')+'" name="rl-'+nom+'" value="'+E(x)+'"'+(nom!=='raison'&&i===0?' checked':'')+'><span>'+E(x)+'</span></label>').join('');
+  sheet('Relevailles','<div class="stack" style="gap:12px"><p class="small" style="margin:0">Les relevailles, c\'est quand une doula vient prendre soin de '+E(n)+' pendant que vous vous reposez, dormez ou faites autre chose. Dites-nous ce qui vous aiderait : votre doula vous répondra avec ses disponibilités et ses tarifs.</p>'+
+   '<b class="small">Quand ?</b><div class="su-chs">'+ch('moment',['De jour','De nuit','Jour et nuit'])+'</div>'+
+   '<label class="f">Date souhaitée<input type="date" id="rlDate"></label>'+
+   '<label class="f">Combien d\'heures environ ?<select id="rlHeures"><option>2 à 3 heures</option><option>4 à 6 heures</option><option>Une nuit complète</option><option>Plus longtemps / à discuter</option></select></label>'+
+   '<b class="small">Pour quoi ?</b><div class="su-chs">'+ch('raison',['Me reposer, dormir','Faire des commissions','Un rendez-vous','M\'occuper de mes autres enfants','Du temps pour moi','Autre'])+'</div>'+
+   '<label class="f">Un mot pour votre doula (facultatif)<textarea id="rlNote" style="min-height:60px"></textarea></label>'+
+   '<button class="btn" data-su="relevSend">Envoyer ma demande</button>'+
+   '<p class="xs muted" style="margin:0">Votre demande est envoyée à votre doula dans la messagerie. Si vous n\'avez pas encore de doula, trouvez-en une dans l\'onglet « Doulas ».</p></div>')}
+function envoyerRelev(){try{
+  const q=n=>[...document.querySelectorAll('.sheet input[name="rl-'+n+'"]:checked')].map(x=>x.value);
+  if(!(typeof FAM!=='undefined'&&FAM&&FAM.doula_id)){toast('Choisissez d\'abord une doula dans l\'onglet « Doulas »');return}
+  const d=(document.getElementById('rlDate')||{}).value,h=(document.getElementById('rlHeures')||{}).value,note=((document.getElementById('rlNote')||{}).value||'').trim(),r=q('raison');
+  const txt='Bonjour ! J\'aimerais des relevailles : '+(q('moment')[0]||'de jour').toLowerCase()+(d?', autour du '+d:'')+(h?', environ '+h.toLowerCase():'')+'.'+(r.length?' Pour : '+r.map(x=>x.toLowerCase()).join(', ')+'.':'')+(note?' '+note:'')+' Pouvez-vous me dire vos disponibilités et vos tarifs ?';
+  Promise.resolve(sb.from('fam_messages').insert({famille_id:FAM.id,de_doula:false,texte:txt})).then(r2=>{if(r2&&r2.error){toast('Pas envoyé : réessayez');return}toast('Demande envoyée à votre doula');try{close()}catch(e){}}).catch(()=>toast('Pas envoyé : réessayez'))}catch(e){toast('Pas envoyé : réessayez')}}
 
 
 /* ---------- « Ma grossesse » : sorti des Paramètres, accessible depuis le journal ---------- */
@@ -85,7 +100,7 @@ function rangerParams(){try{const app=document.getElementById('app');if(!app||S.
   const kids=[...app.children];const isG=c=>(c.matches('details')&&/^\s*Ma grossesse et mes dates/i.test(c.innerText||''))||c.classList.contains('gm-inf');
   kids.forEach(c=>{if(c.classList.contains('foot'))return;
     if(window.__soloGross){const garde=isG(c)||c.classList.contains('sh')||(c.classList.contains('flat'));c.classList.toggle('su-hide',!garde)}
-    else c.classList.toggle('su-hide',isG(c))});
+    else c.classList.toggle('su-hide',isG(c)||/^\s*Voir les doulas près de moi/i.test(c.innerText||''))});
   if(window.__soloGross){const sh=app.querySelector(':scope>.sh');if(sh){const h=sh.querySelector('h1,h2,b');if(h)h.textContent='Ma grossesse';const sm=sh.querySelector('p,.small');if(sm)sm.textContent='Vos dates et les particularités de votre grossesse.';const d=app.querySelector(':scope>details');if(d)d.open=true}}
   return true}catch(e){return false}}
 
@@ -113,20 +128,21 @@ function ranger(){try{
   const hr=top&&top.querySelector('.ab-hero');
   if(fp&&hr&&hr.nextElementSibling!==fp)hr.after(fp);
   else if(fp&&top&&!hr&&top.nextElementSibling!==fp)top.after(fp);
-  {const st=stg();if(st.k==='pp'&&st.day<=45&&!document.querySelector('.gr-relev')&&!document.querySelector('.gr-frpp')?.closest('.sheet')&&document.querySelector('.gr-frpp')){const d=document.createElement('div');d.innerHTML=carteRelev(st.day);if(d.firstElementChild)document.querySelector('.gr-frpp').after(d.firstElementChild)}
+  {const st=stg();if(st.k==='pp'&&!document.querySelector('.gr-relev')&&!document.querySelector('.gr-frpp')?.closest('.sheet')&&document.querySelector('.gr-frpp')){const d=document.createElement('div');d.innerHTML=carteRelev();if(d.firstElementChild)document.querySelector('.gr-frpp').after(d.firstElementChild)}
    const rl=document.querySelector('.gr-relev'),fz3=document.querySelector('.gr-frpp');if(rl&&fz3&&fz3.nextElementSibling!==rl)fz3.after(rl)}
   {const rg2=document.querySelector(".gr-regle"),fz2=document.querySelector(".gr-relev")||document.querySelector(".gr-frpp");if(rg2&&fz2&&fz2.nextElementSibling!==rg2)fz2.after(rg2)}
   document.querySelectorAll('.card:not(.su-pastel),.tile:not(.su-pastel)').forEach(c=>{const t=(c.innerText||'').trim().slice(0,40);if(/Mon livre souvenir/.test(t))c.classList.add('su-pastel')});
   const s=document.querySelector('.gr-frpp .gr-strip'),o=s&&s.querySelector('.on');if(s&&o&&!s.dataset.ok){s.dataset.ok=1;s.scrollLeft=o.offsetLeft-s.clientWidth/2+o.offsetWidth/2}
 }catch(e){}}
 const _r=render;render=function(){const r=_r.apply(this,arguments);try{ranger();requestAnimationFrame(ranger)}catch(e){}return r};
-document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-su="etape"],[data-su="phase"],[data-su="regle"],[data-su="gross"]');if(!b)return;e.stopPropagation();e.preventDefault();if(b.dataset.su==='gross'){window.__soloGross=true;S.vue='params';render();return}if(b.dataset.su==='regle'){feuilleRegle();return}b.dataset.su==='phase'?feuillePhase(+b.dataset.i):feuilleEtape(+b.dataset.i)},true);
+document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-su="etape"],[data-su="phase"],[data-su="regle"],[data-su="gross"],[data-su="relevForm"],[data-su="relevSend"],[data-act="baDemande"],[data-act="baOuvre"][data-v="relev"]');if(!b)return;e.stopPropagation();e.preventDefault();if(b.dataset.su==='relevSend'){envoyerRelev();return}if(b.dataset.su==='relevForm'||b.dataset.act==='baDemande'||b.dataset.v==='relev'){feuilleRelev();return}if(b.dataset.su==='gross'){window.__soloGross=true;S.vue='params';render();return}if(b.dataset.su==='regle'){feuilleRegle();return}b.dataset.su==='phase'?feuillePhase(+b.dataset.i):feuilleEtape(+b.dataset.i)},true);
 
 const css=document.createElement('style');css.textContent=`
 .gr-et{width:104px!important;padding:10px 6px!important;gap:4px!important}.gr-et i{font-size:1.5rem}.gr-et b{font-size:.74rem!important;line-height:1.15;font-family:inherit!important;text-align:center}
 .su-exp{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.su-ex{border:0;border-radius:18px;padding:12px 6px;display:grid;justify-items:center;gap:2px;color:#3b2a24;font:inherit;cursor:pointer;box-shadow:0 3px 10px rgba(120,70,50,.08)}.su-ex span{font-size:1.5rem}.su-ex b{font-size:.86rem}.su-ex small{font-size:.66rem;opacity:.75;text-align:center}
 .su-ex:nth-child(6n+1){background:#e3f3e6}.su-ex:nth-child(6n+2){background:#fdf3d6}.su-ex:nth-child(6n+3){background:#fde8e0}.su-ex:nth-child(6n+4){background:#e6eefc}.su-ex:nth-child(6n+5){background:#f3e6f6}.su-ex:nth-child(6n+6){background:#fbe0e6}
 .su-rbar{height:8px;border-radius:6px;background:#f1e7e2;overflow:hidden}.su-rbar i{display:block;height:100%;background:linear-gradient(90deg,#f6c9b8,#e08f77)}
+.su-chs{display:flex;flex-wrap:wrap;gap:6px}.su-ch{position:relative}.su-ch input{position:absolute;opacity:0}.su-ch span{display:inline-block;padding:8px 12px;border-radius:16px;background:#f3ebe6;font-size:.86rem;border:2px solid transparent}.su-ch input:checked+span{background:#fde8e0;border-color:#a85743;font-weight:700}
 .su-hide{display:none!important}.su-exp .su-ex:last-child:nth-child(3n+1){grid-column:span 3}
 .su-jl{margin:10px 0;display:grid;gap:3px}.su-jl.pas{opacity:.55}.su-jl.now .su-jt b{color:var(--accent,#a85743)}.su-jt{display:flex;gap:8px;align-items:center;font-size:.88rem}.su-jt span{font-size:1.2rem}.su-jr{position:relative;height:12px;border-radius:8px;background:#f1e7e2}.su-jr i{position:absolute;top:0;bottom:0;border-radius:8px;background:linear-gradient(90deg,#f6c9b8,#e9a58f)}.su-jl.now .su-jr i{background:linear-gradient(90deg,#8fc9a0,#5fae7c)}.su-jr u{position:absolute;top:-3px;bottom:-3px;width:3px;background:#3b6fd6;border-radius:2px;text-decoration:none}.su-jl small{font-size:.7rem;opacity:.7}
 .su-axe{display:flex;justify-content:space-between;font-size:.68rem;opacity:.65;margin-top:6px}
