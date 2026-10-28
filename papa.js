@@ -34,8 +34,12 @@ function rendre(){
   if(!PAPA||!S.parent)return _r.apply(this,arguments);
   const vrai=S.parent.prenom;S.parent.prenom=PAPA.prenom||'Papa';
   /* les félicitations « une seule fois » restent pour la maman */
-  const n=S.parent.naissance,fel=n?n.felicite:undefined;if(n)n.felicite=1;
-  try{return _r.apply(this,arguments)}finally{S.parent.prenom=vrai;if(n){if(fel===undefined)delete n.felicite;else n.felicite=fel}}
+  /* papa a droit aux siennes : une fois, sur son appareil */
+  const cle='papa-felic-'+(FAM&&FAM.id);let vu=false;try{vu=!!localStorage.getItem(cle)}catch(e){}
+  const n=S.parent.naissance,fel=n?n.felicite:undefined;if(n){if(vu)n.felicite=1;else delete n.felicite}
+  try{const x=_r.apply(this,arguments);
+    const o=document.getElementById('felic');if(o&&!vu){try{localStorage.setItem(cle,'1')}catch(e){}const h=o.querySelector('h1');if(h)h.textContent='Félicitations, '+(PAPA.prenom||'Papa')+' et '+nomMere()+' !'}
+    return x}finally{S.parent.prenom=vrai;if(n){if(fel===undefined)delete n.felicite;else n.felicite=fel}}
 };
 if(typeof sauverProfil==='function'){const _sp=sauverProfil;sauverProfil=function(){if(PAPA){toast('Ce profil est celui de '+nomMere()+'. Votre accès partage son suivi.');return}return _sp.apply(this,arguments)}}
 
