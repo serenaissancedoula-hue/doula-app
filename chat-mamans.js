@@ -12,7 +12,7 @@ const peut=()=>!!(typeof FAM!=='undefined'&&FAM&&!window.PAPA&&S&&S.role==='pare
 
 window.__cmPeut=()=>{try{return peut()}catch(e){return false}};
 /* la bulle de chat ouvre TOUS les messages ; « Ma doula » est épinglée en haut */
-(function(){try{const _b=chatBulleBasculer;chatBulleBasculer=function(){try{if(peut()){if(CB.ouvert){CB.ouvert=false;cbDessiner();return}if($o()){fermer();return}CM.tab='prives';ouvrir();return}}catch(e){}return _b.apply(this,arguments)}}catch(e){}})();
+(function(){try{const _b=chatBulleBasculer;chatBulleBasculer=function(){try{if(peut()){if(CB.ouvert){CB.ouvert=false;cbDessiner();return}if($o()){fermer();return}CM.tab='prives';CM.flot=true;const _p=ouvrir();const o=$o();if(o){o.classList.add('cm-flot');document.body.classList.add('cm-flot-b')}return _p}}catch(e){}return _b.apply(this,arguments)}}catch(e){}})();
 document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-cb="inbox"]');if(!b)return;e.preventDefault();e.stopPropagation();CB.ouvert=false;cbDessiner();CM.tab='prives';ouvrir()},true);
 /* ---------- carte d'entrée (accueil) ---------- */
 function carte(){const n=Object.values(CM.nonlus||{}).reduce((a,b)=>a+(+b||0),0);return '<button class="card cm-entree" data-cm="ouvrir" style="width:100%;text-align:left;cursor:pointer;border:0;font:inherit"><span class="eyebrow acc">💬 Messages entre mamans'+(n?' <span class="cm-pastille">'+n+'</span>':'')+'</span><h2 class="papa-t" style="margin:2px 0 4px">Écrire à d\'autres mamans</h2><p class="small" style="margin:0">Comme Messenger, mais entre mamans seulement : discussions privées et salons en direct.</p></button>'}
@@ -56,7 +56,7 @@ async function ouvrir(apres){
     if(typeof apres==='function')await apres();else vAccueil();
   }catch(e){fermer();toast('Le cercle est indisponible pour le moment')}
 }
-function fermer(){CM.depuisFil=false;desabonner();if(CM.inbox){try{sb.removeChannel(CM.inbox)}catch(e){}CM.inbox=null}const o=$o();if(o)o.remove();document.body.classList.remove('cm-ouvert');CM.cur=null;CM.msgs=[];setTimeout(badge,300);if(S.tab==='fil'&&!S.vue){FIL.pret=false;try{render()}catch(e){}}}
+function fermer(){CM.depuisFil=false;desabonner();if(CM.inbox){try{sb.removeChannel(CM.inbox)}catch(e){}CM.inbox=null}const o=$o();if(o)o.remove();document.body.classList.remove('cm-ouvert');document.body.classList.remove('cm-flot-b');CM.flot=false;CM.cur=null;CM.msgs=[];setTimeout(badge,300);if(S.tab==='fil'&&!S.vue){FIL.pret=false;try{render()}catch(e){}}}
 function desabonner(){if(CM.ch){try{sb.removeChannel(CM.ch)}catch(e){}CM.ch=null}}
 
 /* ---------- vues ---------- */
@@ -445,4 +445,6 @@ st.textContent='#cm{position:fixed;inset:0;z-index:8000;background:var(--bg,#faf
 '.cm-bar{display:flex;gap:8px;align-items:flex-end;padding:8px 10px calc(8px + env(safe-area-inset-bottom));border-top:1px solid var(--line,#e6d9d0);background:var(--card,#fffbf8)}.cm-bar textarea{flex:1;resize:none;border:1px solid var(--line,#e6d9d0);border-radius:22px;padding:10px 14px;font:inherit;font-size:1rem;background:var(--bg,#faf5ef);color:inherit;max-height:120px}.cm-send{width:42px;height:42px;border-radius:50%;border:0;background:var(--accent,#a85743);color:#fff;font-size:1.1rem;cursor:pointer;flex:none}.cm-note{margin:0;padding:6px 14px;font-size:.78rem;color:#7a685e;text-align:center}'+
 '.cm-menu{position:absolute;inset:0;background:rgba(0,0,0,.35);display:flex;align-items:flex-end;z-index:2}.cm-menu[hidden]{display:none}.cm-mi{width:100%;background:var(--card,#fffbf8);border-radius:22px 22px 0 0;padding:16px 16px calc(16px + env(safe-area-inset-bottom));display:grid;gap:8px}.cm-mi button{border:1px solid var(--line,#e6d9d0);background:transparent;border-radius:14px;padding:13px;font:inherit;color:inherit;text-align:left;cursor:pointer}';
 document.head.appendChild(st);
+(function(){const s2=document.createElement('style');s2.textContent='#cm.cm-flot{inset:auto;right:10px;left:auto;bottom:96px;width:min(400px,calc(100vw - 20px));height:min(72vh,580px);border-radius:22px;box-shadow:0 18px 50px rgba(60,35,25,.28);border:1px solid var(--line,#e6d9d0);overflow:hidden;z-index:7990}#cm.cm-flot .cm-h{padding-top:10px}body.cm-ouvert.cm-flot-b{overflow:auto}';document.head.appendChild(s2);
+ document.addEventListener('pointerdown',e=>{const o=$o();if(!o||!o.classList.contains('cm-flot'))return;if(e.target.closest&&(e.target.closest('#cm')||e.target.closest('#chatFab')||e.target.closest('.sheet')||e.target.closest('#toast')))return;fermer()},true)})();
 })();

@@ -1,6 +1,6 @@
 {
-  "version": "2026.10.28-253",
-  "nouveautes": "La bulle de messages se déplace maintenant avec le doigt, comme Messenger.",
+  "version": "2026.10.28-254",
+  "nouveautes": "La bulle de messages ouvre maintenant une petite fenêtre flottante : vos conversations et Ma doula, sans quitter la page.",
   "maintenance": {
     "debut": "2026-10-28T17:55",
     "fin": "2026-10-28T20:30",
