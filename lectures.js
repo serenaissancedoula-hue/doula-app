@@ -35,6 +35,7 @@ const L=[
      'Vers six mois, les premiers aliments devraient être riches en fer : viande, œufs, tofu, légumineuses ou céréales enrichies.',
      'Si bébé n\'est pas exclusivement allaité, la préparation commerciale à base de lait de vache est la norme. On la prépare et la conserve de façon sécuritaire, on ne laisse jamais bébé boire seul au biberon, et on évite le lait de vache, de chèvre ou les boissons végétales avant un an. Dans tous les cas, on suit l\'appétit de bébé et ses signes de satiété, comme détourner la tête.',
      'Besoin d\'aide avec l\'allaitement ou le biberon ? Votre doula et votre équipe de soins peuvent vous guider.']}];
+window.LECT_SEM=w=>L.filter(a=>a.preg&&w>=a.preg[0]&&w<=a.preg[1]);
 function pertinentes(){const st=stage();let sc=x=>0;
   if(st.k==='preg'){const w=st.g.w;return L.filter(a=>a.preg&&w>=a.preg[0]-6&&w<=a.preg[1]).sort((a,b)=>Math.abs(w-(a.preg[0]+6))-Math.abs(w-(b.preg[0]+6)))}
   if(st.k==='pp'){const d=st.day;return L.filter(a=>a.pp&&d>=a.pp[0]&&d<=a.pp[1]).sort((a,b)=>a.pp[0]-b.pp[0])}
