@@ -54,9 +54,12 @@ function tuiles(h){const i=h.indexOf('<div class="quick">');if(i<0)return h;cons
 const _pA=pAccueil;
 pAccueil=function(){let h=_pA.apply(this,arguments);try{const w=cur(),st=stage();
   if(w!=null){h=tuiles(h);const i=h.indexOf('<div class="gr-tuiles">');if(i>=0)h=h.slice(0,i)+frise(w)+h.slice(i)}
-  if(st.k==='preg')h=nomme(h);
+  if(st.k==='preg'){h=h.replace(/<div class="soft" style="margin:8px 0"><div class="grid2 resp">[\s\S]*?(?=<div class="prog">)/,'');h=nomme(h)}
   if(st.k==='preg'||st.k==='pp'){const k='<button class="btn ghost" data-act="go" data-v="infos|alertes">',j=h.indexOf(k);if(j>=0)h=h.slice(0,j)+guides()+h.slice(j)}
  }catch(e){}return h};
+/* nom et sexe de bébé : dans « Mon journal » plutôt que sur l'accueil */
+function carteNom(){try{return '<div class="card gr-nom"><span class="eyebrow acc">Mon bébé</span><p class="small muted" style="margin:4px 0 8px">Si vous le savez déjà : son prénom remplacera « Bébé » dans toute l\'appli.</p><div class="grid2 resp">'+ui.text('parent.naissance.prenomBebe','Nom de bébé (facultatif)','text','Si vous le connaissez')+'<div class="f"><span>Sexe de bébé (facultatif)</span>'+ui.pick('parent.naissance.sexe',['Fille','Garçon','Surprise'])+'</div></div></div>'}catch(e){return ''}}
+const _pJr=pJournal;pJournal=function(){const h=_pJr.apply(this,arguments);try{if(S.role==='parent'&&stage().k==='preg'&&!S.sub&&S.vue!=='params')return h+carteNom()}catch(e){}return h};
 const _r=render;
 render=function(){const r=_r.apply(this,arguments);try{requestAnimationFrame(()=>{const s=document.getElementById('grStrip'),o=s&&s.querySelector('.on');if(s&&o&&!s.dataset.ok){s.dataset.ok=1;s.scrollLeft=o.offsetLeft-s.clientWidth/2+o.offsetWidth/2}})}catch(e){}return r};
 
