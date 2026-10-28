@@ -33,7 +33,7 @@ function feuilleSemaine(w){w=Math.max(4,Math.min(42,w));const c=cur(),f=fruit(w)
    (ex.length?'<h3 class="gr-h">Repères médicaux de la période</h3>'+ex.map(e=>'<div class="gr-ex"><b>'+E(e[2])+'</b><span>'+E(e[3])+'</span><small>'+(e[0]===e[1]?e[0]:e[0]+' à '+e[1])+' sem.</small></div>').join(''):'')+
    (ar.length?'<h3 class="gr-h">Les essentiels de la semaine</h3><div class="gr-art">'+ar.map(a=>'<button class="gr-a" data-act="lecOuvrir" data-v="'+E(a.id)+'"><small>Article</small><b>'+E(a.t)+'</b><span>'+E(a.r||'')+'</span></button>').join('')+'</div>':'')+
    '<p class="xs muted" style="margin:10px 0 0">Les mesures sont des moyennes : chaque bébé grandit à son rythme. Information générale, qui ne remplace pas l\'avis de votre équipe de soins.</p></div>';
-  sheet('Semaine '+w,nomme(h));
+  sheet(prenomB()?E(prenomB())+' à '+w+' semaines':'Semaine '+w,nomme(h));
   setTimeout(()=>{const s=document.getElementById('grSel'),o=s&&s.querySelector('.on');if(s&&o)s.scrollLeft=o.offsetLeft-s.clientWidth/2+o.offsetWidth/2},30)}
 
 /* ---------- symptômes en icônes ---------- */
