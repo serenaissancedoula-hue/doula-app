@@ -34,7 +34,7 @@ function carteBebe(g){const w=Math.max(4,Math.min(42,g.w)),f=fruit(w),I=infoSema
    '<div class="fruit-l"><span class="fruit-e" aria-hidden="true">'+em+'</span><div><b>Taille '+art(f[0])+esc(f[0])+'</b><p class="small muted num">Environ '+cm(f[1])+' cm'+(f[2]?' · '+(f[2]>=1000?cm((f[2]/1000).toFixed(1))+' kg':f[2]+' g'):'')+' (moyenne)</p></div></div>'+
    '<div class="prog" aria-label="Progression de la grossesse"><i style="width:'+Math.min(100,Math.max(0,g.gaDays/280*100))+'%"></i></div><p class="xs muted num" style="text-align:center">'+(g.left>0?g.left+' jours avant la date prévue':'Date prévue atteinte')+' · semaine '+w+' sur 40</p>'+
    (I?'<div class="grid2 resp"><div class="soft"><b>'+icon('fa-baby')+' Bébé cette semaine</b><p class="small">'+I[1]+'</p></div><div class="soft"><b>'+icon('fa-person-pregnant')+' Vous cette semaine</b><p class="small">'+I[2]+'</p></div></div><div class="banner sage">'+icon('fa-lightbulb')+'<div class="small"><b>Petit conseil :</b> '+I[3]+'</div></div>':'')+
-   (w<42?'<details><summary class="small" style="cursor:pointer;color:var(--accent);font-weight:600">À quoi s\'attendre la semaine prochaine</summary><p class="small">'+(infoSemaine(w+1)||[])[1]+'</p></details>':'')+
+   (w<42?'<details><summary class="small" style="cursor:pointer;color:var(--accent);font-weight:600">La semaine prochaine, en bref</summary><p class="small">'+(infoSemaine(w+1)||[])[1]+'</p></details>':'')+
    '<p class="xs muted">La semaine change toute seule avec votre date prévue. Le son est une illustration, pas le vrai cœur de votre bébé. Information générale : votre équipe de soins reste votre référence.</p></div>'}
 /* Après la naissance */
 function infoPP(day){return BEBE_PP.find(x=>day>=x[0]&&day<=x[1])||BEBE_PP[BEBE_PP.length-1]}
@@ -42,7 +42,7 @@ function svgNouveauNe(){return '<div class="bebe-zone nn"><svg viewBox="0 0 200 
 function carteBebePP(day){const I=infoPP(day),bb=S.parent.naissance.prenomBebe||'Bébé',sem=Math.floor(day/7)+1,nx=BEBE_PP[BEBE_PP.indexOf(I)+1];
   return '<div class="card bebe-carte"><div class="row between"><span class="eyebrow acc">'+esc(bb)+' · '+(day<56?'semaine '+sem+' de vie':I[2])+'</span><span class="pill sage">'+day+' jour'+(day>1?'s':'')+'</span></div>'+svgNouveauNe()+
    '<h2 style="text-align:center">'+esc(I[2])+'</h2><div class="grid2 resp"><div class="soft"><b>'+icon('fa-baby')+' '+esc(bb)+' en ce moment</b><p class="small">'+I[3]+'</p></div><div class="soft"><b>'+icon('fa-spa')+' Vous</b><p class="small">'+I[4]+'</p></div></div><div class="banner sage">'+icon('fa-lightbulb')+'<div class="small"><b>Ce que disent les études :</b> '+I[5]+'</div></div>'+
-   (nx?'<details><summary class="small" style="cursor:pointer;color:var(--accent);font-weight:600">À quoi s\'attendre ensuite</summary><p class="small"><b>'+esc(nx[2])+' :</b> '+nx[3]+'</p></details>':'')+
+   (nx?'<details><summary class="small" style="cursor:pointer;color:var(--accent);font-weight:600">Et ensuite ?</summary><p class="small"><b>'+esc(nx[2])+' :</b> '+nx[3]+'</p></details>':'')+
    '<details><summary class="xs muted" style="cursor:pointer">Sources</summary><ul class="clean xs">'+SOURCES_BEBE.map(s=>'<li><a href="'+s[1]+'" target="_blank" rel="noopener">'+esc(s[0])+'</a></li>').join('')+'</ul></details><p class="xs muted">Chaque bébé a son rythme. Une inquiétude ? Parlez-en à votre équipe, à votre doula, ou appelez Info-Santé 811.</p></div>'}
 
 /* Intégration dans l'accueil et le suivi */

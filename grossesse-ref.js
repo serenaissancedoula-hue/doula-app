@@ -15,7 +15,7 @@ function cur(){try{const st=stage();return st.k==='preg'?Math.max(4,Math.min(42,
 /* ---------- frise des semaines ---------- */
 function frise(w0){let s='';for(let w=4;w<=42;w++)s+='<button class="gr-w'+(w===w0?' on':'')+(w<w0?' pas':'')+'" data-gr="sem" data-w="'+w+'" aria-label="Semaine '+w+'"><small>sem.</small><b>'+w+'</b><i>'+emo(w)+'</i></button>';
   return '<div class="card gr-fr"><div class="row between"><span class="eyebrow acc">Semaine par semaine</span><span class="xs muted">Glissez pour explorer</span></div><div class="gr-strip" id="grStrip">'+s+'</div></div>'}
-function selecteur(w){let s='';for(let k=4;k<=42;k++)s+='<button class="gr-sel'+(k===w?' on':'')+'" data-gr="sem" data-w="'+k+'">'+k+'</button>';return '<div class="gr-selw"><div class="gr-selr" id="grSel">'+s+'</div><div class="gr-sellab">SEMAINES</div></div>'}
+function selecteur(w){let s='';for(let k=4;k<=42;k++)s+='<button class="gr-sel'+(k===w?' on':'')+'" data-gr="sem" data-w="'+k+'">'+k+'</button>';return '<div class="gr-selw"><div class="gr-selr" id="grSel">'+s+'</div><div class="gr-sellab">semaine</div></div>'}
 function feuilleSemaine(w){w=Math.max(4,Math.min(42,w));const c=cur(),f=fruit(w),I=infoSemaine(w)||[],M=(()=>{try{return mouvement(w)}catch(e){return null}})(),g=f[2];
   let N=[];try{N=b3fNotes(w)}catch(e){}const sens=(N.find(n=>n[1]==='Ce qu\'il ressent')||[])[2];
   const rel=c==null?'':w===c?'Cette semaine':w>c?'Dans '+(w-c)+' semaine'+(w-c>1?'s':''):'Il y a '+(c-w)+' semaine'+(c-w>1?'s':'');
@@ -25,13 +25,13 @@ function feuilleSemaine(w){w=Math.max(4,Math.min(42,w));const c=cur(),f=fruit(w)
   let ar=[];try{ar=(window.LECT_SEM?LECT_SEM(w):[]).slice(0,4)}catch(e){}
   let h=selecteur(w)+'<div class="gr-sem">'+
    '<div class="gr-top"><div class="gr-img"><img src="img/bebe/semaine-'+String(w).padStart(2,'0')+'.jpg" alt="Bébé à '+w+' semaines" loading="lazy" onerror="this.parentNode.innerHTML=\'<span class=gr-big>'+emo(w)+'</span>\'"></div>'+
-   '<div class="gr-taille"><div class="gr-tt">Taille</div><div class="gr-tl"><span>Longueur<small>cm</small></span><b>'+cm(f[1])+'</b></div>'+(kg?'<div class="gr-tl"><span>Poids<small>'+(g>=1000?'kilos':'grammes')+'</small></span><b>'+(g>=1000?cm((g/1000).toFixed(2)):g)+'</b></div>':'')+(bpm(w)?'<div class="gr-tl"><span>Cœur<small>bpm ≈</small></span><b>'+bpm(w)+'</b></div>':'')+'<div class="gr-fr2">'+emo(w)+' Taille de bébé : '+E(f[0])+'</div></div></div>'+
+   '<div class="gr-taille"><div class="gr-tt">Bébé en chiffres</div><div class="gr-tl"><span>Longueur<small>cm</small></span><b>'+cm(f[1])+'</b></div>'+(kg?'<div class="gr-tl"><span>Poids<small>'+(g>=1000?'kilos':'grammes')+'</small></span><b>'+(g>=1000?cm((g/1000).toFixed(2)):g)+'</b></div>':'')+(bpm(w)?'<div class="gr-tl"><span>Cœur<small>battements/min ≈</small></span><b>'+bpm(w)+'</b></div>':'')+'<div class="gr-fr2">'+emo(w)+' Taille de bébé : '+E(f[0])+'</div></div></div>'+
    (rel?'<p class="xs muted" style="margin:0">'+rel+'</p>':'')+
-   '<h3 class="gr-h">Votre bébé</h3>'+(I[1]?par(I[1]):'')+(M&&M[2]?par('Ses mouvements : '+M[2]):'')+(sens?par('Ce qu\'il ressent : '+sens):'')+
-   '<h3 class="gr-h">Votre corps</h3>'+(I[2]?par(I[2]):'')+'<button class="btn sm ghost" data-gr="corps" data-w="'+w+'" style="justify-self:start">🤰 Mon corps et la photo de mon ventre</button>'+
+   '<h3 class="gr-h">'+(prenomB()?E(prenomB())+' cette semaine':'Bébé cette semaine')+'</h3>'+(I[1]?par(I[1]):'')+(M&&M[2]?par('Ses mouvements : '+M[2]):'')+(sens?par('Ce qu\'il ressent : '+sens):'')+
+   '<h3 class="gr-h">Vous cette semaine</h3>'+(I[2]?par(I[2]):'')+'<button class="btn sm ghost" data-gr="corps" data-w="'+w+'" style="justify-self:start">🤰 Mon corps et la photo de mon ventre</button>'+
    (I[3]?'<div class="banner sage" style="margin:6px 0 0"><div class="small"><b>Petit conseil :</b> '+E(I[3])+'</div></div>':'')+
-   (ex.length?'<h3 class="gr-h">Repères médicaux de la période</h3>'+ex.map(e=>'<div class="gr-ex"><b>'+E(e[2])+'</b><span>'+E(e[3])+'</span><small>'+(e[0]===e[1]?e[0]:e[0]+' à '+e[1])+' sem.</small></div>').join(''):'')+
-   (ar.length?'<h3 class="gr-h">Les essentiels de la semaine</h3><div class="gr-art">'+ar.map(a=>'<button class="gr-a" data-act="lecOuvrir" data-v="'+E(a.id)+'"><small>Article</small><b>'+E(a.t)+'</b><span>'+E(a.r||'')+'</span></button>').join('')+'</div>':'')+
+   (ex.length?'<h3 class="gr-h">Rendez-vous et examens à prévoir</h3>'+ex.map(e=>'<div class="gr-ex"><b>'+E(e[2])+'</b><span>'+E(e[3])+'</span><small>'+(e[0]===e[1]?e[0]:e[0]+' à '+e[1])+' sem.</small></div>').join(''):'')+
+   (ar.length?'<h3 class="gr-h">À lire cette semaine</h3><div class="gr-art">'+ar.map(a=>'<button class="gr-a" data-act="lecOuvrir" data-v="'+E(a.id)+'"><small>Article</small><b>'+E(a.t)+'</b><span>'+E(a.r||'')+'</span></button>').join('')+'</div>':'')+
    '<p class="xs muted" style="margin:10px 0 0">Les mesures sont des moyennes : chaque bébé grandit à son rythme. Information générale, qui ne remplace pas l\'avis de votre équipe de soins.</p></div>';
   sheet(prenomB()?E(prenomB())+' à '+w+' semaines':'Semaine '+w,nomme(h));
   setTimeout(()=>{const s=document.getElementById('grSel'),o=s&&s.querySelector('.on');if(s&&o)s.scrollLeft=o.offsetLeft-s.clientWidth/2+o.offsetWidth/2},30)}
@@ -47,12 +47,12 @@ async function feuilleCorps(w){w=Math.max(4,Math.min(42,w));const I=infoSemaine(
    '<div class="gr-ventre">'+(cetteSem?'<img src="'+cetteSem.src+'" alt="Mon ventre à '+w+' semaines">':'<div class="gr-vv"><span>🤰</span><b>Votre ventre à '+w+' semaines</b><small>Gardez un souvenir de chaque étape</small></div>')+'</div>'+
    '<label class="btn gr-vbtn">📷 '+(cetteSem?'Changer la photo de la semaine '+w:'Photo de mon ventre à '+w+' semaines')+'<input type="file" accept="image/*" id="grVentre" data-w="'+w+'" hidden></label>'+
    '<p class="xs muted" style="margin:0">La photo reste sur votre téléphone : elle est aussi dans l\'onglet des souvenirs.</p>'+
-   (L.length>1?'<h3 class="gr-h">Mon ventre, semaine après semaine</h3><div class="gr-vrow">'+L.map(x=>'<figure class="gr-vp"><img src="'+x.src+'" alt=""><figcaption>'+x.ventre+' sem.</figcaption></figure>').join('')+'</div>':'')+
+   (L.length>1?'<h3 class="gr-h">Mon ventre au fil des semaines</h3><div class="gr-vrow">'+L.map(x=>'<figure class="gr-vp"><img src="'+x.src+'" alt=""><figcaption>'+x.ventre+' sem.</figcaption></figure>').join('')+'</div>':'')+
    '<h3 class="gr-h">Ce qui change pour vous</h3>'+(I[2]?par(I[2]):par('Chaque corps change à son rythme.'))+
    (I[3]?'<div class="banner sage" style="margin:6px 0 0"><div class="small"><b>Petit conseil :</b> '+E(I[3])+'</div></div>':'')+
    '<h3 class="gr-h">Mes symptômes cette semaine</h3>'+(synt.length?'<div class="row" style="flex-wrap:wrap;gap:6px">'+synt.map(x=>'<span class="chip">'+E(x)+'</span>').join('')+'</div>':'<p class="gr-p muted">Rien de noté pour l\'instant.</p>')+
    '<div class="row" style="gap:8px;flex-wrap:wrap;margin-top:6px"><button class="btn sm" data-gr="symform">Noter mes symptômes</button><button class="btn sm ghost" data-gr="poids">Mon poids de grossesse</button></div>'+
-   '<p class="xs muted" style="margin:10px 0 0">Information générale : ça ne remplace pas l\'avis de votre équipe de soins. Un symptôme nouveau, intense ou qui vous inquiète : appelez votre professionnel ou le 811.</p></div>';
+   '<p class="xs muted" style="margin:10px 0 0">Information générale : ça ne remplace pas l\'avis de votre équipe de soins. Un symptôme nouveau, intense ou qui vous inquiète : appelez votre professionnel ou le 811 (France : 15).</p></div>';
   sheet('Mon corps à '+w+' semaines',h)}
 document.addEventListener('change',async e=>{const i=e.target;if(!i||i.id!=='grVentre'||!i.files||!i.files[0])return;const w=+i.dataset.w;toast('Enregistrement de la photo…');
   try{const src=await shrinkTo(i.files[0],1200);await putPhoto({id:uid(),t:Date.now(),src,cap:'Mon ventre à '+w+' semaines',ventre:w});toast('Photo ajoutée');feuilleCorps(w)}catch(x){toast('La photo n\'a pas pu être ajoutée')}},true);
@@ -64,7 +64,7 @@ function feuilleSymptomes(){const r=recent();
    (r.length?'<div class="gr-rec"><span class="xs muted">Cette semaine :</span> '+r.slice(0,5).map(x=>'<span class="chip">'+E(x[0])+' × '+x[1]+'</span>').join(' ')+'</div>':'')+
    '<div class="gr-sy-g">'+SYM.map(s=>'<button class="gr-sy" data-gr="sy" data-n="'+E(s[0])+'"><span>'+s[1]+'</span><b>'+E(s[0])+'</b></button>').join('')+'</div>'+
    '<label class="f">Une note (facultatif)<input type="text" id="m_note"></label>'+(typeof W==='function'?W():'')+
-   '<div class="banner" style="margin:0"><div class="xs">Un symptôme nouveau, intense ou qui vous inquiète : appelez votre professionnel de la santé ou le 811 (Info-Santé). Saignements, perte de liquide, douleur forte ou bébé qui bouge moins : consultez sans attendre.</div></div>'+
+   '<div class="banner" style="margin:0"><div class="xs">Un symptôme nouveau, intense ou qui vous inquiète : appelez votre professionnel de la santé ou le 811 (Info-Santé, Télé-Soins; France : 15). Saignements, perte de liquide, douleur forte ou bébé qui bouge moins : consultez sans attendre.</div></div>'+
    '<button class="btn" data-gr="sysave">Enregistrer</button></div>')}
 try{FORMS.symptome=feuilleSymptomes}catch(e){}
 
@@ -158,7 +158,7 @@ const css=document.createElement('style');css.textContent=`
 .gr-w small{font-size:.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}.gr-w b{font-size:1.15rem;font-family:var(--serif,inherit)}.gr-w i{font-style:normal;font-size:1.3rem}
 .gr-w.pas{opacity:.65}.gr-w.on{background:var(--accent,#a85743);border-color:var(--accent,#a85743);color:#fff;opacity:1;transform:scale(1.06)}.gr-w.on small{color:#ffe9e0}
 .gr-sem{display:grid;gap:8px}.gr-selw{position:sticky;top:-2px;z-index:3;background:var(--bg,#faf4ef);padding:2px 0 6px;margin:0 -2px 6px}.gr-selr{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none}.gr-selr::-webkit-scrollbar{display:none}
-.gr-sel{flex:0 0 auto;min-width:40px;padding:8px 6px;border:0;background:none;font:inherit;font-weight:600;color:var(--muted);cursor:pointer;border-radius:10px}.gr-sel.on{color:#1aa6b7;font-weight:800;font-size:1.1rem;box-shadow:inset 0 -3px 0 #1aa6b7;border-radius:0}.gr-sellab{text-align:center;font-size:.62rem;letter-spacing:.12em;font-weight:800;color:#1aa6b7}
+.gr-sel{flex:0 0 auto;min-width:40px;padding:8px 6px;border:0;background:none;font:inherit;font-weight:600;color:var(--muted);cursor:pointer;border-radius:10px}.gr-sel.on{color:var(--accent,#a85743);font-weight:800;font-size:1.1rem;box-shadow:inset 0 -3px 0 var(--accent,#a85743);border-radius:0}.gr-sellab{text-align:center;font-size:.62rem;letter-spacing:.12em;font-weight:800;color:var(--accent,#a85743)}
 .gr-top{display:grid;grid-template-columns:1fr 1fr;gap:12px}.gr-img{border-radius:20px;overflow:hidden;background:#f3e6e2;aspect-ratio:1/1.05;display:grid;place-items:center}.gr-img img{width:100%;height:100%;object-fit:cover}
 .gr-taille{background:var(--soft,#f3ece6);border-radius:20px;padding:12px 14px;display:flex;flex-direction:column;gap:8px}.gr-tt{font-weight:800;border-bottom:2px solid var(--line,#e0d4ca);padding-bottom:6px}.gr-tl{display:flex;justify-content:space-between;align-items:baseline;gap:6px}.gr-tl span{font-weight:700;font-size:.9rem}.gr-tl small{display:block;font-weight:400;font-size:.65rem;color:var(--muted)}.gr-tl b{font-size:1.4rem;font-family:var(--serif,inherit)}.gr-fr2{font-size:.78rem;color:var(--muted)}
 .gr-ventre{border-radius:22px;overflow:hidden;background:linear-gradient(135deg,#fde8e0,#f9d3c6);min-height:200px;display:grid;place-items:center}.gr-ventre img{width:100%;max-height:420px;object-fit:cover;display:block}.gr-vv{display:grid;gap:4px;justify-items:center;padding:30px 16px;text-align:center;color:#3b2a24}.gr-vv span{font-size:3.4rem}.gr-vv small{opacity:.7}

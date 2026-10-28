@@ -90,5 +90,5 @@ carteBebe=function(g){const w=Math.max(4,Math.min(42,g.w)),f=fruit(w),I=infoSema
    '<div class="prog"><i style="width:'+Math.min(100,Math.max(0,g.gaDays/280*100))+'%"></i></div>'+
    '<h2 class="bb2-h">Votre bébé</h2><p>'+(I?I[1]:'')+'</p><p class="small"><b>Ses mouvements :</b> '+M[2]+'</p>'+
    '<h2 class="bb2-h">Vous</h2><p>'+(I?I[2]:'')+'</p>'+(I?'<div class="banner sage">'+icon('fa-lightbulb')+'<div class="small"><b>Petit conseil :</b> '+I[3]+'</div></div>':'')+
-   (w<42?'<details><summary class="small" style="cursor:pointer;color:var(--accent);font-weight:600">À quoi s\'attendre la semaine prochaine</summary><p class="small">'+(infoSemaine(w+1)||[])[1]+'</p></details>':'')+
+   (w<42?'<details><summary class="small" style="cursor:pointer;color:var(--accent);font-weight:600">La semaine prochaine, en bref</summary><p class="small">'+(infoSemaine(w+1)||[])[1]+'</p></details>':'')+
    '<p class="xs muted">Touchez l\'image pour voir bébé en grand et entendre son cœur. Mesures moyennes : chaque bébé grandit à son rythme. La semaine avance toute seule avec votre date prévue.</p></div>'};
