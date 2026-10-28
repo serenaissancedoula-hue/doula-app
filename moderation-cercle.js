@@ -17,8 +17,8 @@ async function chargerMod(){
 const nom=id=>{const p=(MOD&&MOD.profs[id])||null;return p?E((p.emoji||'🌸')+' '+p.pseudo):'Une maman'};
 function page(){
   if(!MOD){chargerMod().then(()=>{if(S.dsub==='cercle')render()});return sh('Cercle des mamans','Chargement…')}
-  const sig=MOD.sig.map(x=>'<div class="card"><p class="xs muted" style="margin:0">'+E(new Date(x.created_at).toLocaleString('fr-CA',{dateStyle:'medium',timeStyle:'short'}))+' · Motif : '+E(x.motif||'—')+'</p><p style="margin:6px 0"><b>'+nom(x.auteur)+'</b> :</p><p class="papa-note" style="font-style:normal">« '+E(x.extrait||'(message supprimé)')+' »</p>'+
-    '<div class="row" style="gap:6px;flex-wrap:wrap"><button class="btn sm" data-cmod="masquer" data-id="'+x.id+'">Masquer le message</button><button class="btn sm danger" data-cmod="suspendre" data-id="'+x.id+'">Masquer + suspendre l\'accès</button><button class="btn sm ghost" data-cmod="ignorer" data-id="'+x.id+'">Ignorer</button></div></div>').join('');
+  const sig=MOD.sig.map(x=>'<div class="card"><p class="xs muted" style="margin:0">'+E(new Date(x.created_at).toLocaleString('fr-CA',{dateStyle:'medium',timeStyle:'short'}))+' · Motif : '+E(x.motif||'—')+'</p><p style="margin:6px 0"><b>'+nom(x.auteur)+'</b> :</p><p class="papa-note" style="font-style:normal">« '+E(x.extrait||'(message supprimé)')+' »</p>'+(x.photo?'<img data-pm="'+E(x.photo)+'" alt="Photo signalée" style="max-width:100%;border-radius:12px;margin:0 0 8px">':'')+
+    '<div class=\"row\" style="gap:6px;flex-wrap:wrap"><button class="btn sm" data-cmod="masquer" data-id="'+x.id+'">Masquer le message</button><button class="btn sm danger" data-cmod="suspendre" data-id="'+x.id+'">Masquer + suspendre l\'accès</button><button class="btn sm ghost" data-cmod="ignorer" data-id="'+x.id+'">Ignorer</button></div></div>').join('');
   const sus=MOD.susp.map(x=>'<div class="pf-l"><div><b>'+nom(x.user_id)+'</b></div><button class="btn sm ghost" data-cmod="retablir" data-u="'+x.user_id+'">Rétablir</button></div>').join('');
   return sh('Cercle des mamans','Signalements à lire et décisions')+
     (sig||'<div class="card tint"><p class="small" style="margin:0">Aucun signalement à traiter 🌿</p></div>')+
@@ -26,6 +26,8 @@ function page(){
     '<button class="btn sm ghost" data-cmod="actualiser">Actualiser</button>';
 }
 DSUB.cercle=page;
+async function photosMod(){const L=[...document.querySelectorAll('img[data-pm]')];for(const i of L){if(i.src)continue;const {data}=await sb.storage.from('chat-photos').createSignedUrl(i.dataset.pm,600);if(data&&data.signedUrl)i.src=data.signedUrl}}
+const _rM=render;render=function(){const x=_rM.apply(this,arguments);if(S.dsub==='cercle')setTimeout(photosMod,50);return x};
 if(typeof DOUT!=='undefined')DOUT.push(['cercle','fa-comments','Cercle des mamans','Signalements et modération']);
 const _dOA=dOutils;dOutils=function(){if(!S.dsub&&!admin()){const k=DOUT.findIndex(x=>x[0]==='cercle');if(k>=0)DOUT.splice(k,1)}return _dOA.apply(this,arguments)};
 const _da=dAccueil;
