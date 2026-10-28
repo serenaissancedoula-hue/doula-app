@@ -7,6 +7,9 @@ const emo=w=>{try{return FRUIT_EMOJI[fruit(w)[0]]||'🌱'}catch(e){return '🌱'
 const cm=x=>String(x).replace('.',',');
 const SYM=[['Nausées','🤢'],['Fatigue','😴'],['Brûlures d\'estomac','🔥'],['Maux de dos','🦴'],['Crampes','⚡'],['Contractions','🌀'],['Enflure','🦶'],['Maux de tête','🤕'],['Insomnie','🌙'],['Constipation','💨'],['Essoufflement','😮‍💨'],['Pertes vaginales','💧'],['Étourdissements','😵‍💫'],['Seins sensibles','🤱'],['Jambes lourdes','🦵'],['Appétit changé','🍽️']];
 const CATS={'Préparation':['🎒','Se préparer à la naissance'],'Allaitement':['🤱','Allaitement'],'Nouveau-né':['👶','Prendre soin de bébé'],'Post-partum':['🌸','Après la naissance']};
+/* le prénom de bébé, quand la maman l'a choisi, remplace « Bébé » / « Votre bébé » */
+function prenomB(){try{return ((S.parent.naissance||{}).prenomBebe||'').trim()}catch(e){return ''}}
+function nomme(h){const n=prenomB();if(!n)return h;const e=E(n);return h.replace(/<h2 class="bb2-h">Votre bébé<\/h2>/g,'<h2 class="bb2-h">'+e+'</h2>').replace(/(^|>|[.!?:] |<\/b> )Bébé (?=[a-zéèêàâ'])/g,'$1'+e+' ').replace(/Votre bébé<\/span>/g,e+'</span>')}
 function cur(){try{const st=stage();return st.k==='preg'?Math.max(4,Math.min(42,st.g.w)):null}catch(e){return null}}
 
 /* ---------- frise des semaines ---------- */
@@ -16,12 +19,12 @@ function feuilleSemaine(w){w=Math.max(4,Math.min(42,w));const c=cur(),f=fruit(w)
   const rel=c==null?'':w===c?'Cette semaine':w>c?'Dans '+(w-c)+' semaine'+(w-c>1?'s':''):'Il y a '+(c-w)+' semaine'+(c-w>1?'s':'');
   let h='<div class="gr-sem"><div class="gr-hero"><span class="gr-big">'+emo(w)+'</span><div><b>Bébé a la taille de : '+E(f[0])+'</b><p class="small muted">Environ '+cm(f[1])+' cm'+(g?' · '+(g>=1000?cm((g/1000).toFixed(1))+' kg':g+' g'):'')+(bpm(w)?' · cœur : environ '+bpm(w)+' battements par minute':'')+'</p></div></div>';
   if(rel)h+='<p class="xs muted" style="margin:0">'+rel+'</p>';
-  if(I[1])h+='<div class="card"><span class="eyebrow acc">Votre bébé</span><p class="small" style="margin:6px 0 0">'+E(I[1])+'</p></div>';
+  if(I[1])h+='<div class="card"><span class="eyebrow acc">'+(prenomB()?E(prenomB()):'Votre bébé')+'</span><p class="small" style="margin:6px 0 0">'+E(I[1])+'</p></div>';
   if(I[2])h+='<div class="card"><span class="eyebrow acc">Vous</span><p class="small" style="margin:6px 0 0">'+E(I[2])+'</p></div>';
   if(I[3])h+='<div class="banner sage" style="margin:0"><div class="small"><b>Petit conseil :</b> '+E(I[3])+'</div></div>';
   h+='<div class="row between"><button class="btn sm ghost" data-gr="sem" data-w="'+(w-1)+'"'+(w<=4?' disabled':'')+'>← Semaine '+(w-1)+'</button><button class="btn sm ghost" data-gr="sem" data-w="'+(w+1)+'"'+(w>=42?' disabled':'')+'>Semaine '+(w+1)+' →</button></div>'+
     '<p class="xs muted" style="margin:0">Les mesures sont des moyennes : chaque bébé grandit à son rythme. Ça ne remplace pas l\'avis de votre équipe de soins.</p></div>';
-  sheet('Semaine '+w,h)}
+  sheet('Semaine '+w,nomme(h))}
 
 /* ---------- symptômes en icônes ---------- */
 function recent(){const t0=Date.now()-7*864e5,m={};(S.logs||[]).filter(l=>l.type==='symptome'&&l.t>t0).forEach(l=>(l.list||[]).forEach(x=>m[x]=(m[x]||0)+1));return Object.entries(m).sort((a,b)=>b[1]-a[1])}
@@ -51,6 +54,7 @@ function tuiles(h){const i=h.indexOf('<div class="quick">');if(i<0)return h;cons
 const _pA=pAccueil;
 pAccueil=function(){let h=_pA.apply(this,arguments);try{const w=cur(),st=stage();
   if(w!=null){h=tuiles(h);const i=h.indexOf('<div class="gr-tuiles">');if(i>=0)h=h.slice(0,i)+frise(w)+h.slice(i)}
+  if(st.k==='preg')h=nomme(h);
   if(st.k==='preg'||st.k==='pp'){const k='<button class="btn ghost" data-act="go" data-v="infos|alertes">',j=h.indexOf(k);if(j>=0)h=h.slice(0,j)+guides()+h.slice(j)}
  }catch(e){}return h};
 const _r=render;
