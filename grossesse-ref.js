@@ -37,7 +37,7 @@ function feuilleSemaine(w){w=Math.max(4,Math.min(42,w));const c=cur(),f=fruit(w)
    (I[3]?'<div class="banner sage" style="margin:6px 0 0"><div class="small"><b>Petit conseil :</b> '+E(I[3])+'</div></div>':'')+
    (ex.length?'<h3 class="gr-h">Rendez-vous et examens à prévoir</h3>'+ex.map(e=>'<div class="gr-ex"><b>'+E(e[2])+'</b><span>'+E(e[3])+'</span><small>'+(e[0]===e[1]?e[0]:e[0]+' à '+e[1])+' sem.</small></div>').join(''):'')+
    (ar.length?'<h3 class="gr-h">À lire cette semaine</h3><div class="gr-art">'+ar.map(a=>'<button class="gr-a" data-act="lecOuvrir" data-v="'+E(a.id)+'"><small>Article</small><b>'+E(a.t)+'</b><span>'+E(a.r||'')+'</span></button>').join('')+'</div>':'')+
-   '<p class="xs muted" style="margin:10px 0 0">Les mesures sont des moyennes : chaque bébé grandit à son rythme. Information générale, qui ne remplace pas l\'avis de votre équipe de soins.</p></div>';
+   '<p class="xs muted" style="margin:10px 0 0">Les mesures sont des moyennes : chaque bébé grandit à son rythme.</p><p class="xs muted" style="margin:4px 0 0">'+E(window.REG?REG.pied('preg'):'')+'</p></div>';
   sheet(prenomB()?E(prenomB())+' à '+w+' semaines':'Semaine '+w,nomme(h));
   setTimeout(()=>{const s=document.getElementById('grSel'),o=s&&s.querySelector('.on');if(s&&o)s.scrollLeft=o.offsetLeft-s.clientWidth/2+o.offsetWidth/2},30)}
 
@@ -57,7 +57,7 @@ async function feuilleCorps(w){w=Math.max(4,Math.min(42,w));const I=infoSemaine(
    (I[3]?'<div class="banner sage" style="margin:6px 0 0"><div class="small"><b>Petit conseil :</b> '+E(I[3])+'</div></div>':'')+
    '<h3 class="gr-h">Mes symptômes cette semaine</h3>'+(synt.length?'<div class="row" style="flex-wrap:wrap;gap:6px">'+synt.map(x=>'<span class="chip">'+E(x)+'</span>').join('')+'</div>':'<p class="gr-p muted">Rien de noté pour l\'instant.</p>')+
    '<div class="row" style="gap:8px;flex-wrap:wrap;margin-top:6px"><button class="btn sm" data-gr="symform">Noter mes symptômes</button><button class="btn sm ghost" data-gr="poids">Mon poids de grossesse</button></div>'+
-   '<p class="xs muted" style="margin:10px 0 0">Information générale : ça ne remplace pas l\'avis de votre équipe de soins. Un symptôme nouveau, intense ou qui vous inquiète : appelez votre professionnel ou le 811 (France : 15).</p></div>';
+   '<p class="xs muted" style="margin:10px 0 0">'+E(window.REG?REG.pied('preg'):'Information générale : ça ne remplace pas l\'avis de votre équipe de soins.')+'</p></div>';
   sheet('Mon corps à '+w+' semaines',h)}
 document.addEventListener('change',async e=>{const i=e.target;if(!i||i.id!=='grVentre'||!i.files||!i.files[0])return;const w=+i.dataset.w;toast('Enregistrement de la photo…');
   try{const src=await shrinkTo(i.files[0],1200);await putPhoto({id:uid(),t:Date.now(),src,cap:'Mon ventre à '+w+' semaines',ventre:w});toast('Photo ajoutée');feuilleCorps(w)}catch(x){toast('La photo n\'a pas pu être ajoutée')}},true);
@@ -69,7 +69,7 @@ function feuilleSymptomes(){const r=recent();
    (r.length?'<div class="gr-rec"><span class="xs muted">Cette semaine :</span> '+r.slice(0,5).map(x=>'<span class="chip">'+E(x[0])+' × '+x[1]+'</span>').join(' ')+'</div>':'')+
    '<div class="gr-sy-g">'+SYM.map(s=>'<button class="gr-sy" data-gr="sy" data-n="'+E(s[0])+'"><span>'+s[1]+'</span><b>'+E(s[0])+'</b></button>').join('')+'</div>'+
    '<label class="f">Une note (facultatif)<input type="text" id="m_note"></label>'+(typeof W==='function'?W():'')+
-   '<div class="banner" style="margin:0"><div class="xs">Un symptôme nouveau, intense ou qui vous inquiète : appelez votre professionnel de la santé ou le 811 (Info-Santé, Télé-Soins; France : 15). Saignements, perte de liquide, douleur forte ou bébé qui bouge moins : consultez sans attendre.</div></div>'+
+   '<div class="banner" style="margin:0"><div class="xs">Un symptôme nouveau, intense ou qui vous inquiète : '+E(window.REG?REG.ligne():'appelez votre professionnel de la santé')+'. Saignements, perte de liquide, douleur forte ou bébé qui bouge moins : consultez sans attendre.</div></div>'+
    '<button class="btn" data-gr="sysave">Enregistrer</button></div>')}
 try{FORMS.symptome=feuilleSymptomes}catch(e){}
 

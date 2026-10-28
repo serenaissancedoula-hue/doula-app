@@ -83,7 +83,7 @@ window.PHASES_FT=[
   v:['Des rapports tous les 1 à 2 jours suffisent : pas besoin de la pression de la performance.','Un test d\'ovulation positif annonce l\'ovulation dans les 24 à 48 heures.'],
   sv:'Les chances d\'une grossesse par cycle se situent autour de 20 à 25 % pour un couple en bonne santé : la patience fait partie du chemin.',q:'Y a-t-il quelque chose à vérifier avant d\'essayer ?'},
  {k:'attente',ic:'🌙',t:'L\'attente',court:'Attente',
-  s:['Après l\'ovulation, la progestérone monte : la température basale grimpe d\'environ 0,2 à 0,5 °C.','Si l\'ovule est fécondé, il s\'implante dans l\'utérus de 6 à 12 jours après l\'ovulation.'],
+  s:['Après l\'ovulation, la progestérone monte : la température basale grimpe d\'environ 0,2 à 0,5 °C (0,4 à 1 °F).','Si l\'ovule est fécondé, il s\'implante dans l\'utérus de 6 à 12 jours après l\'ovulation.'],
   v:['Les symptômes ressemblent à ceux des règles ou d\'un début de grossesse : on ne peut pas les départager.','Faites-vous du bien : cette attente de deux semaines peut sembler longue.'],
   sv:'Les phases après l\'ovulation durent généralement entre 12 et 16 jours.',q:'À partir de quand puis-je tester ?'},
  {k:'test',ic:'🤰',t:'Le test',court:'Test',
@@ -95,24 +95,72 @@ window.PHASES_FT=[
 /* Repères du développement : [emoji, texte, début (mois), fin (mois)] — fourchettes larges et prudentes, d'après les repères du CDC (2022),
    de la Société canadienne de pédiatrie et de Naître et grandir. Chaque enfant a son rythme : un repère n'est jamais un test. */
 window.JALONS=[
-['👀','Suit un visage ou un objet des yeux',0.5,3],
-['😊','Premiers sourires en réponse à vous',1,3],
-['🗣️','Roucoule et gazouille (« aaa », « ooo »)',1,5],
-['💪','Tient sa tête droite quand on le porte',1.5,4],
-['😄','Rit aux éclats',3,5],
-['🤲','Attrape un jouet et le porte à sa bouche',3,6],
-['🔄','Se retourne du ventre au dos, puis du dos au ventre',4,7],
-['🪑','S\'assoit sans soutien',6,9],
-['🗨️','Babille (« ba-ba », « ma-ma »)',4,9],
-['😳','Se méfie des inconnus',6,10],
-['🐛','Se déplace : ramper, quatre pattes',6,11],
-['🤏','Pince entre le pouce et l\'index',8,12],
-['🧍','Se met debout en s\'appuyant',8,12],
-['👋','Fait « coucou » ou « bye-bye »',9,13],
-['☝️','Pointe du doigt ce qu\'il veut',9,15],
-['🚶','Premiers pas seul',9,18],
-['💬','Premiers mots avec un sens',10,16],
-['🏃','Court et monte quelques marches avec aide',14,24],
-['🧩','Combine deux mots (« encore lait »)',18,26]
+/* Mouvement */
+['💪','Tient sa tête droite quand on le porte',1.5,4,'mv'],
+['🔄','Se retourne du ventre au dos, puis du dos au ventre',4,7,'mv'],
+['🪑','S\'assoit sans soutien',6,9,'mv'],
+['🐛','Se déplace : ramper, quatre pattes',6,11,'mv'],
+['🧍','Se met debout en s\'appuyant',8,12,'mv'],
+['🚶','Premiers pas seul',9,18,'mv'],
+['🏃','Court',14,24,'mv'],
+['🪜','Monte et descend l\'escalier',18,30,'mv'],
+['🦘','Saute à pieds joints',24,36,'mv'],
+['🚲','Pédale sur un tricycle',30,42,'mv'],
+['🤸','Sautille sur un pied, attrape un ballon',42,60,'mv'],
+/* Mains et jeu */
+['🤲','Attrape un jouet et le porte à sa bouche',3,6,'mn'],
+['🤏','Pince entre le pouce et l\'index',8,12,'mn'],
+['🧱','Empile des cubes',12,24,'mn'],
+['🖍️','Griffonne, puis dessine un cercle',15,36,'mn'],
+['✂️','Utilise des ciseaux d\'enfant',36,54,'mn'],
+['🧍‍♂️','Dessine un bonhomme avec plusieurs parties du corps',42,60,'mn'],
+/* Langage */
+['🗣️','Roucoule et gazouille (« aaa », « ooo »)',1,5,'lg'],
+['🗨️','Babille (« ba-ba », « ma-ma »)',4,9,'lg'],
+['👋','Fait « coucou » ou « bye-bye »',9,13,'lg'],
+['💬','Premiers mots avec un sens',10,16,'lg'],
+['☝️','Pointe du doigt ce qu\'il veut',9,15,'lg'],
+['🧩','Combine deux mots (« encore lait »)',18,26,'lg'],
+['📣','Dit des phrases de 3 ou 4 mots',24,36,'lg'],
+['👂','Est compris par les gens qu\'il ne connaît pas',36,48,'lg'],
+['📖','Raconte une petite histoire',36,60,'lg'],
+['🔢','Compte jusqu\'à 5, puis jusqu\'à 10',36,60,'lg'],
+/* Cœur et relations */
+['👀','Suit un visage ou un objet des yeux',0.5,3,'so'],
+['😊','Premiers sourires en réponse à vous',1,3,'so'],
+['😄','Rit aux éclats',3,5,'so'],
+['😳','Se méfie des inconnus',6,10,'so'],
+['🎭','Joue à faire semblant',18,36,'so'],
+['🧒','Joue à côté d\'autres enfants, puis avec eux',24,48,'so'],
+['🔁','Attend son tour et partage avec de l\'aide',36,54,'so'],
+['🚽','Prêt pour la propreté (signes d\'envie, couche sèche plus longtemps)',18,42,'so'],
+['👕','S\'habille presque seul',36,60,'so']
 ];
+window.JALONS_CAT=[['mv','🏃','Mouvement'],['mn','🤲','Mains et jeu'],['lg','🗣️','Langage'],['so','💗','Cœur et relations']];
+
+/* Contenu qui change selon le pays ou la province choisi (numéros, sources). */
+window.REG={
+ code(){try{return (window.maRegion&&window.maRegion())||''}catch(e){return ''}},
+ groupe(){const r=this.code();return r==='FR'?'FR':r==='US'?'US':'CA'},
+ en(){return window.LANG==='en'},
+ /* « appelez le … » : la bonne ligne de santé */
+ ligne(){const r=this.code(),en=this.en();
+  if(r==='FR')return en?'call 15 (SAMU) or 116 117 for an on-call doctor':'appelez le 15 (SAMU) ou le 116 117 (médecin de garde)';
+  if(r==='US')return en?'call your clinic or your insurance nurse line (911 in an emergency)':'appelez votre clinique ou la ligne infirmière de votre assurance (911 en urgence)';
+  if(r==='NU')return en?'call your community health centre':'appelez votre centre de santé communautaire';
+  if(r==='MB')return en?'call Health Links – Info Santé (1-888-315-9257)':'appelez Health Links – Info Santé (1-888-315-9257)';
+  if(r==='QC')return en?'call 811 (Info-Santé)':'appelez le 811 (Info-Santé)';
+  if(r==='NB')return en?'call 811 (Tele-Care)':'appelez le 811 (Télé-Soins)';
+  return en?'call 811':'appelez le 811'},
+ sources(type){const g=this.groupe(),en=this.en();
+  const T={
+   CA:{preg:['Agence de la santé publique du Canada, SOGC, INSPQ','Public Health Agency of Canada, SOGC, INSPQ'],bebe:['Société canadienne de pédiatrie, Naître et grandir, Santé Canada','Canadian Paediatric Society, Naître et grandir, Health Canada'],regle:['CDC, Société canadienne de pédiatrie, Naître et grandir','CDC, Canadian Paediatric Society, Naître et grandir'],cycle:['Agence de la santé publique du Canada, SOGC','Public Health Agency of Canada, SOGC']},
+   FR:{preg:['Assurance Maladie (ameli), Haute Autorité de santé, Santé publique France','Assurance Maladie (ameli), Haute Autorité de santé, Santé publique France'],bebe:['Santé publique France, Haute Autorité de santé, carnet de santé','Santé publique France, Haute Autorité de santé, health record book'],regle:['Haute Autorité de santé, Santé publique France, carnet de santé','Haute Autorité de santé, Santé publique France, health record book'],cycle:['Assurance Maladie (ameli), Haute Autorité de santé','Assurance Maladie (ameli), Haute Autorité de santé']},
+   US:{preg:['CDC, ACOG (American College of Obstetricians and Gynecologists)','CDC, ACOG (American College of Obstetricians and Gynecologists)'],bebe:['CDC, American Academy of Pediatrics','CDC, American Academy of Pediatrics'],regle:['CDC, American Academy of Pediatrics','CDC, American Academy of Pediatrics'],cycle:['CDC, ACOG','CDC, ACOG']}}[g][type];
+  return T[en?1:0]},
+ /* pied de page « information générale » selon le sujet */
+ pied(type){const en=this.en();const src=this.sources(type);
+  return en?'General information: it does not replace the advice of your care team. In case of doubt, '+this.ligne()+'. Sources: '+src+'.':'Information générale : ne remplace pas l\'avis de votre équipe de soins. En cas de doute, '+this.ligne()+'. Sources : '+src+'.'}
+};
+if(window.LANG==='en'){try{const x=new XMLHttpRequest();x.open('GET','contenu-riche-en.js?v=1',false);x.send();if(x.status===200)(0,eval)(x.responseText)}catch(e){}}
 })();

@@ -13,7 +13,7 @@
       });
     });
   }
-  var FILES=['tr/en-8.js','tr/en-1.js','tr/en-2.js','tr/en-3.js','tr/en-4.js','tr/en-5.js','tr/en-6.js','tr/en-7.js'];
+  var FILES=['tr/en-9.js','tr/en-8.js','tr/en-1.js','tr/en-2.js','tr/en-3.js','tr/en-4.js','tr/en-5.js','tr/en-6.js','tr/en-7.js'];
   var EX={},SUB=[],RX=null,cache=Object.create(null),vus=new WeakMap();
   var SKIP={SCRIPT:1,STYLE:1,TEXTAREA:1,CODE:1,NOSCRIPT:1};
   function prep(){
@@ -32,6 +32,7 @@
     else if(RX){if(SN.test(core)){prot=true;out=core.replace(SN,'\u0001')}out=out.replace(RX,function(x){return EX[x]});if(prot)out=out.replace(/\u0001/g,'Sérénaissance')}
     if(out===core)out=core.replace(/^Bonjour( [^\s,.!?:;]+( [^\s,.!?:;]+)?)?$/,'Hello$1');
     out=out.replace(/(\d{1,2}) h (\d{2})/g,'$1:$2').replace(/ à (?=\d)/g,' at ');
+    out=out.replace(/(\d+) jours\b/g,'$1 days').replace(/(\d+) jour\b/g,'$1 day').replace(/(\d+) semaines\b/g,'$1 weeks').replace(/(\d+) semaine\b/g,'$1 week').replace(/(\d+) mois\b/g,'$1 months').replace(/(\d+) sem\./g,'$1 wk').replace(/^du (.+ \d+) au (.+ \d+)$/,'from $1 to $2').replace(/L'équipe Sérénaissance/g,'The Sérénaissance team').replace(/^Règles · /,'Period · ').replace(/^([A-ZÉ]\S*) et ([A-ZÉ]\S*)$/,'$1 and $2').replace(/per day (\d+) de vie/g,'on day $1 of life').replace(/week (\d+) de vie/g,'week $1 of life').replace(/\(prévus\)/g,'(planned)').replace(/^prévue le /,'expected on ').replace(/(^|\s)de (\d+) days/g,'$1of $2 days').replace(/^Semaine (\d+)$/,'Week $1').replace(/semaine (\d+) de vie/g,'week $1 of life').replace(/\b[Vv]ers le /g,function(x){return x[0]==='V'?'Around ':'around '}).replace(/ à (?=\d)/g,' at ');
     out=m[1]+out+m[3];
     if(Object.keys(cache).length>6000)cache=Object.create(null);
     cache[s]=out;return out;
