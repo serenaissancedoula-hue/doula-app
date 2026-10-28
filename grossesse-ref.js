@@ -105,8 +105,22 @@ function remettreEnOrdre(){try{const hero=document.querySelector('.bebe-carte');
   const mot=box.querySelector('.card.mot');let ancre=hero;if(mot){if(hero.nextElementSibling!==mot)hero.after(mot);ancre=mot}
   if(ins&&ancre.nextElementSibling!==ins)ancre.after(ins);
   if(fr&&ins&&ins.nextElementSibling!==fr)ins.after(fr)}catch(e){}}
+/* ---------- mot du jour : une fenêtre à la première ouverture de la journée ---------- */
+const jourCle=()=>{const d=new Date();return 'mot-vu-'+d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate()};
+let motVuSession=null;
+function motDejaVu(){try{return !!localStorage.getItem(jourCle())}catch(e){return motVuSession===jourCle()}}
+function motMarquer(){motVuSession=jourCle();try{localStorage.setItem(jourCle(),'1')}catch(e){}}
+function visible(el){return !!(el&&(el.offsetWidth||el.offsetHeight||el.getClientRects().length))}
+function afficherMot(){try{
+  if(S.role!=='parent'||S.tab!=='accueil'||S.vue==='params'||motDejaVu()||document.getElementById('motJour'))return;
+  const c=document.querySelector('.card.mot');if(!c)return;
+  if(['#cguOv','#ecranMaint','.fe-in','#layer .modal','#cm','#chatPan'].some(q=>visible(document.querySelector(q))))return;
+  const pr=(S.parent&&S.parent.prenom&&S.parent.prenom!=='Exemple')?S.parent.prenom:'';
+  const o=document.createElement('div');o.id='motJour';o.setAttribute('role','dialog');o.setAttribute('aria-label','Mot du jour');
+  o.innerHTML='<div class="mj-b"><div class="mj-h">Bonjour'+(pr?' '+E(pr):'')+' 🌸</div>'+c.innerHTML+'<button class="btn" data-gr="motok">Merci 💗</button><i class="mj-bar"></i></div>';
+  document.body.appendChild(o);motMarquer();setTimeout(()=>{const m=document.getElementById('motJour');if(m){m.style.transition='opacity .5s';m.style.opacity=0;setTimeout(()=>m.remove(),520)}},10000)}catch(e){}}
 const _r=render;
-render=function(){const r=_r.apply(this,arguments);try{remettreEnOrdre();requestAnimationFrame(()=>{const s=document.getElementById('grStrip'),o=s&&s.querySelector('.on');if(s&&o&&!s.dataset.ok){s.dataset.ok=1;s.scrollLeft=o.offsetLeft-s.clientWidth/2+o.offsetWidth/2}})}catch(e){}return r};
+render=function(){const r=_r.apply(this,arguments);try{remettreEnOrdre();setTimeout(afficherMot,700);requestAnimationFrame(()=>{const s=document.getElementById('grStrip'),o=s&&s.querySelector('.on');if(s&&o&&!s.dataset.ok){s.dataset.ok=1;s.scrollLeft=o.offsetLeft-s.clientWidth/2+o.offsetWidth/2}})}catch(e){}return r};
 
 document.addEventListener('click',async e=>{const b=e.target.closest&&e.target.closest('[data-gr]');if(!b||b.disabled)return;e.stopPropagation();e.preventDefault();
   const a=b.dataset.gr;
@@ -115,6 +129,7 @@ document.addEventListener('click',async e=>{const b=e.target.closest&&e.target.c
   else if(a==='corps')feuilleCorps(+b.dataset.w);
   else if(a==='symform')feuilleSymptomes();
   else if(a==='poids'){try{close()}catch(x){}S.tab='journal';S.sub='';try{scrollTo(0,0)}catch(x){}render()}
+  else if(a==='motok'){motMarquer();const m=document.getElementById('motJour');if(m)m.remove()}
   else if(a==='sy')b.classList.toggle('on');
   else if(a==='sysave'){const l=[...document.querySelectorAll('.sheet .gr-sy.on')].map(x=>x.dataset.n),n=(document.getElementById('m_note')||{}).value||'';
     if(!l.length&&!n){toast('Choisissez au moins un symptôme');return}
@@ -147,6 +162,11 @@ const css=document.createElement('style');css.textContent=`
 .gr-taille{background:var(--soft,#f3ece6);border-radius:20px;padding:12px 14px;display:flex;flex-direction:column;gap:8px}.gr-tt{font-weight:800;border-bottom:2px solid var(--line,#e0d4ca);padding-bottom:6px}.gr-tl{display:flex;justify-content:space-between;align-items:baseline;gap:6px}.gr-tl span{font-weight:700;font-size:.9rem}.gr-tl small{display:block;font-weight:400;font-size:.65rem;color:var(--muted)}.gr-tl b{font-size:1.4rem;font-family:var(--serif,inherit)}.gr-fr2{font-size:.78rem;color:var(--muted)}
 .gr-ventre{border-radius:22px;overflow:hidden;background:linear-gradient(135deg,#fde8e0,#f9d3c6);min-height:200px;display:grid;place-items:center}.gr-ventre img{width:100%;max-height:420px;object-fit:cover;display:block}.gr-vv{display:grid;gap:4px;justify-items:center;padding:30px 16px;text-align:center;color:#3b2a24}.gr-vv span{font-size:3.4rem}.gr-vv small{opacity:.7}
 .gr-vbtn{display:flex;justify-content:center;align-items:center;gap:8px;cursor:pointer}.gr-vrow{display:flex;gap:10px;overflow-x:auto;padding-bottom:6px}.gr-vp{margin:0;flex:0 0 92px}.gr-vp img{width:92px;height:122px;object-fit:cover;border-radius:14px;display:block}.gr-vp figcaption{text-align:center;font-size:.72rem;color:var(--muted);margin-top:3px}
+.card.mot{display:none!important}
+#motJour{position:fixed;inset:0;z-index:90;background:rgba(40,25,20,.55);display:grid;place-items:center;padding:20px;animation:mjIn .35s ease}@keyframes mjIn{from{opacity:0}to{opacity:1}}
+.mj-b{background:var(--bg,#faf4ef);border-radius:26px;padding:22px 20px;max-width:420px;width:100%;display:grid;gap:14px;box-shadow:0 20px 60px rgba(0,0,0,.35);animation:mjUp .4s ease}@keyframes mjUp{from{transform:translateY(24px);opacity:0}to{transform:none;opacity:1}}
+.mj-b{position:relative;overflow:hidden}.mj-bar{position:absolute;left:0;bottom:0;height:4px;background:var(--accent,#a85743);width:100%;animation:mjBar 10s linear forwards}@keyframes mjBar{to{width:0}}
+.mj-h{font-family:var(--serif,inherit);font-size:1.5rem;text-align:center}.mj-b .row{display:flex;gap:14px;align-items:flex-start}.mj-b p,.mj-b blockquote{font-size:1.02rem}
 .gr-h{font-family:var(--serif,inherit);font-size:1.3rem;margin:14px 0 2px}.gr-p{margin:6px 0 0;line-height:1.55;font-size:.95rem}
 .gr-ex{display:grid;gap:2px;background:var(--soft,#f3ece6);border-radius:14px;padding:10px 12px;margin-top:6px}.gr-ex span{font-size:.85rem}.gr-ex small{color:var(--muted)}
 .gr-art{display:grid;gap:10px;margin-top:6px}.gr-a{border:0;border-radius:18px;padding:14px;text-align:left;cursor:pointer;color:#3b2a24;font:inherit;display:grid;gap:4px;background:linear-gradient(135deg,#fdf0e6,#fbe6ec)}.gr-a small{font-size:.65rem;letter-spacing:.08em;text-transform:uppercase;font-weight:800;color:var(--accent,#a85743)}.gr-a b{font-size:1rem}.gr-a span{font-size:.82rem;opacity:.8}.gr-hero{display:flex;gap:14px;align-items:center}.gr-big{font-size:3.2rem;line-height:1}
