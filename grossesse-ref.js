@@ -45,23 +45,36 @@ function guides(){let F=[];try{F=FICHES}catch(e){}if(!F.length)return '';const p
 function feuilleCat(c){const m=CATS[c]||['📖',c];sheet(m[0]+' '+E(m[1]),'<div class="list">'+FICHES.filter(f=>f.cat===c).map(f=>'<button class="li" data-gr="fiche" data-id="'+E(f.id)+'" style="background:none;border-left:0;border-right:0;border-top:0;width:100%;text-align:left;cursor:pointer;color:inherit"><div class="ic">'+icon(f.ic)+'</div><div class="tx"><b>'+E(f.t)+'</b><span>Fiche '+E(f.id)+'</span></div>'+icon('fa-chevron-right','var(--muted)')+'</button>').join('')+'</div><p class="xs muted">Fiches d\'information générale appuyées sur des sources reconnues. Elles ne remplacent pas l\'avis de votre équipe de soins.</p>')}
 function aller(sub){try{close()}catch(e){}S.tab='infos';S.sub=sub||'';try{scrollTo(0,0)}catch(e){}render()}
 
-/* ---------- gros boutons en tuiles pastel ---------- */
-const TUILES={kickStart:['👣','Mouvements','#fde8e0','#f9d3c6'],contr:['⏱️','Contractions','#e6eefc','#d3e2f8'],humeur:['😊','Humeur','#fdf3d6','#f8e7ab'],symptome:['🩺','Symptômes','#e3f3e6','#cbe8d1']};
-function tuiles(h){const i=h.indexOf('<div class="quick">');if(i<0)return h;const j=h.indexOf('</div>',i);if(j<0)return h;
-  const bloc=h.slice(i,j+6),acts=[...bloc.matchAll(/data-act="([a-zA-Z]+)"/g)].map(m=>m[1]);if(!acts.length||acts.some(a=>!TUILES[a]))return h;
-  return h.slice(0,i)+'<div class="gr-tuiles">'+acts.map(a=>{const t=TUILES[a];return '<button data-act="'+a+'" style="background:linear-gradient(145deg,'+t[2]+','+t[3]+')"><span>'+t[0]+'</span><b>'+t[1]+'</b></button>'}).join('')+'</div>'+h.slice(j+6)}
+/* ---------- « Mes repères du jour » : cartes à glisser, comme sur les applis de référence ---------- */
+const INS={symptome:['Noter mes symptômes','🩺','#ffffff','plus'],humeur:['Mon humeur','😊','#fdf3d6','plus'],kickStart:['Les mouvements de bébé','👣','#fde8e0','plus'],contr:['Mes contractions','⏱️','#e6eefc','plus']};
+function insights(h,w){const i=h.indexOf('<div class="quick">');if(i<0)return h;const j=h.indexOf('</div>',i);if(j<0)return h;
+  const acts=[...h.slice(i,j+6).matchAll(/data-act="([a-zA-Z]+)"/g)].map(m=>m[1]);if(!acts.length||acts.some(a=>!INS[a]))return h;
+  const nom=prenomB()||'Mon bébé';
+  const carte=(att,t,em,bg,plus)=>'<button class="gr-ins" '+att+' style="background:'+bg+'"><small>'+t+'</small><span>'+em+'</span>'+(plus?'<i>+</i>':'')+'</button>';
+  let c=[];
+  ['symptome'].filter(a=>acts.includes(a)).forEach(a=>c.push(carte('data-act="'+a+'"',INS[a][0],INS[a][1],INS[a][2],1)));
+  c.push(carte('data-gr="sem" data-w="'+w+'"',(prenomB()?E(nom):'Mon bébé')+' à '+w+' sem.',emo(w),'linear-gradient(160deg,#f3e6e2,#ead7d2)'));
+  c.push(carte('data-gr="sem" data-w="'+w+'"','Mon corps à '+w+' sem.','🤰','linear-gradient(160deg,#dbe9f8,#c9dcf2)'));
+  acts.filter(a=>a!=='symptome').forEach(a=>c.push(carte('data-act="'+a+'"',INS[a][0],INS[a][1],INS[a][2],1)));
+  return h.slice(0,i)+'<div class="gr-insw"><div class="gr-ins-h">Mes repères du jour</div><div class="gr-ins-row">'+c.join('')+'</div></div>'+h.slice(j+6)}
 /* ---------- accueil ---------- */
 const _pA=pAccueil;
 pAccueil=function(){let h=_pA.apply(this,arguments);try{const w=cur(),st=stage();
-  if(w!=null){h=tuiles(h);const i=h.indexOf('<div class="gr-tuiles">');if(i>=0)h=h.slice(0,i)+frise(w)+h.slice(i)}
+  if(w!=null){h=insights(h,w);const i=h.indexOf('<div class="gr-insw">');if(i>=0)h=h.slice(0,i)+frise(w)+h.slice(i)}
   if(st.k==='preg'){h=h.replace(/<div class="soft" style="margin:8px 0"><div class="grid2 resp">[\s\S]*?(?=<div class="prog">)/,'');h=nomme(h)}
   if(st.k==='preg'||st.k==='pp'){const k='<button class="btn ghost" data-act="go" data-v="infos|alertes">',j=h.indexOf(k);if(j>=0)h=h.slice(0,j)+guides()+h.slice(j)}
  }catch(e){}return h};
 /* nom et sexe de bébé : dans « Mon journal » plutôt que sur l'accueil */
 function carteNom(){try{return '<div class="card gr-nom"><span class="eyebrow acc">Mon bébé</span><p class="small muted" style="margin:4px 0 8px">Si vous le savez déjà : son prénom remplacera « Bébé » dans toute l\'appli.</p><div class="grid2 resp">'+ui.text('parent.naissance.prenomBebe','Nom de bébé (facultatif)','text','Si vous le connaissez')+'<div class="f"><span>Sexe de bébé (facultatif)</span>'+ui.pick('parent.naissance.sexe',['Fille','Garçon','Surprise'])+'</div></div></div>'}catch(e){return ''}}
 const _pJr=pJournal;pJournal=function(){const h=_pJr.apply(this,arguments);try{if(S.role==='parent'&&stage().k==='preg'&&!S.sub&&S.vue!=='params')return h+carteNom()}catch(e){}return h};
+function remettreEnOrdre(){try{const hero=document.querySelector('.bebe-carte');if(!hero||hero.closest('.sheet'))return;const box=hero.parentElement;if(!box||document.getElementById('grStrip')==null)return;
+  if(!hero.dataset.gr){hero.dataset.gr=1;const h2=hero.querySelector('.bb2-h');if(h2){const d=document.createElement('details');d.className='gr-det';d.innerHTML='<summary>Tout lire sur cette semaine</summary>';let n=h2;const lot=[];while(n){lot.push(n);n=n.nextElementSibling}lot.forEach(x=>d.appendChild(x));hero.appendChild(d)}}
+  const ins=box.querySelector('.gr-insw'),fr=box.querySelector('.gr-fr');
+  const prem=[...box.children].find(x=>x!==hero&&/(^|\s)card(\s|$)/.test(x.className));if(prem&&prem!==hero&&!(hero.compareDocumentPosition(prem)&4))box.insertBefore(hero,prem);
+  if(ins&&hero.nextElementSibling!==ins)hero.after(ins);
+  if(fr&&ins&&ins.nextElementSibling!==fr)ins.after(fr)}catch(e){}}
 const _r=render;
-render=function(){const r=_r.apply(this,arguments);try{requestAnimationFrame(()=>{const s=document.getElementById('grStrip'),o=s&&s.querySelector('.on');if(s&&o&&!s.dataset.ok){s.dataset.ok=1;s.scrollLeft=o.offsetLeft-s.clientWidth/2+o.offsetWidth/2}})}catch(e){}return r};
+render=function(){const r=_r.apply(this,arguments);try{remettreEnOrdre();requestAnimationFrame(()=>{const s=document.getElementById('grStrip'),o=s&&s.querySelector('.on');if(s&&o&&!s.dataset.ok){s.dataset.ok=1;s.scrollLeft=o.offsetLeft-s.clientWidth/2+o.offsetWidth/2}})}catch(e){}return r};
 
 document.addEventListener('click',async e=>{const b=e.target.closest&&e.target.closest('[data-gr]');if(!b||b.disabled)return;e.stopPropagation();e.preventDefault();
   const a=b.dataset.gr;
@@ -76,8 +89,12 @@ document.addEventListener('click',async e=>{const b=e.target.closest&&e.target.c
 },true);
 
 const css=document.createElement('style');css.textContent=`
-.gr-tuiles{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:4px 0 12px}.gr-tuiles button{border:0;border-radius:22px;padding:16px 14px;display:flex;align-items:center;gap:12px;cursor:pointer;color:#3b2a24;font:inherit;text-align:left;box-shadow:0 4px 14px rgba(120,70,50,.10);min-height:68px}
-.gr-tuiles button span{font-size:1.9rem;line-height:1}.gr-tuiles button b{font-size:.92rem}.gr-tuiles button:active{transform:scale(.97)}
+.gr-insw{margin:2px 0 12px}.gr-ins-h{font-family:var(--serif,inherit);font-size:1.15rem;font-weight:700;margin:0 4px 8px}
+.gr-ins-row{display:flex;gap:12px;overflow-x:auto;padding:4px 2px 10px;scrollbar-width:none;scroll-snap-type:x proximity}.gr-ins-row::-webkit-scrollbar{display:none}
+.gr-ins{flex:0 0 138px;height:150px;border:0;border-radius:22px;padding:14px 12px;display:flex;flex-direction:column;justify-content:space-between;text-align:left;cursor:pointer;color:#3b2a24;font:inherit;position:relative;box-shadow:0 4px 14px rgba(120,70,50,.12);scroll-snap-align:start}
+.gr-ins small{font-size:.86rem;font-weight:700;line-height:1.2}.gr-ins span{font-size:2.8rem;line-height:1;align-self:center}.gr-ins i{position:absolute;right:12px;bottom:12px;width:34px;height:34px;border-radius:50%;background:#e8607f;color:#fff;font-style:normal;font-size:1.4rem;display:grid;place-items:center}
+.gr-ins:active{transform:scale(.97)}
+.gr-det{margin-top:10px}.gr-det>summary{cursor:pointer;font-weight:700;color:var(--accent,#a85743);padding:8px 2px;list-style:none}.gr-det>summary::before{content:'▸ '}.gr-det[open]>summary::before{content:'▾ '}
 .gr-fr{background:linear-gradient(135deg,#fdf0e6,#fbe6ec)!important;border:0!important}.gr-gd{background:linear-gradient(135deg,#f3f7ee,#eef3fb)!important;border:0!important}
 .gr-cat:nth-child(1){background:linear-gradient(135deg,#fde8e0,#f9d3c6)}.gr-cat:nth-child(2){background:linear-gradient(135deg,#fdf3d6,#f8e7ab)}.gr-cat:nth-child(3){background:linear-gradient(135deg,#e6eefc,#d3e2f8)}.gr-cat:nth-child(4){background:linear-gradient(135deg,#f6e4f3,#ecd0e8)}
 .gr-cat b,.gr-cat small{color:#3b2a24}.gr-cat small{opacity:.7}.gr-cat{border-radius:22px!important;box-shadow:0 4px 14px rgba(120,70,50,.08)}
