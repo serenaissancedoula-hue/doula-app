@@ -22,7 +22,21 @@ export function courrielSuppression(prenom: string, intro: string, points: strin
     + `<p style="font-family:Arial,sans-serif;font-size:14px;color:#3d312b;margin:18px 0 0;">Avec douceur,<br>L'équipe Sérénaissance</p></td></tr>` + bas;
 }
 
+// Envoi par Resend (noreply@academiesere.ca : rien dans les « Envoyés » du Gmail).
+// Repli sur l'ancien envoi (EmailJS / Gmail) si Resend refuse ou n'est pas configuré.
 export async function envoyer(a: string, sujet: string, html: string) {
+  const cle = (Deno.env.get("RESEND_API_KEY") ?? "").trim();
+  if (cle) {
+    try {
+      const r = await fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${cle}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ from: "Sérénaissance <noreply@academiesere.ca>", to: [a], reply_to: "serenaissance.doula@gmail.com", subject: sujet, html }),
+      });
+      if (r.ok) return;
+      console.error("Resend refus", r.status, (await r.text()).slice(0, 200));
+    } catch (e) { console.error("Resend erreur", String(e)); }
+  } else console.error("RESEND_API_KEY absente : repli EmailJS");
   const r = await fetch("https://api.emailjs.com/api/v1.0/email/send", {
     method: "POST",
     headers: { "Content-Type": "application/json", Origin: "https://academiesere.ca" },
