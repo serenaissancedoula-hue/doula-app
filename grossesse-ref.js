@@ -28,13 +28,34 @@ function feuilleSemaine(w){w=Math.max(4,Math.min(42,w));const c=cur(),f=fruit(w)
    '<div class="gr-taille"><div class="gr-tt">Taille</div><div class="gr-tl"><span>Longueur<small>cm</small></span><b>'+cm(f[1])+'</b></div>'+(kg?'<div class="gr-tl"><span>Poids<small>'+(g>=1000?'kilos':'grammes')+'</small></span><b>'+(g>=1000?cm((g/1000).toFixed(2)):g)+'</b></div>':'')+(bpm(w)?'<div class="gr-tl"><span>Cœur<small>bpm ≈</small></span><b>'+bpm(w)+'</b></div>':'')+'<div class="gr-fr2">'+emo(w)+' Taille de bébé : '+E(f[0])+'</div></div></div>'+
    (rel?'<p class="xs muted" style="margin:0">'+rel+'</p>':'')+
    '<h3 class="gr-h">Votre bébé</h3>'+(I[1]?par(I[1]):'')+(M&&M[2]?par('Ses mouvements : '+M[2]):'')+(sens?par('Ce qu\'il ressent : '+sens):'')+
-   '<h3 class="gr-h">Votre corps</h3>'+(I[2]?par(I[2]):'')+
+   '<h3 class="gr-h">Votre corps</h3>'+(I[2]?par(I[2]):'')+'<button class="btn sm ghost" data-gr="corps" data-w="'+w+'" style="justify-self:start">🤰 Mon corps et la photo de mon ventre</button>'+
    (I[3]?'<div class="banner sage" style="margin:6px 0 0"><div class="small"><b>Petit conseil :</b> '+E(I[3])+'</div></div>':'')+
    (ex.length?'<h3 class="gr-h">Repères médicaux de la période</h3>'+ex.map(e=>'<div class="gr-ex"><b>'+E(e[2])+'</b><span>'+E(e[3])+'</span><small>'+(e[0]===e[1]?e[0]:e[0]+' à '+e[1])+' sem.</small></div>').join(''):'')+
    (ar.length?'<h3 class="gr-h">Les essentiels de la semaine</h3><div class="gr-art">'+ar.map(a=>'<button class="gr-a" data-act="lecOuvrir" data-v="'+E(a.id)+'"><small>Article</small><b>'+E(a.t)+'</b><span>'+E(a.r||'')+'</span></button>').join('')+'</div>':'')+
    '<p class="xs muted" style="margin:10px 0 0">Les mesures sont des moyennes : chaque bébé grandit à son rythme. Information générale, qui ne remplace pas l\'avis de votre équipe de soins.</p></div>';
   sheet(prenomB()?E(prenomB())+' à '+w+' semaines':'Semaine '+w,nomme(h));
   setTimeout(()=>{const s=document.getElementById('grSel'),o=s&&s.querySelector('.on');if(s&&o)s.scrollLeft=o.offsetLeft-s.clientWidth/2+o.offsetWidth/2},30)}
+
+/* ---------- « Mon corps » : ce que vit la maman + photo de son ventre ---------- */
+async function feuilleCorps(w){w=Math.max(4,Math.min(42,w));const I=infoSemaine(w)||[];let N=[];try{N=b3fNotes(w)}catch(e){}
+  let P=[];try{P=(await allPhotos()).filter(x=>x.ventre)}catch(e){}
+  const parSem={};P.sort((a,b)=>b.t-a.t).forEach(x=>{if(!parSem[x.ventre])parSem[x.ventre]=x});const L=Object.values(parSem).sort((a,b)=>a.ventre-b.ventre);
+  const cetteSem=parSem[w];
+  const sy=(S.logs||[]).filter(l=>l.type==='symptome'&&l.t>Date.now()-7*864e5).flatMap(l=>l.list||[]);const synt=[...new Set(sy)];
+  const par=t=>'<p class="gr-p">'+E(t)+'</p>';
+  let h='<div class="gr-sem">'+
+   '<div class="gr-ventre">'+(cetteSem?'<img src="'+cetteSem.src+'" alt="Mon ventre à '+w+' semaines">':'<div class="gr-vv"><span>🤰</span><b>Votre ventre à '+w+' semaines</b><small>Gardez un souvenir de chaque étape</small></div>')+'</div>'+
+   '<label class="btn gr-vbtn">📷 '+(cetteSem?'Changer la photo de la semaine '+w:'Photo de mon ventre à '+w+' semaines')+'<input type="file" accept="image/*" id="grVentre" data-w="'+w+'" hidden></label>'+
+   '<p class="xs muted" style="margin:0">La photo reste sur votre téléphone : elle est aussi dans l\'onglet des souvenirs.</p>'+
+   (L.length>1?'<h3 class="gr-h">Mon ventre, semaine après semaine</h3><div class="gr-vrow">'+L.map(x=>'<figure class="gr-vp"><img src="'+x.src+'" alt=""><figcaption>'+x.ventre+' sem.</figcaption></figure>').join('')+'</div>':'')+
+   '<h3 class="gr-h">Ce qui change pour vous</h3>'+(I[2]?par(I[2]):par('Chaque corps change à son rythme.'))+
+   (I[3]?'<div class="banner sage" style="margin:6px 0 0"><div class="small"><b>Petit conseil :</b> '+E(I[3])+'</div></div>':'')+
+   '<h3 class="gr-h">Mes symptômes cette semaine</h3>'+(synt.length?'<div class="row" style="flex-wrap:wrap;gap:6px">'+synt.map(x=>'<span class="chip">'+E(x)+'</span>').join('')+'</div>':'<p class="gr-p muted">Rien de noté pour l\'instant.</p>')+
+   '<div class="row" style="gap:8px;flex-wrap:wrap;margin-top:6px"><button class="btn sm" data-gr="symform">Noter mes symptômes</button><button class="btn sm ghost" data-gr="poids">Mon poids de grossesse</button></div>'+
+   '<p class="xs muted" style="margin:10px 0 0">Information générale : ça ne remplace pas l\'avis de votre équipe de soins. Un symptôme nouveau, intense ou qui vous inquiète : appelez votre professionnel ou le 811.</p></div>';
+  sheet('Mon corps à '+w+' semaines',h)}
+document.addEventListener('change',async e=>{const i=e.target;if(!i||i.id!=='grVentre'||!i.files||!i.files[0])return;const w=+i.dataset.w;toast('Enregistrement de la photo…');
+  try{const src=await shrinkTo(i.files[0],1200);await putPhoto({id:uid(),t:Date.now(),src,cap:'Mon ventre à '+w+' semaines',ventre:w});toast('Photo ajoutée');feuilleCorps(w)}catch(x){toast('La photo n\'a pas pu être ajoutée')}},true);
 
 /* ---------- symptômes en icônes ---------- */
 function recent(){const t0=Date.now()-7*864e5,m={};(S.logs||[]).filter(l=>l.type==='symptome'&&l.t>t0).forEach(l=>(l.list||[]).forEach(x=>m[x]=(m[x]||0)+1));return Object.entries(m).sort((a,b)=>b[1]-a[1])}
@@ -64,7 +85,7 @@ function insights(h,w){const i=h.indexOf('<div class="quick">');if(i<0)return h;
   let c=[];
   ['symptome'].filter(a=>acts.includes(a)).forEach(a=>c.push(carte('data-act="'+a+'"',INS[a][0],INS[a][1],INS[a][2],1)));
   c.push(carte('data-gr="sem" data-w="'+w+'"',(prenomB()?E(nom):'Mon bébé')+' à '+w+' sem.',emo(w),'linear-gradient(160deg,#f3e6e2,#ead7d2)'));
-  c.push(carte('data-gr="sem" data-w="'+w+'"','Mon corps à '+w+' sem.','🤰','linear-gradient(160deg,#dbe9f8,#c9dcf2)'));
+  c.push(carte('data-gr="corps" data-w="'+w+'"','Mon corps à '+w+' sem.','🤰','linear-gradient(160deg,#dbe9f8,#c9dcf2)'));
   acts.filter(a=>a!=='symptome').forEach(a=>c.push(carte('data-act="'+a+'"',INS[a][0],INS[a][1],INS[a][2],1)));
   return h.slice(0,i)+'<div class="gr-insw"><div class="gr-ins-h">Mes repères du jour</div><div class="gr-ins-row">'+c.join('')+'</div></div>'+h.slice(j+6)}
 /* ---------- accueil ---------- */
@@ -91,6 +112,9 @@ document.addEventListener('click',async e=>{const b=e.target.closest&&e.target.c
   const a=b.dataset.gr;
   if(a==='sem')feuilleSemaine(+b.dataset.w);
   else if(a==='det'){const d=b.closest('.gr-det');d.classList.toggle('open');b.setAttribute('aria-expanded',d.classList.contains('open'))}
+  else if(a==='corps')feuilleCorps(+b.dataset.w);
+  else if(a==='symform')feuilleSymptomes();
+  else if(a==='poids'){try{close()}catch(x){}S.tab='journal';S.sub='';try{scrollTo(0,0)}catch(x){}render()}
   else if(a==='sy')b.classList.toggle('on');
   else if(a==='sysave'){const l=[...document.querySelectorAll('.sheet .gr-sy.on')].map(x=>x.dataset.n),n=(document.getElementById('m_note')||{}).value||'';
     if(!l.length&&!n){toast('Choisissez au moins un symptôme');return}
@@ -121,6 +145,8 @@ const css=document.createElement('style');css.textContent=`
 .gr-sel{flex:0 0 auto;min-width:40px;padding:8px 6px;border:0;background:none;font:inherit;font-weight:600;color:var(--muted);cursor:pointer;border-radius:10px}.gr-sel.on{color:#1aa6b7;font-weight:800;font-size:1.1rem;box-shadow:inset 0 -3px 0 #1aa6b7;border-radius:0}.gr-sellab{text-align:center;font-size:.62rem;letter-spacing:.12em;font-weight:800;color:#1aa6b7}
 .gr-top{display:grid;grid-template-columns:1fr 1fr;gap:12px}.gr-img{border-radius:20px;overflow:hidden;background:#f3e6e2;aspect-ratio:1/1.05;display:grid;place-items:center}.gr-img img{width:100%;height:100%;object-fit:cover}
 .gr-taille{background:var(--soft,#f3ece6);border-radius:20px;padding:12px 14px;display:flex;flex-direction:column;gap:8px}.gr-tt{font-weight:800;border-bottom:2px solid var(--line,#e0d4ca);padding-bottom:6px}.gr-tl{display:flex;justify-content:space-between;align-items:baseline;gap:6px}.gr-tl span{font-weight:700;font-size:.9rem}.gr-tl small{display:block;font-weight:400;font-size:.65rem;color:var(--muted)}.gr-tl b{font-size:1.4rem;font-family:var(--serif,inherit)}.gr-fr2{font-size:.78rem;color:var(--muted)}
+.gr-ventre{border-radius:22px;overflow:hidden;background:linear-gradient(135deg,#fde8e0,#f9d3c6);min-height:200px;display:grid;place-items:center}.gr-ventre img{width:100%;max-height:420px;object-fit:cover;display:block}.gr-vv{display:grid;gap:4px;justify-items:center;padding:30px 16px;text-align:center;color:#3b2a24}.gr-vv span{font-size:3.4rem}.gr-vv small{opacity:.7}
+.gr-vbtn{display:flex;justify-content:center;align-items:center;gap:8px;cursor:pointer}.gr-vrow{display:flex;gap:10px;overflow-x:auto;padding-bottom:6px}.gr-vp{margin:0;flex:0 0 92px}.gr-vp img{width:92px;height:122px;object-fit:cover;border-radius:14px;display:block}.gr-vp figcaption{text-align:center;font-size:.72rem;color:var(--muted);margin-top:3px}
 .gr-h{font-family:var(--serif,inherit);font-size:1.3rem;margin:14px 0 2px}.gr-p{margin:6px 0 0;line-height:1.55;font-size:.95rem}
 .gr-ex{display:grid;gap:2px;background:var(--soft,#f3ece6);border-radius:14px;padding:10px 12px;margin-top:6px}.gr-ex span{font-size:.85rem}.gr-ex small{color:var(--muted)}
 .gr-art{display:grid;gap:10px;margin-top:6px}.gr-a{border:0;border-radius:18px;padding:14px;text-align:left;cursor:pointer;color:#3b2a24;font:inherit;display:grid;gap:4px;background:linear-gradient(135deg,#fdf0e6,#fbe6ec)}.gr-a small{font-size:.65rem;letter-spacing:.08em;text-transform:uppercase;font-weight:800;color:var(--accent,#a85743)}.gr-a b{font-size:1rem}.gr-a span{font-size:.82rem;opacity:.8}.gr-hero{display:flex;gap:14px;align-items:center}.gr-big{font-size:3.2rem;line-height:1}
