@@ -78,7 +78,7 @@ pAccueil=function(){let h=_pA.apply(this,arguments);try{const w=cur(),st=stage()
 function carteNom(){try{return '<div class="card gr-nom"><span class="eyebrow acc">Mon bébé</span><p class="small muted" style="margin:4px 0 8px">Si vous le savez déjà : son prénom remplacera « Bébé » dans toute l\'appli.</p><div class="grid2 resp">'+ui.text('parent.naissance.prenomBebe','Nom de bébé (facultatif)','text','Si vous le connaissez')+'<div class="f"><span>Sexe de bébé (facultatif)</span>'+ui.pick('parent.naissance.sexe',['Fille','Garçon','Surprise'])+'</div></div></div>'}catch(e){return ''}}
 const _pJr=pJournal;pJournal=function(){const h=_pJr.apply(this,arguments);try{if(S.role==='parent'&&stage().k==='preg'&&!S.sub&&S.vue!=='params')return h+carteNom()}catch(e){}return h};
 function remettreEnOrdre(){try{const hero=document.querySelector('.bebe-carte');if(!hero||hero.closest('.sheet'))return;const box=hero.parentElement;if(!box||document.getElementById('grStrip')==null)return;
-  if(!hero.dataset.gr){hero.dataset.gr=1;const h2=hero.querySelector('.bb2-h');if(h2){const d=document.createElement('details');d.className='gr-det';d.innerHTML='<summary>Tout lire sur cette semaine</summary>';let n=h2;const lot=[];while(n){lot.push(n);n=n.nextElementSibling}lot.forEach(x=>d.appendChild(x));hero.appendChild(d)}}
+  if(!hero.dataset.gr){hero.dataset.gr=1;const h2=hero.querySelector('.bb2-h');if(h2){const d=document.createElement('div');d.className='gr-det';d.innerHTML='<button type="button" class="gr-detb" data-gr="det">Tout lire sur cette semaine</button><div class="gr-detc"></div>';const cc=d.lastChild;let n=h2;const lot=[];while(n){lot.push(n);n=n.nextElementSibling}lot.forEach(x=>cc.appendChild(x));hero.appendChild(d)}}
   const ins=box.querySelector('.gr-insw'),fr=box.querySelector('.gr-fr');
   const prem=[...box.children].find(x=>x!==hero&&/(^|\s)card(\s|$)/.test(x.className));if(prem&&prem!==hero&&!(hero.compareDocumentPosition(prem)&4))box.insertBefore(hero,prem);
   const mot=box.querySelector('.card.mot');let ancre=hero;if(mot){if(hero.nextElementSibling!==mot)hero.after(mot);ancre=mot}
@@ -90,6 +90,7 @@ render=function(){const r=_r.apply(this,arguments);try{remettreEnOrdre();request
 document.addEventListener('click',async e=>{const b=e.target.closest&&e.target.closest('[data-gr]');if(!b||b.disabled)return;e.stopPropagation();e.preventDefault();
   const a=b.dataset.gr;
   if(a==='sem')feuilleSemaine(+b.dataset.w);
+  else if(a==='det'){const d=b.closest('.gr-det');d.classList.toggle('open');b.setAttribute('aria-expanded',d.classList.contains('open'))}
   else if(a==='sy')b.classList.toggle('on');
   else if(a==='sysave'){const l=[...document.querySelectorAll('.sheet .gr-sy.on')].map(x=>x.dataset.n),n=(document.getElementById('m_note')||{}).value||'';
     if(!l.length&&!n){toast('Choisissez au moins un symptôme');return}
@@ -105,7 +106,7 @@ const css=document.createElement('style');css.textContent=`
 .gr-ins{flex:0 0 138px;height:150px;border:0;border-radius:22px;padding:14px 12px;display:flex;flex-direction:column;justify-content:space-between;text-align:left;cursor:pointer;color:#3b2a24;font:inherit;position:relative;box-shadow:0 4px 14px rgba(120,70,50,.12);scroll-snap-align:start}
 .gr-ins small{font-size:.86rem;font-weight:700;line-height:1.2}.gr-ins span{font-size:2.8rem;line-height:1;align-self:center}.gr-ins i{position:absolute;right:12px;bottom:12px;width:34px;height:34px;border-radius:50%;background:#e8607f;color:#fff;font-style:normal;font-size:1.4rem;display:grid;place-items:center}
 .gr-ins:active{transform:scale(.97)}
-.gr-det{margin-top:10px}.gr-det>summary{cursor:pointer;font-weight:700;color:var(--accent,#a85743);padding:8px 2px;list-style:none}.gr-det>summary::before{content:'▸ '}.gr-det[open]>summary::before{content:'▾ '}
+.gr-det{margin-top:10px}.gr-detb{display:block;width:100%;text-align:left;background:none;border:0;font:inherit;cursor:pointer;font-weight:700;color:var(--accent,#a85743);padding:10px 2px}.gr-detb::before{content:'▸ '}.gr-det.open>.gr-detb::before{content:'▾ '}.gr-detc{display:none}.gr-det.open>.gr-detc{display:block}
 .gr-fr{background:linear-gradient(135deg,#fdf0e6,#fbe6ec)!important;border:0!important}.gr-gd{background:linear-gradient(135deg,#f3f7ee,#eef3fb)!important;border:0!important}
 .gr-cat:nth-child(1){background:linear-gradient(135deg,#fde8e0,#f9d3c6)}.gr-cat:nth-child(2){background:linear-gradient(135deg,#fdf3d6,#f8e7ab)}.gr-cat:nth-child(3){background:linear-gradient(135deg,#e6eefc,#d3e2f8)}.gr-cat:nth-child(4){background:linear-gradient(135deg,#f6e4f3,#ecd0e8)}
 .gr-cat b,.gr-cat small{color:#3b2a24}.gr-cat small{opacity:.7}.gr-cat{border-radius:22px!important;box-shadow:0 4px 14px rgba(120,70,50,.08)}
