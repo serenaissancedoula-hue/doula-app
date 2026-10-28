@@ -5,7 +5,7 @@
    À chaque publication : changer APP_VERSION ici ET dans version.json, et le ?v= des scripts dans index.html et parents/index.html (sinon le téléphone garde les anciens fichiers). */
 /* Comptes autorisés à passer l'écran de maintenance pour tester (en plus de la propriétaire). */
 const MAINT_OK=['sabrinac9779@gmail.com'];
-const APP_VERSION='2026.10.28-227';
+const APP_VERSION='2026.10.28-228';
 async function versionEnLigne(){try{const r=await fetch('version.json?t='+Date.now(),{cache:'no-store'});if(!r.ok)return null;return await r.json()}catch(e){return null}}
 async function majForcer(){try{toast('Mise à jour en cours…')}catch(e){}
   try{sessionStorage.setItem('sere-maj-ok','1')}catch(e){}
@@ -31,7 +31,8 @@ function maintenanceAffiche(m){const f=d=>new Date(d).toLocaleString('fr-CA',{we
     document.body.appendChild(o);try{if(typeof MOI!=='undefined'&&MOI&&MOI.admin)document.getElementById('maintFermer').hidden=false}catch(x){}
     const peutPasser=()=>{try{return !!(MOI&&(MOI.admin||MAINT_OK.includes(String(MOI.courriel||'').toLowerCase())))}catch(x){return false}};
     const btn=document.getElementById('maintFermer');const w=setInterval(()=>{if(!document.getElementById('ecranMaint')){clearInterval(w);return}if(peutPasser()){btn.hidden=false;clearInterval(w)}},1500);
-    btn.onclick=()=>o.remove();setTimeout(()=>maintenanceAffiche(m),Math.min(e-now+1000,600000));return}
+    btn.onclick=()=>o.remove();
+    let taps=0;const em=o.firstChild;if(em)em.onclick=()=>{if(++taps>=5){try{localStorage.setItem('sere-maint-test','1')}catch(x){}o.remove()}};setTimeout(()=>maintenanceAffiche(m),Math.min(e-now+1000,600000));return}
   const b=document.createElement('div');b.id='bandeauMaint';b.className='bandeau-maj';b.innerHTML='<span>🛠️ Mise à jour prévue le <b>'+f(m.debut)+'</b>. L\'appli sera en maintenance jusqu\'à '+new Date(m.fin).toLocaleTimeString('fr-CA',{hour:'2-digit',minute:'2-digit'})+'.</span><button class="btn sm ghost" id="maintOk">OK</button>';
   document.body.appendChild(b);document.getElementById('maintOk').onclick=()=>b.remove();setTimeout(()=>maintenanceAffiche(m),Math.min(d-now+500,600000))}
 /* Nettoie le ?maj= de l'adresse après la mise à jour */
