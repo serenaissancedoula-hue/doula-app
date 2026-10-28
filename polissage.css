@@ -38,3 +38,11 @@ details.acc>.body{padding:4px 18px 18px}
 .sheet-h{padding-bottom:6px}
 
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
+
+/* Mot du jour : plus petit sur l'accueil */
+.card.mot{padding:10px 14px!important}
+.card.mot .row{gap:10px!important}
+.card.mot .av,.card.mot .avatar,.card.mot img{width:34px!important;height:34px!important;min-width:34px!important;font-size:.85rem!important}
+.card.mot .eyebrow{font-size:.62rem!important;letter-spacing:.08em}
+.card.mot .mot-t{font-size:.92rem!important;line-height:1.35!important;margin-top:2px!important}
+.card.mot p.xs,.card.mot p.small{font-size:.72rem!important;margin:2px 0 0!important}
