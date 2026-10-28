@@ -16,6 +16,10 @@ function cur(){try{const st=stage();return st.k==='preg'?Math.max(4,Math.min(42,
 function frise(w0){let s='';for(let w=4;w<=42;w++)s+='<button class="gr-w'+(w===w0?' on':'')+(w<w0?' pas':'')+'" data-gr="sem" data-w="'+w+'" aria-label="Semaine '+w+'"><small>sem.</small><b>'+w+'</b><i>'+emo(w)+'</i></button>';
   return '<div class="card gr-fr"><div class="row between"><span class="eyebrow acc">Semaine par semaine</span><span class="xs muted">Glissez pour explorer</span></div><div class="gr-strip" id="grStrip">'+s+'</div></div>'}
 function selecteur(w){let s='';for(let k=4;k<=42;k++)s+='<button class="gr-sel'+(k===w?' on':'')+'" data-gr="sem" data-w="'+k+'">'+k+'</button>';return '<div class="gr-selw"><div class="gr-selr" id="grSel">'+s+'</div><div class="gr-sellab">semaine</div></div>'}
+function plus(w){const P=(window.SEM_PLUS||{})[w];if(!P)return '';const n=prenomB()||'Bébé';
+  const li=a=>'<ul class="gr-ul">'+a.map(x=>'<li>'+E(x)+'</li>').join('')+'</ul>';
+  return '<div class="gr-plus"><div class="gr-pt">'+E(P[0])+'</div><h3 class="gr-h">'+E(n)+'</h3>'+li(P[1])+'<h3 class="gr-h">Vous</h3>'+li(P[2])+
+   '<div class="gr-sav">💡 <b>Le saviez-vous ?</b> '+E(P[3])+'</div>'+(P[4]?'<div class="gr-dem">🗣️ <b>À demander à mon équipe :</b> '+E(P[4])+'</div>':'')+'</div>'}
 function feuilleSemaine(w){w=Math.max(4,Math.min(42,w));const c=cur(),f=fruit(w),I=infoSemaine(w)||[],M=(()=>{try{return mouvement(w)}catch(e){return null}})(),g=f[2];
   let N=[];try{N=b3fNotes(w)}catch(e){}const sens=(N.find(n=>n[1]==='Ce qu\'il ressent')||[])[2];
   const rel=c==null?'':w===c?'Cette semaine':w>c?'Dans '+(w-c)+' semaine'+(w-c>1?'s':''):'Il y a '+(c-w)+' semaine'+(c-w>1?'s':'');
@@ -27,8 +31,9 @@ function feuilleSemaine(w){w=Math.max(4,Math.min(42,w));const c=cur(),f=fruit(w)
    '<div class="gr-top"><div class="gr-img"><img src="img/bebe/semaine-'+String(w).padStart(2,'0')+'.jpg" alt="Bébé à '+w+' semaines" loading="lazy" onerror="this.parentNode.innerHTML=\'<span class=gr-big>'+emo(w)+'</span>\'"></div>'+
    '<div class="gr-taille"><div class="gr-tt">Bébé en chiffres</div><div class="gr-tl"><span>Longueur<small>cm</small></span><b>'+cm(f[1])+'</b></div>'+(kg?'<div class="gr-tl"><span>Poids<small>'+(g>=1000?'kilos':'grammes')+'</small></span><b>'+(g>=1000?cm((g/1000).toFixed(2)):g)+'</b></div>':'')+(bpm(w)?'<div class="gr-tl"><span>Cœur<small>battements/min ≈</small></span><b>'+bpm(w)+'</b></div>':'')+'<div class="gr-fr2">'+emo(w)+' Taille de bébé : '+E(f[0])+'</div></div></div>'+
    (rel?'<p class="xs muted" style="margin:0">'+rel+'</p>':'')+
+   plus(w)+'<div class="gr-det"><button type="button" class="gr-detb" data-gr="det">Lire plus en détail</button><div class="gr-detc">'+
    '<h3 class="gr-h">'+(prenomB()?E(prenomB())+' cette semaine':'Bébé cette semaine')+'</h3>'+(I[1]?par(I[1]):'')+(M&&M[2]?par('Ses mouvements : '+M[2]):'')+(sens?par('Ce qu\'il ressent : '+sens):'')+
-   '<h3 class="gr-h">Vous cette semaine</h3>'+(I[2]?par(I[2]):'')+'<button class="btn sm ghost" data-gr="corps" data-w="'+w+'" style="justify-self:start">🤰 Mon corps et la photo de mon ventre</button>'+
+   '<h3 class="gr-h">Vous cette semaine</h3>'+(I[2]?par(I[2]):'')+'</div></div><button class="btn sm ghost" data-gr="corps" data-w="'+w+'" style="justify-self:start">🤰 Mon corps et la photo de mon ventre</button>'+
    (I[3]?'<div class="banner sage" style="margin:6px 0 0"><div class="small"><b>Petit conseil :</b> '+E(I[3])+'</div></div>':'')+
    (ex.length?'<h3 class="gr-h">Rendez-vous et examens à prévoir</h3>'+ex.map(e=>'<div class="gr-ex"><b>'+E(e[2])+'</b><span>'+E(e[3])+'</span><small>'+(e[0]===e[1]?e[0]:e[0]+' à '+e[1])+' sem.</small></div>').join(''):'')+
    (ar.length?'<h3 class="gr-h">À lire cette semaine</h3><div class="gr-art">'+ar.map(a=>'<button class="gr-a" data-act="lecOuvrir" data-v="'+E(a.id)+'"><small>Article</small><b>'+E(a.t)+'</b><span>'+E(a.r||'')+'</span></button>').join('')+'</div>':'')+
@@ -146,6 +151,7 @@ const css=document.createElement('style');css.textContent=`
 .gr-ins{flex:0 0 138px;height:150px;border:0;border-radius:22px;padding:14px 12px;display:flex;flex-direction:column;justify-content:space-between;text-align:left;cursor:pointer;color:#3b2a24;font:inherit;position:relative;box-shadow:0 4px 14px rgba(120,70,50,.12);scroll-snap-align:start}
 .gr-ins small{font-size:.86rem;font-weight:700;line-height:1.2}.gr-ins span{font-size:2.8rem;line-height:1;align-self:center}.gr-ins i{position:absolute;right:12px;bottom:12px;width:34px;height:34px;border-radius:50%;background:#e8607f;color:#fff;font-style:normal;font-size:1.4rem;display:grid;place-items:center}
 .gr-ins:active{transform:scale(.97)}
+.gr-pt{font-family:var(--serif,inherit);font-size:1.15rem;font-weight:700;margin:2px 0 4px}.gr-ul{margin:4px 0 8px;padding-left:20px;display:grid;gap:4px;font-size:.92rem;line-height:1.4}.gr-sav{background:#fdf3d6;color:#3b2a24;border-radius:16px;padding:10px 12px;font-size:.88rem;margin:8px 0}.gr-dem{background:#e6eefc;color:#3b2a24;border-radius:16px;padding:10px 12px;font-size:.88rem;margin:8px 0}
 .gr-det{margin-top:10px}.gr-detb{display:block;width:100%;text-align:left;background:none;border:0;font:inherit;cursor:pointer;font-weight:700;color:var(--accent,#a85743);padding:10px 2px}.gr-detb::before{content:'▸ '}.gr-det.open>.gr-detb::before{content:'▾ '}.gr-detc{display:none}.gr-det.open>.gr-detc{display:block}
 .gr-fr{background:linear-gradient(135deg,#fdf0e6,#fbe6ec)!important;border:0!important}.gr-gd{background:linear-gradient(135deg,#f3f7ee,#eef3fb)!important;border:0!important}
 .gr-cat:nth-child(1){background:linear-gradient(135deg,#fde8e0,#f9d3c6)}.gr-cat:nth-child(2){background:linear-gradient(135deg,#fdf3d6,#f8e7ab)}.gr-cat:nth-child(3){background:linear-gradient(135deg,#e6eefc,#d3e2f8)}.gr-cat:nth-child(4){background:linear-gradient(135deg,#f6e4f3,#ecd0e8)}
