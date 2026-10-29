@@ -30,6 +30,7 @@ const T={
   ['Proper use','Use the app in good faith, without illegal, misleading or offensive content. We may suspend an account that does not respect these terms. The app is provided as is: we do our best to keep it available and secure but cannot guarantee it will be free of interruption or error. A major update is announced at least 7 days in advance.'],
   ['Questions','For any question or request about your information, write to us from the app ("Write to Sérénaissance" or "Report a problem") or at sc@academiesere.ca.']],
   ok:'I have read and accept the terms of use and privacy policy.',nom:'Your full name (signature)',btn:'Accept and continue',sortir:'Log out',fermer:'Cancel',nomOb:'Type your full name to sign.',caseOb:'Tick the box to accept.'}};
+window.CGU_ACTUEL={V,T};
 const L=()=>EN?T.en:T.fr;
 const sauve=nom=>{try{localStorage.setItem(LS,JSON.stringify({v:V,nom,date:new Date().toISOString()}))}catch(e){}};
 const local=()=>{try{const o=JSON.parse(localStorage.getItem(LS)||'null');return o&&o.v===V?o:null}catch(e){return null}};

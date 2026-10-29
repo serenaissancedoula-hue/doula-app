@@ -6,7 +6,7 @@ const GROUPES=[
  ['Rencontres et guides',['rencontres','approche','retour','positions','confort','partenaire','cadre']],
  ['Avis des familles',['temoignages']],
  ['Mon compte',['profil','couleurs','aide']],
- ['Administration',['proprio','approbations','avisTab','doulas']]];
+ ['Administration',['proprio','signesAvis','cguSignes','avisTab','avisFam','approbations','doulas']]];
 const CACHES=['support','probleme','avis'];
 const _dOutE=dOutils;
 dOutils=function(){if(S.dsub&&DSUB[S.dsub])return _dOutE();
