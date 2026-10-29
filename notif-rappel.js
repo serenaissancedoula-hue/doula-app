@@ -19,5 +19,12 @@ function verifier(){if(etat!==null||!('serviceWorker' in navigator)||!('PushMana
 const _r=render;render=function(){const x=_r.apply(this,arguments);try{if(etat===null)verifier();else carte()}catch(e){}return x};
 document.addEventListener('click',e=>{const b=e.target.closest('[data-nr]');if(!b)return;e.stopPropagation();
   if(b.dataset.nr==='non'){try{localStorage.setItem(KEY,String(Date.now()))}catch(x){}const c=document.getElementById('nrCarte');if(c)c.remove();return}
-  const c=document.getElementById('nrCarte');if(c)c.remove();S.vue='params';render()},true);
+  const c=document.getElementById('nrCarte');
+  const vers=()=>{if(c)c.remove();S.vue='params';render()};
+  if(typeof window.srnActiverNotifs!=='function'){vers();return}
+  b.disabled=true;
+  window.srnActiverNotifs().then(r=>{
+    if(r==='granted'){etat=true;if(c)c.remove();try{toast('Notifications activées 🔔')}catch(x){}}
+    else if(r==='denied'){b.disabled=false;try{toast('Notifications bloquées : autorisez-les dans les réglages de votre appareil')}catch(x){}}
+    else vers()})},true);
 })();

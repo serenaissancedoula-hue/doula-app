@@ -1,7 +1,9 @@
 {
- "version": "2026.10.28-256",
+ "version": "2026.10.28-257",
  "nouveautes": [
-  "Repères du jour : les boutons « Mes symptômes » (fertilité), « Mouvements de bébé » et « Contractions » fonctionnent maintenant."
+  "Plan de naissance beaucoup plus complet : arrivée, déclenchement, périnée, placenta, césarienne, deuil périnatal, séjour, visiteurs, moral.",
+  "Vous pouvez créer vos propres sections dans votre plan.",
+  "Le bouton « Activer » des notifications ne change plus de page."
  ],
  "maintenance": {
   "debut": "2026-10-28T17:55",

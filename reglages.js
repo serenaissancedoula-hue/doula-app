@@ -108,6 +108,19 @@
     return opts.sb.rpc('enregistrer_abonnement', { p_endpoint: ab.endpoint, p_abonnement: ab.toJSON(), p_appareil: navigator.userAgent, p_prefs: { son: !!d.son, vibration: !!d.vibration } });
   }
 
+  /* Activation directe (carte « Notifications » de l'accueil) : sans changer de page */
+  window.srnActiverNotifs = function () {
+    if (!('Notification' in window) || !('serviceWorker' in navigator) || !('PushManager' in window)) return Promise.resolve('indisponible');
+    var tmp = false;
+    if (!opts) { try { opts = { sb: sb, vapid: VAPID }; tmp = true; } catch (x) { return Promise.resolve('indisponible'); } }
+    return Notification.requestPermission().then(function (p) {
+      if (p !== 'granted') return p;
+      return navigator.serviceWorker.ready.then(function (reg) {
+        return reg.pushManager.getSubscription().then(function (ab) { return ab || reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: cleVapid(opts.vapid) }); });
+      }).then(enregistrer).then(function (r) { return r && r.error ? 'erreur' : 'granted'; });
+    }).catch(function () { return 'erreur'; }).then(function (r) { if (tmp) opts = null; return r; });
+  };
+
   function etat() {
     var e = q('.rg-etat'), act = q('.rg-activer'), reg = q('.rg-reglages'), off = q('.rg-desactiver');
     act.hidden = true; off.hidden = true; reg.hidden = false;
