@@ -1,7 +1,7 @@
 {
- "version": "2026.10.28-259",
+ "version": "2026.10.28-260",
  "nouveautes": [
-  "Sommeil de bébé : un chrono « Bébé s'endort » / « Il se réveille » enregistre la durée automatiquement."
+  "Sommeil de bébé : heure de début, heure de fin, sieste ou nuit, et un chrono qui enregistre la durée automatiquement."
  ],
  "maintenance": {
   "debut": "2026-10-28T17:55",
