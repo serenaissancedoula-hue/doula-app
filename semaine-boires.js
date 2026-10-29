@@ -28,7 +28,7 @@ function sbDetail(a,CO,b0){if(a>Date.now())return '';const L=(S.logs||[]).filter
   const D=new Date(a).toLocaleDateString('fr-CA',{weekday:'long',day:'numeric',month:'long'}),bo=L.filter(l=>l.type!=='tirage'),ml=L.filter(l=>l.type==='biberon').reduce((s,l)=>s+(+l.ml||0),0),sec=L.filter(l=>l.type==='sein').reduce((s,l)=>s+(+l.sec||0),0);
   const lig=l=>{let m=['fa-droplet','Boire'];try{m=LOGMETA[l.type]}catch(e){}let tx='';try{tx=logText(l)}catch(e){}
     return '<div class="li"><div class="ic">'+icon(m[0])+'</div><div class="tx"><b>'+esc(m[1])+' · '+fmtT(l.t)+'</b><span>'+tx+'</span></div><button class="icon-btn" data-act="delLog" data-id="'+l.id+'" aria-label="Supprimer">'+icon('fa-trash')+'</button></div>'};
-  const tt=(jv?'Jour '+jv+' · ':'')+D.charAt(0).toUpperCase()+D.slice(1);
+  const tt=(jv?'Jour '+jv+' de vie · ':'')+D.charAt(0).toUpperCase()+D.slice(1);
   const res=CO?L.filter(l=>l.pipi).length+' couche'+(L.filter(l=>l.pipi).length>1?'s':'')+' pipi · '+L.filter(l=>l.selle).length+' souillée'+(L.filter(l=>l.selle).length>1?'s':'')+(L.filter(l=>l.pipi&&l.selle).length?' (dont '+L.filter(l=>l.pipi&&l.selle).length+' les deux)':''):bo.length+' boire'+(bo.length>1?'s':'')+(ml?' · '+ml+' ml':'')+(sec?' · '+Math.round(sec/60)+' min au sein':'');
   return '<div class="sb-det"><div class="sb-det-t"><b>'+tt+'</b><span>'+res+'</span></div>'+
     (L.length?'<div class="list">'+L.map(lig).join('')+'</div>':'<p class="small muted" style="margin:6px 0 0">'+(CO?'Aucune couche notée ce jour-là.':'Aucun boire noté ce jour-là.')+'</p>')+'</div>'}
@@ -38,7 +38,7 @@ function sbSom(a){const L=(S.logs||[]).filter(l=>l.type==='sommeil'&&l.t>=a&&l.t
   const Si=L.filter(sieste),Nu=L.filter(l=>!sieste(l)),sum=A=>A.reduce((s,l)=>s+(+l.sec||0),0);return {L,n:Si.length,sie:sum(Si),nuit:sum(Nu),tot:sum(L)}}
 function sbDetSom(a,b0){if(a>Date.now())return '';const Z=sbSom(a),jv=Math.round((a-b0)/J)+1,D=new Date(a).toLocaleDateString('fr-CA',{weekday:'long',day:'numeric',month:'long'});
   const lig=l=>{const h=new Date(l.t).getHours(),si=h>=7&&h<19,fin=l.t+(+l.sec||0)*1000;return '<div class="li"><div class="ic">'+icon(si?'fa-sun':'fa-moon')+'</div><div class="tx"><b>'+(si?'Sieste':'Nuit')+' · '+fmtT(l.t)+(l.sec?' à '+fmtT(fin):'')+'</b><span>'+hm(l.sec)+(l.note?' · '+esc(l.note):'')+'</span></div><button class="icon-btn" data-act="delLog" data-id="'+l.id+'" aria-label="Supprimer">'+icon('fa-trash')+'</button></div>'};
-  return '<div class="sb-det"><div class="sb-det-t"><b>Jour '+jv+' · '+D.charAt(0).toUpperCase()+D.slice(1)+'</b><span><b>'+Z.n+' sieste'+(Z.n>1?'s':'')+'</b> pour un total de <b>'+hm(Z.sie)+'</b>'+(Z.nuit?' · nuit '+hm(Z.nuit):'')+' · en tout '+hm(Z.tot)+'</span></div>'+
+  return '<div class="sb-det"><div class="sb-det-t"><b>Jour '+jv+' de vie · '+D.charAt(0).toUpperCase()+D.slice(1)+'</b><span><b>'+Z.n+' sieste'+(Z.n>1?'s':'')+'</b> pour un total de <b>'+hm(Z.sie)+'</b>'+(Z.nuit?' · nuit '+hm(Z.nuit):'')+' · en tout '+hm(Z.tot)+'</span></div>'+
     (Z.L.length?'<div class="list">'+Z.L.map(lig).join('')+'</div>':'<p class="small muted" style="margin:6px 0 0">Aucun sommeil noté ce jour-là.</p>')+'</div>'}
 const _pJ=pJournal;
 pJournal=function(){const h=_pJ.apply(this,arguments);try{const st=stage();const tb=S.jbTab||'repas';if(st.k!=='pp'||!['repas','resume','couches','sommeil'].includes(tb))return h;
