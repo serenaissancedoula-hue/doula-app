@@ -184,3 +184,14 @@ const css=document.createElement('style');css.textContent=`
   setInterval(()=>{const f=document.getElementById('chatFab');if(f&&pos)place(f)},1200);
 })();
 })();
+
+/* repères du jour : « mouvements » et « contractions » ouvrent une carte plus bas → on y amène la maman */
+document.addEventListener('click',function(e){try{
+  var b=e.target.closest&&e.target.closest('.gr-ins[data-act="kickStart"],.gr-ins[data-act="contr"]');if(!b)return;
+  var k=b.getAttribute('data-act');
+  setTimeout(function(){try{
+    var c=null;
+    if(k==='contr'){var x=document.querySelector('[data-act="contrStart"],[data-act="contrEnd"]');c=x&&x.closest('.card')}
+    else{var ey=[].slice.call(document.querySelectorAll('.card .eyebrow')).filter(function(n){return /mouvement/i.test(n.textContent)})[0];c=ey&&ey.closest('.card')}
+    if(c)c.scrollIntoView({behavior:'smooth',block:'center'});
+  }catch(e){}},120)}catch(e){}});

@@ -1,9 +1,11 @@
 {
-  "version": "2026.10.28-255",
-  "nouveautes": "Relevailles : sans doula, vous pouvez en chercher une près de chez vous directement dans le formulaire (votre demande est déjà écrite).",
-  "maintenance": {
-    "debut": "2026-10-28T17:55",
-    "fin": "2026-10-28T20:30",
-    "message": "Nous ajoutons de nouvelles fonctions à l'appli (dont un cercle de discussion entre mamans). Vos données sont en sécurité. Revenez dans un petit moment 💗"
-  }
+ "version": "2026.10.28-256",
+ "nouveautes": [
+  "Repères du jour : les boutons « Mes symptômes » (fertilité), « Mouvements de bébé » et « Contractions » fonctionnent maintenant."
+ ],
+ "maintenance": {
+  "debut": "2026-10-28T17:55",
+  "fin": "2026-10-28T20:30",
+  "message": "Nous ajoutons de nouvelles fonctions à l'appli (dont un cercle de discussion entre mamans). Vos données sont en sécurité. Revenez dans un petit moment 💗"
+ }
 }
