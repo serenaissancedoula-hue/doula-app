@@ -105,7 +105,10 @@
   }
   function enregistrer(ab) {
     var d = lire();
-    return opts.sb.rpc('enregistrer_abonnement', { p_endpoint: ab.endpoint, p_abonnement: ab.toJSON(), p_appareil: navigator.userAgent, p_prefs: { son: !!d.son, vibration: !!d.vibration } });
+    var p = { p_endpoint: ab.endpoint, p_abonnement: ab.toJSON(), p_appareil: navigator.userAgent, p_prefs: { son: !!d.son, vibration: !!d.vibration } };
+    /* l'Espace Doula et l'Espace Parents s'identifient : les avis de la propriétaire n'arrivent plus dans l'appli de l'Académie */
+    if (window.ESPACE) { p.p_app = window.ESPACE === 'parent' ? 'parents-app' : 'doula-app'; return opts.sb.rpc('enregistrer_abonnement_app', p).then(function (r) { return r && r.error ? opts.sb.rpc('enregistrer_abonnement', { p_endpoint: p.p_endpoint, p_abonnement: p.p_abonnement, p_appareil: p.p_appareil, p_prefs: p.p_prefs }) : r; }); }
+    return opts.sb.rpc('enregistrer_abonnement', p);
   }
 
   /* Activation directe (carte « Notifications » de l'accueil) : sans changer de page */
