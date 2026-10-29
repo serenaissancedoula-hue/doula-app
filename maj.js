@@ -5,7 +5,7 @@
    À chaque publication : changer APP_VERSION ici ET dans version.json, et le ?v= des scripts dans index.html et parents/index.html (sinon le téléphone garde les anciens fichiers). */
 /* Comptes autorisés à passer l'écran de maintenance pour tester (en plus de la propriétaire). */
 const MAINT_OK=['sabrinac9779@gmail.com'];
-const APP_VERSION='2026.10.29-271';
+const APP_VERSION='2026.10.29-272';
 async function versionEnLigne(){try{const r=await fetch('version.json?t='+Date.now(),{cache:'no-store'});if(!r.ok)return null;return await r.json()}catch(e){return null}}
 async function majForcer(){try{toast('Mise à jour en cours…')}catch(e){}
   try{sessionStorage.setItem('sere-maj-ok','1')}catch(e){}
