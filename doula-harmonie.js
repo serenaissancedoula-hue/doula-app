@@ -33,7 +33,19 @@ function harmoniser(){try{
   /* thèmes de la boîte à outils en tuiles pastel */
   app.querySelectorAll('details.grpOutils').forEach((d,i)=>{d.style.setProperty('--dh-c',PASTEL[i%PASTEL.length])});
 }catch(e){}}
-const _r=render;render=function(){const r=_r.apply(this,arguments);try{harmoniser();requestAnimationFrame(harmoniser)}catch(e){}return r};
+/* Retour en arrière : chaque page se rappelle les menus ouverts et l'endroit où on était rendu */
+const MEM={};let cle0=null,retour=0;
+function cle(){return [S.dtab||'accueil',S.vue||'',S.dsub||'',S.openClient||'',S.ctab||''].join('|')}
+function nomD(d){const s=d.querySelector(':scope>summary');return s?s.textContent.replace(/\(\d+\)/,'').trim():''}
+function noter(sansY){if(retour||!cle0)return;const app=document.getElementById('app');if(!app)return;const m=MEM[cle0]||{y:0};
+  MEM[cle0]={y:sansY?m.y:window.scrollY,ouverts:[...app.querySelectorAll('details')].filter(d=>d.open).map(nomD)}}
+window.addEventListener('scroll',()=>{noter()},{passive:true});
+document.addEventListener('toggle',e=>{if(e.target.tagName==='DETAILS')setTimeout(noter,0)},true);
+function restaurer(m){const app=document.getElementById('app');if(!app)return;retour=1;
+  app.querySelectorAll('details').forEach(d=>{const n=nomD(d);if(!n)return;const o=m.ouverts.includes(n);if(d.open!==o)d.open=o});
+  const aller=()=>window.scrollTo(0,m.y);aller();requestAnimationFrame(aller);setTimeout(aller,60);setTimeout(()=>{aller();retour=0},180)}
+const _r=render;render=function(){noter(1);const r=_r.apply(this,arguments);try{harmoniser();requestAnimationFrame(harmoniser);
+  const k=cle();if(k!==cle0){const m=MEM[k];cle0=k;if(m)restaurer(m)}}catch(e){}return r};
 const css=document.createElement('style');css.textContent=`
 .esp-doula .ab-top{margin-bottom:14px}.esp-doula .ab-tete{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin:4px 2px 12px}
 .esp-doula .ab-date{display:block;font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}.esp-doula .ab-tete h1{font-size:2rem;margin:0}
