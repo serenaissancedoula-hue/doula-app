@@ -41,8 +41,15 @@ const _rAB=render;render=function(){const x=_rAB.apply(this,arguments);try{if(S.
     app.querySelectorAll(':scope>.quick').forEach(x=>x.remove());
     [...app.querySelectorAll(':scope>.card')].forEach(c=>{const e=((c.querySelector('.eyebrow')||{}).textContent||'').trim();
       if(/^\d+\s*jours?\s*de vie/i.test(c.textContent.trim())||/jours? de vie$|^comment va le moral|^petites lectures|^ma doula$/i.test(e)||(c.classList.contains('tint')&&/ma doula/i.test(e)))c.remove()})}}}catch(e){}return x};
-document.addEventListener('click',e=>{const b=e.target.closest('[data-ab]');if(!b)return;e.stopPropagation();const v=b.dataset.ab;S.vue=null;S.sub='';
+document.addEventListener('click',e=>{const b=e.target.closest('[data-ab]');if(!b)return;e.stopPropagation();const v=b.dataset.ab;
   if(v==='dev'&&window.dvOuvrir){dvOuvrir();return}
+  /* raccourcis : la fiche s'ouvre ici, sans changer de page (comme en grossesse et en fertilité) */
+  const F=(typeof FORMS==='object'&&FORMS)||{};
+  if(v==='couches'&&F.couche){F.couche();return}
+  if(v==='sommeil'&&F.sommeil){F.sommeil();return}
+  if(v==='croissance'&&F.poids){F.poids();return}
+  if(v==='repas'&&typeof sheet==='function'){sheet('Noter un repas','<div class="stack" style="gap:10px"><button class="btn" data-act="feed">'+icon('fa-person-breastfeeding')+'Tétée</button><button class="btn ghost" data-act="biberon">'+icon('fa-bottle-droplet')+'Biberon</button><button class="btn ghost" data-act="tirage">'+icon('fa-pump-medical')+'Tirage de lait</button></div>');return}
+  S.vue=null;S.sub='';
   if(v==='vaccins'){S.tab='suivi'}else{S.tab='journal';S.jbTab=v}scrollTo(0,0);render()},true);
 document.addEventListener('change',async e=>{if(!e.target||e.target.id!=='abPhoto')return;const f=e.target.files&&e.target.files[0];if(!f)return;
   try{S.parent.photoBebe=await shrinkTo(f,900);await saveParent();render();toast('Photo ajoutée')}catch(x){toast('Photo non ajoutée')}});

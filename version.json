@@ -1,9 +1,7 @@
 {
- "version": "2026.10.28-257",
+ "version": "2026.10.28-258",
  "nouveautes": [
-  "Plan de naissance beaucoup plus complet : arrivée, déclenchement, périnée, placenta, césarienne, deuil périnatal, séjour, visiteurs, moral.",
-  "Vous pouvez créer vos propres sections dans votre plan.",
-  "Le bouton « Activer » des notifications ne change plus de page."
+  "Accueil de bébé : « Noter un repas / une couche / le sommeil / une pesée » s'ouvrent sur place, sans changer de page."
  ],
  "maintenance": {
   "debut": "2026-10-28T17:55",
