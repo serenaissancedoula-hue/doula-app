@@ -1,6 +1,6 @@
 {
- "version": "2026.10.28-262",
+ "version": "2026.10.28-263",
  "nouveautes": [
-  "Accueil doula : un mot du jour s'affiche à la première ouverture de la journée (10 secondes)."
+  "Tableau doula : 4 raccourcis (nouvelle famille, guides, agenda, messages) et un résumé « Cette semaine » : rencontres, messages, paiements à valider, naissances."
  ]
 }
