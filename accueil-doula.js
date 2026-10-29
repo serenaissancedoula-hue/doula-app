@@ -5,6 +5,23 @@ function adSalut(){const h=new Date().getHours();return h>=18||h<4?'Bonsoir':'Bo
 function adMot(){const d=new Date();return MOTS_DOULA[(d.getFullYear()*372+d.getMonth()*31+d.getDate())%MOTS_DOULA.length]}
 window._pvAtt=window._pvAtt||{n:null};
 async function adChargerAtt(){try{if(window._pvAtt.n!==null&&Date.now()-(window._pvAtt.t||0)<60000)return;const {data}=await sb.from('fam_versements_declares').select('famille_id').eq('statut','a_valider');window._pvAtt={n:(data||[]).length,t:Date.now(),f:(data||[])[0]&&(data||[])[0].famille_id};if(S.role==='doula'&&S.dtab==='accueil'&&!S.vue&&!S.dsub&&!S.openClient&&!(document.getElementById('layer')||{}).innerHTML)render()}catch(e){window._pvAtt={n:0,t:Date.now()}}}
+window._adDem=window._adDem||{n:null,t:0};
+async function adChargerDem(){try{if(window._adDem.n!==null&&Date.now()-(window._adDem.t||0)<60000)return;const {data}=await sb.from('fam_demandes').select('id').eq('statut','nouvelle');const n=(data||[]).length,ch=window._adDem.n!==n;window._adDem={n,t:Date.now()};if(ch&&S.role==='doula'&&S.dtab==='accueil'&&!S.vue&&!S.openClient)render()}catch(e){window._adDem={n:window._adDem.n||0,t:Date.now()}}}
+/* répertoire « Trouver ma doula » : où j'en suis, et quoi faire ensuite */
+function adAnnuaire(nbDem){const D=ME_DOULA||{},st=D.annuaire_statut||'aucun',opte=!!D.annuaire;
+  const exempt=!!((typeof MOI!=='undefined'&&MOI&&MOI.admin)||D.acces_gratuit),fin=D.annuaire_fin?new Date(D.annuaire_fin):null,paye=exempt||!!(fin&&fin>new Date());
+  const vis=opte&&D.accepte_nouvelles!==false&&st==='approuve'&&paye;
+  const btn=(t,cl)=>'<button class="btn'+(cl?' '+cl:'')+'" data-act="dgo" data-v="outils|annuaire" style="align-self:flex-start">'+t+'</button>';
+  const dem=nbDem?'<div class="banner acc" style="margin:0"><div class="small"><b>'+nbDem+' demande'+(nbDem>1?'s':'')+' de famille'+(nbDem>1?'s':'')+'</b> à traiter : une famille souhaite vous rencontrer.</div></div>':'';
+  let titre,txt,act,ton='';
+  if(vis){titre='Vous êtes dans « Trouver ma doula » 🎉';txt='Les familles de votre région peuvent vous trouver et vous écrire. Vous choisissez toujours qui vous rencontrez. Votre courriel et votre téléphone ne sont jamais affichés.';act=btn('Voir mon profil','ghost sm');ton='ok'}
+  else if(opte&&st==='approuve'&&!paye){titre='Dernière étape : activer mon inscription';txt='Votre profil est approuvé. Il ne reste que l\'inscription annuelle (25 $) pour apparaître auprès des familles.';act=btn('Activer mon inscription')}
+  else if(opte&&st==='approuve'&&paye){titre='Vous n\'êtes pas visible pour l\'instant';txt='Vous avez indiqué que vous n\'acceptez pas de nouvelles familles. Réactivez l\'option quand vous êtes disponible.';act=btn('Changer ma disponibilité','ghost sm')}
+  else if(opte&&st==='en_attente'){titre='Votre profil est en cours d\'approbation';txt='Sérénaissance le valide, puis vous serez visible. Vous pouvez le modifier en attendant.';act=btn('Voir mon profil','ghost sm');ton='ok'}
+  else if(st==='refuse'){titre='Votre profil est à modifier';txt=D.annuaire_note?esc(D.annuaire_note):'Sérénaissance vous a laissé un message : ouvrez votre profil pour voir quoi corriger.';act=btn('Corriger mon profil')}
+  else if(opte){titre='Terminez votre profil';txt='Remplissez votre profil et enregistrez-le : il sera envoyé pour approbation.';act=btn('Terminer mon profil')}
+  else{titre='Soyez trouvée par les familles';txt='Inscrivez-vous au répertoire « Trouver ma doula » : les familles de votre région vous trouvent par ville, langue et disponibilités, puis vous envoient une demande. Seuls votre prénom, la première lettre de votre nom, votre photo et votre présentation sont affichés.';act=btn('M\'inscrire au répertoire')}
+  return {vis,html:(dem?dem:'')+'<div class="ad-ann'+(ton?' '+ton:'')+'"><span class="eyebrow">Trouver ma doula</span><b class="ad-ann-t">'+titre+'</b><p class="small" style="margin:0">'+txt+'</p>'+act+'</div>'}}
 function adLigne(ic,titre,sous,act,v,ton){return '<button class="cl" data-act="'+act+'"'+(v?' data-v="'+v+'"':'')+' style="box-shadow:none'+(ton?';border-color:var(--accent)':'')+'"><div class="av">'+icon(ic)+'</div><div style="flex:1;min-width:0;text-align:left"><b>'+titre+'</b><p class="xs muted">'+sous+'</p></div>'+icon('fa-chevron-right')+'</button>'}
 dAccueil=function(){const D=S.doula,L=S.clients||[];const prenom=esc(String(D.nom||'').split(' ')[0]||'');
   const garde=L.filter(enGarde),pp=L.filter(c=>cStage(c).k==='pp'&&cStage(c).day<=42),pre=L.filter(c=>cStage(c).k==='preg'&&!enGarde(c)),ov=overlaps();
@@ -17,10 +34,13 @@ dAccueil=function(){const D=S.doula,L=S.clients||[];const prenom=esc(String(D.no
   const proche=L.filter(c=>cStage(c).k==='preg'&&cStage(c).left>=0).sort((a,b)=>cStage(a).left-cStage(b).left)[0];
   const phrase=(nbF?'Vous accompagnez '+nbF+' famille'+(nbF>1?'s':'')+'.':'Votre espace est prêt : ajoutez votre première famille quand vous voulez.');
   let h='<div class="ad-hero"><div class="ad-av">'+avatar(D.photo,prenom||'S','avxl')+'</div><div class="ad-tx"><span class="script">'+adSalut()+' '+prenom+'</span><b class="ad-ent">'+esc(D.entreprise||'Votre espace doula')+'</b><p class="ad-ph">'+phrase+'</p><span class="xs">'+esc(adMot())+'</span></div></div>';
+  adChargerDem();const nbDem=(window._adDem||{}).n||0,AN=adAnnuaire(nbDem);
+  if(!AN.vis)h+=AN.html;
   /* aujourd'hui */
   const todo=[];
   if(garde.length)todo.push(adLigne('fa-phone','En garde : '+garde.map(c=>esc(cFirst(c))).join(', '),'Téléphone chargé, sac prêt','clientOpen" data-id="'+garde[0].id,'',1));
   if(nonlus)todo.push(adLigne('fa-comments',nonlus+' nouveau'+(nonlus>1?'x':'')+' message'+(nonlus>1?'s':''),'Répondez en direct','chatOuvrir','',1));
+  if(nbDem)todo.push(adLigne('fa-envelope-open-text',nbDem+' demande'+(nbDem>1?'s':'')+' de famille'+(nbDem>1?'s':''),'Une famille souhaite vous rencontrer','dgo','outils|annuaire',1));
   if(att)todo.push(adLigne('fa-circle-check',att+' paiement'+(att>1?'s':'')+' à valider','Validez et envoyez le reçu','dgo','outils|paiements',1));
   if(susp.length)todo.push(adLigne('fa-pause','Suivi suspendu : '+susp.map(c=>esc(cFirst(c))).join(', '),'Paiement en retard','dgo','outils|paiements'));
   rdvs.slice(0,2).forEach(r=>todo.push(adLigne('fa-calendar-check','Rencontre avec '+esc(cName(r[0])),esc(fmtD(parseD(r[1]),{weekday:'long',day:'numeric',month:'long'})),'clientOpen" data-id="'+r[0].id,'')));
@@ -37,6 +57,7 @@ dAccueil=function(){const D=S.doula,L=S.clients||[];const prenom=esc(String(D.no
   const nbRdv7=L.reduce((n,c)=>n+(c.rdv||[]).filter(r=>{if(!r.prochaine)return false;const j=diffD(parseD(r.prochaine),new Date());return j>=0&&j<=7}).length,0),nbNaiss30=L.filter(c=>{const st=cStage(c);return st.k==='preg'&&st.left>=0&&st.left<=30}).length;
   const SEM=[['📅','Rencontres',nbRdv7,'#e6eefc','agenda|','dgo'],['💬','Messages',nonlus,'#fde8e0','','chatOuvrir'],['💳','À valider',att,'#fdf3d6','outils|paiements','dgo'],['👶','Naissances',nbNaiss30,'#e3f3e6','clientes|','dgo']];
   h+='<div class="ad-semw"><div class="ad-sem-h">Cette semaine <small>(naissances : 30 jours)</small></div><div class="ad-sem">'+SEM.map(x=>'<button class="ad-sem-t" data-act="'+x[5]+'"'+(x[4]?' data-v="'+x[4]+'"':'')+' style="background:'+x[3]+'"><span>'+x[0]+'</span><b>'+x[2]+'</b><small>'+x[1]+'</small></button>').join('')+'</div></div>';
+  if(AN.vis)h+=AN.html;
   /* étape par étape : où en sont mes familles */
   if(L.length)h+=aeFrise(L);
   /* mes familles en un coup d'œil */
@@ -71,5 +92,6 @@ const _stA=document.createElement('style');_stA.textContent=`
 .ad-feat{padding:18px;border-radius:24px;background:linear-gradient(160deg,#fffbf8,#f7ece5);border:1px solid var(--accent-lt);box-shadow:var(--shadow);display:flex;flex-direction:column;gap:10px}.ad-feat .eyebrow{color:var(--accent)}
 .ad-semw{display:grid;gap:8px}.ad-sem-h{font-family:var(--f-display);font-size:1.05rem;color:var(--ink)}.ad-sem-h small{font-family:inherit;font-size:.72rem;color:var(--muted,#8a7a72)}.ad-sem{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.ad-sem-t{border:1px solid var(--line);border-radius:18px;padding:10px 4px;display:grid;gap:2px;justify-items:center;cursor:pointer;color:#2c221e;box-shadow:none;min-width:0}.ad-sem-t span{font-size:1.2rem}.ad-sem-t b{font-size:1.35rem;line-height:1.1}.ad-sem-t small{font-size:.72rem}
 .ad-etw{display:grid;gap:8px}.ad-strip{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 6px;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch}.ad-et{flex:0 0 118px;scroll-snap-align:start;border:1px solid var(--line);border-radius:20px;padding:12px 8px;display:grid;gap:2px;justify-items:center;cursor:pointer;color:#2c221e;box-shadow:none;position:relative;opacity:.72}.ad-et.on{opacity:1;border-color:var(--accent)}.ad-et i{font-style:normal;font-size:1.5rem}.ad-et b{font-size:.95rem}.ad-et small{font-size:.72rem}.ad-et em{font-style:normal;font-weight:700;font-size:1.2rem;margin-top:2px}
+.ad-ann{padding:18px;border-radius:24px;background:linear-gradient(160deg,#fff6ef,#f8ecd6);border:1px solid var(--accent-lt);box-shadow:var(--shadow);display:flex;flex-direction:column;gap:8px;color:#2c221e}.ad-ann.ok{background:linear-gradient(160deg,#f1f8ef,#fffbf8)}.ad-ann .eyebrow{color:var(--accent)}.ad-ann-t{font-family:var(--f-display);font-size:1.2rem}
 .ad-tiles .tile{border:1px solid var(--line);box-shadow:none}.ad-tiles .ad-t0{background:var(--card)}.ad-tiles .ad-t1{background:var(--card)}.ad-tiles .ad-t2{background:linear-gradient(160deg,#f8ecd6,#fffbf8)}.ad-tiles .ad-t3{background:linear-gradient(160deg,#ecdfe6,#fffbf8)}
 .ad-tiles .ti{background:#fff;box-shadow:0 4px 10px rgba(44,34,30,.08);width:46px;height:46px;font-size:1.15rem}.ad-t0 .ti{color:var(--accent)}.ad-t1 .ti{color:var(--sage-dk)}.ad-t2 .ti{color:var(--warn)}.ad-t3 .ti{color:#8a5a7a}`;document.head.appendChild(_stA);
