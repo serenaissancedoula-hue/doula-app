@@ -37,11 +37,31 @@ dAccueil=function(){const D=S.doula,L=S.clients||[];const prenom=esc(String(D.no
   const nbRdv7=L.reduce((n,c)=>n+(c.rdv||[]).filter(r=>{if(!r.prochaine)return false;const j=diffD(parseD(r.prochaine),new Date());return j>=0&&j<=7}).length,0),nbNaiss30=L.filter(c=>{const st=cStage(c);return st.k==='preg'&&st.left>=0&&st.left<=30}).length;
   const SEM=[['📅','Rencontres',nbRdv7,'#e6eefc','agenda|','dgo'],['💬','Messages',nonlus,'#fde8e0','','chatOuvrir'],['💳','À valider',att,'#fdf3d6','outils|paiements','dgo'],['👶','Naissances',nbNaiss30,'#e3f3e6','clientes|','dgo']];
   h+='<div class="ad-semw"><div class="ad-sem-h">Cette semaine <small>(naissances : 30 jours)</small></div><div class="ad-sem">'+SEM.map(x=>'<button class="ad-sem-t" data-act="'+x[5]+'"'+(x[4]?' data-v="'+x[4]+'"':'')+' style="background:'+x[3]+'"><span>'+x[0]+'</span><b>'+x[2]+'</b><small>'+x[1]+'</small></button>').join('')+'</div></div>';
+  /* étape par étape : où en sont mes familles */
+  if(L.length)h+=aeFrise(L);
   /* mes familles en un coup d'œil */
   h+='<div class="card"><span class="eyebrow acc">Mes familles en un coup d\'œil</span><div class="grid3"><div class="stat acc"><b>'+pre.length+'</b><span>en prénatal</span></div><div class="stat '+(garde.length?'warn':'')+'"><b>'+garde.length+'</b><span>en garde</span></div><div class="stat ok"><b>'+pp.length+'</b><span>en post-partum</span></div></div>'+
     (next.length?'<div class="list" style="margin-top:8px">'+next.map(c=>'<div class="li"><div class="ic">'+icon('fa-baby')+'</div><div class="tx"><b>'+esc(cName(c))+'</b><span>Prévu le '+fmtD(parseD(c.dpa),{day:'numeric',month:'long'})+' · garde dès le '+fmtS(addD(parseD(c.dpa),-14))+'</span></div></div>').join('')+'</div>':'<p class="small muted" style="margin-top:6px">Vos prochaines naissances prévues apparaîtront ici.</p>')+'</div>';
   h+='<div class="card" data-act="dgo" data-v="outils|paiements" style="cursor:pointer" role="button" tabindex="0"><div class="row between"><span class="eyebrow acc">Paiements</span><span class="xs muted">Voir les paiements '+icon('fa-chevron-right')+'</span></div><div class="grid3"><div class="stat"><b>'+money(total)+'</b><span>forfaits signés</span></div><div class="stat ok"><b>'+money(paid)+'</b><span>reçus</span></div><div class="stat '+(total-paid>0?'warn':'')+'"><b>'+money(total-paid)+'</b><span>solde à recevoir</span></div></div></div>';
   return h};
+
+/* ---------- étape par étape : un bandeau qui défile, un toucher ouvre la liste des familles de l'étape ---------- */
+function aeEtapes(L){const E=[
+  {ico:'🤰',t:'Prénatal',s:'Avant 38 sem.',c:'#e3f3e6',f:c=>{const x=cStage(c);return x.k==='preg'&&x.w<38}},
+  {ico:'🔔',t:'En garde',s:'Dès 38 sem.',c:'#fdf3d6',f:c=>{const x=cStage(c);return x.k==='preg'&&x.w>=38}},
+  {ico:'🍼',t:'Post-partum',s:'0 à 6 sem.',c:'#fbe0e6',f:c=>{const x=cStage(c);return x.k==='pp'&&x.day<=42}},
+  {ico:'🌿',t:'Suivi',s:'Après 6 sem.',c:'#e6eefc',f:c=>{const x=cStage(c);return x.k==='pp'&&x.day>42}}];
+  E.forEach(e=>{e.l=L.filter(c=>{try{return e.f(c)}catch(x){return false}})});return E}
+function aeFrise(L){const E=aeEtapes(L);
+  return '<div class="ad-etw"><div class="row between"><span class="ad-sem-h">Étape par étape</span><span class="xs muted">Touchez une étape</span></div><div class="ad-strip">'+
+   E.map((e,i)=>'<button class="ad-et'+(e.l.length?' on':'')+'" data-ae-st="'+i+'" style="background:'+e.c+'"><i>'+e.ico+'</i><b>'+esc(e.t)+'</b><small>'+esc(e.s)+'</small><em>'+e.l.length+'</em></button>').join('')+'</div></div>'}
+function aeOuvrirEtape(i){try{const L=S.clients||[],e=aeEtapes(L)[i];if(!e)return;
+  const lig=c=>{const x=cStage(c);const d=x.k==='preg'?'Semaine '+x.w+' · prévue le '+fmtD(parseD(c.dpa),{day:'numeric',month:'long'}):'Bébé de '+x.day+' jour'+(x.day>1?'s':'');
+    return '<button class="cl" data-ae-open="'+esc(String(c.id))+'" style="box-shadow:none"><div class="av">'+avatar((c.parent_data||{}).photo,cFirst(c),'av')+'</div><div style="flex:1;text-align:left"><b>'+esc(cName(c))+'</b><div class="xs muted">'+d+'</div></div>'+icon('fa-chevron-right')+'</button>'};
+  sheet(e.ico+' '+esc(e.t),e.l.length?'<div class="stack" style="gap:8px">'+e.l.map(lig).join('')+'</div>':'<p class="small muted">Aucune famille à cette étape pour l\'instant.</p>')}catch(x){}}
+document.addEventListener('click',ev=>{const t=ev.target.closest&&ev.target.closest('[data-ae-st],[data-ae-open]');if(!t)return;
+  if(t.dataset.aeSt!==undefined){aeOuvrirEtape(+t.dataset.aeSt);return}
+  const id=t.dataset.aeOpen;try{close()}catch(e){}S.vue=null;S.openClient=id;S.dtab='clientes';S.ctab='resume';scrollTo(0,0);render();try{Promise.resolve(chargerClientDetail(id)).then(()=>render()).catch(()=>{})}catch(e){}});
 
 const _stA=document.createElement('style');_stA.textContent=`
 .ad-hero{display:flex;gap:16px;align-items:center;padding:22px 18px;border-radius:26px;background:linear-gradient(135deg,#f6d9cc 0%,#f8ecd6 55%,#dcebd9 100%);box-shadow:var(--shadow);border:1px solid var(--line)}
@@ -50,5 +70,6 @@ const _stA=document.createElement('style');_stA.textContent=`
 .ad-ent{font-family:var(--f-display);font-size:1.12rem;color:var(--ink)}.ad-ph{margin:2px 0 4px;font-size:.95rem;color:var(--ink)}.ad-tx .xs{font-style:italic;color:var(--accent-dk)}
 .ad-feat{padding:18px;border-radius:24px;background:linear-gradient(160deg,#fffbf8,#f7ece5);border:1px solid var(--accent-lt);box-shadow:var(--shadow);display:flex;flex-direction:column;gap:10px}.ad-feat .eyebrow{color:var(--accent)}
 .ad-semw{display:grid;gap:8px}.ad-sem-h{font-family:var(--f-display);font-size:1.05rem;color:var(--ink)}.ad-sem-h small{font-family:inherit;font-size:.72rem;color:var(--muted,#8a7a72)}.ad-sem{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.ad-sem-t{border:1px solid var(--line);border-radius:18px;padding:10px 4px;display:grid;gap:2px;justify-items:center;cursor:pointer;color:#2c221e;box-shadow:none;min-width:0}.ad-sem-t span{font-size:1.2rem}.ad-sem-t b{font-size:1.35rem;line-height:1.1}.ad-sem-t small{font-size:.72rem}
+.ad-etw{display:grid;gap:8px}.ad-strip{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 6px;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch}.ad-et{flex:0 0 118px;scroll-snap-align:start;border:1px solid var(--line);border-radius:20px;padding:12px 8px;display:grid;gap:2px;justify-items:center;cursor:pointer;color:#2c221e;box-shadow:none;position:relative;opacity:.72}.ad-et.on{opacity:1;border-color:var(--accent)}.ad-et i{font-style:normal;font-size:1.5rem}.ad-et b{font-size:.95rem}.ad-et small{font-size:.72rem}.ad-et em{font-style:normal;font-weight:700;font-size:1.2rem;margin-top:2px}
 .ad-tiles .tile{border:1px solid var(--line);box-shadow:none}.ad-tiles .ad-t0{background:var(--card)}.ad-tiles .ad-t1{background:var(--card)}.ad-tiles .ad-t2{background:linear-gradient(160deg,#f8ecd6,#fffbf8)}.ad-tiles .ad-t3{background:linear-gradient(160deg,#ecdfe6,#fffbf8)}
 .ad-tiles .ti{background:#fff;box-shadow:0 4px 10px rgba(44,34,30,.08);width:46px;height:46px;font-size:1.15rem}.ad-t0 .ti{color:var(--accent)}.ad-t1 .ti{color:var(--sage-dk)}.ad-t2 .ti{color:var(--warn)}.ad-t3 .ti{color:#8a5a7a}`;document.head.appendChild(_stA);
