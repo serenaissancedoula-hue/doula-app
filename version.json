@@ -1,7 +1,7 @@
 {
- "version": "2026.10.28-258",
+ "version": "2026.10.28-259",
  "nouveautes": [
-  "Accueil de bébé : « Noter un repas / une couche / le sommeil / une pesée » s'ouvrent sur place, sans changer de page."
+  "Sommeil de bébé : un chrono « Bébé s'endort » / « Il se réveille » enregistre la durée automatiquement."
  ],
  "maintenance": {
   "debut": "2026-10-28T17:55",

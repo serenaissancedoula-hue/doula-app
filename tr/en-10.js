@@ -81,3 +81,4 @@ window.TR_EN=Object.assign(window.TR_EN||{},{
 "Notifications activées 🔔":"Notifications turned on 🔔",
 "Notifications bloquées : autorisez-les dans les réglages de votre appareil":"Notifications are blocked: allow them in your device settings"
 });
+window.TR_EN=Object.assign(window.TR_EN||{},{"Bébé dort":"Baby is sleeping","Il se réveille":"Baby wakes up","Bébé s'endort : démarrer le chrono":"Baby is falling asleep: start the timer","ou noter un sommeil déjà passé :":"or log a sleep that already happened:","Le chrono est déjà en marche.":"The timer is already running.","Chrono démarré : bonne sieste 🌙":"Timer started: sweet dreams 🌙"});
