@@ -41,7 +41,7 @@ if(typeof cPaie!=='undefined'){const _cpPV=cPaie;cPaie=function(c){let h=_cpPV.a
 
 /* Outil « Paiements » : mon lien de paiement, mon virement Interac, soldes de toutes les familles */
 DSUB.paiements=function(){const C=((ME_DOULA&&ME_DOULA.modeles)||{}).paiement||{};
-  let h=back('dsub','','Outils')+sh('Paiements','Soldes de vos familles, et comment elles vous paient');
+  let h=sh('Paiements','Soldes de vos familles, et comment elles vous paient');
   h+='<div class="card"><span class="eyebrow acc">Comment mes familles me paient</span>'+
     (pvProprio()?'<div class="banner sage">'+icon('fa-circle-check')+'<div class="small"><b>Vos liens Stripe sont déjà dans l\'appli.</b> Vous en avez un par forfait et par nombre de versements : la famille voit automatiquement le bon lien (selon son forfait et ce qu\'elle a choisi dans son contrat). Rien à ajouter ici.</div></div>':'<label class="f">Mon lien de paiement par carte (Stripe, PayPal, Square…)<input id="pvLien" type="url" placeholder="https://buy.stripe.com/…" value="'+pvEsc(C.lienCarte)+'"></label><p class="xs muted">Créez un lien de paiement dans votre compte Stripe (ou autre) et collez-le ici : la famille paie sur la page sécurisée du fournisseur, l\'argent va directement dans votre compte, et l\'appli ne voit jamais de numéro de carte.</p>')+
     '<label class="f">Mon virement Interac (courriel ou téléphone)<input id="pvInterac" value="'+pvEsc(C.interac)+'" placeholder="vous@exemple.ca"></label>'+
