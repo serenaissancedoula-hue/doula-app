@@ -1,6 +1,6 @@
 {
- "version": "2026.10.28-261",
+ "version": "2026.10.28-262",
  "nouveautes": [
-  "Journal : un crayon permet de modifier une entrée (sommeil, tétée, biberon, couche, poids…)."
+  "Accueil doula : un mot du jour s'affiche à la première ouverture de la journée (10 secondes)."
  ]
 }
