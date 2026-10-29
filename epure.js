@@ -5,9 +5,9 @@ const GROUPES=[
  ['Documents et messages',['modeles','biblio','messages','lettre']],
  ['Rencontres et guides',['rencontres','approche','retour','positions','confort','partenaire','cadre']],
  ['Avis des familles',['temoignages']],
- ['Mon compte',['profil','couleurs','aide']],
- ['Administration',['proprio','activite','signesAvis','cguSignes','avisTab','avisFam','approbations','doulas']]];
-const CACHES=['support','probleme','avis'];
+ ['Mon compte',['paiements','profil','couleurs','aide']],
+ ['Administration',['proprio','activite','signesAvis','approbations','cercle','doulas']]];
+const CACHES=['support','probleme','avis','cguSignes','avisTab','avisFam','avisEtoiles'];
 const _dOutE=dOutils;
 dOutils=function(){if(S.dsub&&DSUB[S.dsub])return _dOutE();
   _dOutE(); /* laisse les autres modules ajouter leurs tuiles */
