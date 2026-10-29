@@ -119,5 +119,10 @@ window.TR_EN=Object.assign(window.TR_EN||{},{
 "811 : Info-Santé / Info-Social (QC), Télé-Soins (N.-B.), 24/7":"811: Info-Santé / Info-Social (QC), Tele-Care (N.B.), 24/7",
 "Ligue La Leche : allaitement.ca":"La Leche League: allaitement.ca",
 "Naître et grandir : naitreetgrandir.com":"Naître et grandir: naitreetgrandir.com",
-"Marraines d'allaitement de l'Académie Sérénaissance":"Sérénaissance Academy breastfeeding godmothers"
+"Marraines d'allaitement de l'Académie Sérénaissance":"Sérénaissance Academy breastfeeding godmothers",
+"Vous n'avez pas encore de doula":"You do not have a doula yet",
+"Trouvez une doula près de chez vous : en la choisissant, votre demande sera déjà écrite pour elle.":"Find a doula near you: when you choose one, your request will already be written for her.",
+"Choisissez d'abord une doula ci-dessous":"First choose a doula below",
+"Votre demande est envoyée à votre doula dans la messagerie.":"Your request is sent to your doula in the messaging.",
+"Ville ou région":"City or region","Chargement des doulas…":"Loading doulas…"
 });

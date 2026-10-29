@@ -78,22 +78,26 @@ function carteRegle(){const m=moisBebe(),J=window.JALONS||[];if(m==null||!J.leng
   return '<div class="gr-insw gr-regle"><div class="gr-ins-h">Ce que bébé apprend en ce moment</div><button class="su-reglebtn" data-su="regle">'+(now.length?now.map(j=>'<span>'+j[0]+' '+E(j[1])+'</span>').join(''):'<span>Voir tous les repères</span>')+'<em>Voir la règle complète ›</em></button></div>'}
 
 
-function carteRelev(){return '<div class="card gr-relev"><span class="eyebrow acc">🫖 Relevailles</span><b style="display:block;margin:4px 0">Besoin de souffler ?</b><p class="small" style="margin:0 0 8px">Une doula peut venir s\'occuper de bébé, de jour ou de nuit, pendant que vous vous reposez ou faites vos commissions.</p><button class="btn sm" data-su="relevForm">Demander des relevailles</button></div>'}
+function carteRelev(){return '<div class="card gr-relev" data-keepdoula="1"><span class="eyebrow acc">🫖 Relevailles</span><b style="display:block;margin:4px 0">Besoin de souffler ?</b><p class="small" style="margin:0 0 8px">Une doula peut venir s\'occuper de bébé, de jour ou de nuit, pendant que vous vous reposez ou faites vos commissions.</p><button class="btn sm" data-su="relevForm">Demander des relevailles</button></div>'}
 function feuilleRelev(){const n=prenomB()||'bébé';
   const ch=(nom,L)=>L.map((x,i)=>'<label class="su-ch"><input type="'+(nom==='raison'?'checkbox':'radio')+'" name="rl-'+nom+'" value="'+E(x)+'"'+(nom!=='raison'&&i===0?' checked':'')+'><span>'+E(x)+'</span></label>').join('');
-  sheet('Relevailles','<div class="stack" style="gap:12px"><p class="small" style="margin:0">Les relevailles, c\'est quand une doula vient prendre soin de '+E(n)+' pendant que vous vous reposez, dormez ou faites autre chose. Dites-nous ce qui vous aiderait : votre doula vous répondra avec ses disponibilités et ses tarifs.</p>'+
+  sheet('Relevailles','<div class="stack" data-keepdoula="1" style="gap:12px"><p class="small" style="margin:0">Les relevailles, c\'est quand une doula vient prendre soin de '+E(n)+' pendant que vous vous reposez, dormez ou faites autre chose. Dites-nous ce qui vous aiderait : votre doula vous répondra avec ses disponibilités et ses tarifs.</p>'+
    '<b class="small">Quand ?</b><div class="su-chs">'+ch('moment',['De jour','De nuit','Jour et nuit'])+'</div>'+
    '<label class="f">Date souhaitée<input type="date" id="rlDate"></label>'+
    '<label class="f">Combien d\'heures environ ?<select id="rlHeures"><option>2 à 3 heures</option><option>4 à 6 heures</option><option>Une nuit complète</option><option>Plus longtemps / à discuter</option></select></label>'+
    '<b class="small">Pour quoi ?</b><div class="su-chs">'+ch('raison',['Me reposer, dormir','Faire des commissions','Un rendez-vous','M\'occuper de mes autres enfants','Du temps pour moi','Autre'])+'</div>'+
    '<label class="f">Un mot pour votre doula (facultatif)<textarea id="rlNote" style="min-height:60px"></textarea></label>'+
-   '<button class="btn" data-su="relevSend">Envoyer ma demande</button>'+
-   '<p class="xs muted" style="margin:0">Votre demande est envoyée à votre doula dans la messagerie. Si vous n\'avez pas encore de doula, trouvez-en une dans l\'onglet « Doulas ».</p></div>')}
-function envoyerRelev(){try{
-  const q=n=>[...document.querySelectorAll('.sheet input[name="rl-'+n+'"]:checked')].map(x=>x.value);
-  if(!(typeof FAM!=='undefined'&&FAM&&FAM.doula_id)){toast('Choisissez d\'abord une doula dans l\'onglet « Doulas »');return}
+   (aDoula()?'<button class="btn" data-su="relevSend">Envoyer ma demande</button><p class="xs muted" style="margin:0">Votre demande est envoyée à votre doula dans la messagerie.</p>':
+    '<div class="card tint"><b>Vous n\'avez pas encore de doula</b><p class="small" style="margin:6px 0 10px">Trouvez une doula près de chez vous : en la choisissant, votre demande sera déjà écrite pour elle.</p><div id="rlBloc"></div></div>')+'</div>');
+  if(!aDoula())setTimeout(blocRecherche,60)}
+function texteRelev(){const q=n=>[...document.querySelectorAll('.sheet input[name="rl-'+n+'"]:checked')].map(x=>x.value);
   const d=(document.getElementById('rlDate')||{}).value,h=(document.getElementById('rlHeures')||{}).value,note=((document.getElementById('rlNote')||{}).value||'').trim(),r=q('raison');
-  const txt='Bonjour ! J\'aimerais des relevailles : '+(q('moment')[0]||'de jour').toLowerCase()+(d?', autour du '+d:'')+(h?', environ '+h.toLowerCase():'')+'.'+(r.length?' Pour : '+r.map(x=>x.toLowerCase()).join(', ')+'.':'')+(note?' '+note:'')+' Pouvez-vous me dire vos disponibilités et vos tarifs ?';
+  return 'Bonjour ! J\'aimerais des relevailles : '+(q('moment')[0]||'de jour').toLowerCase()+(d?', autour du '+d:'')+(h?', environ '+h.toLowerCase():'')+'.'+(r.length?' Pour : '+r.map(x=>x.toLowerCase()).join(', ')+'.':'')+(note?' '+note:'')+' Pouvez-vous me dire vos disponibilités et vos tarifs ?'}
+function aDoula(){try{return !!(typeof FAM!=='undefined'&&FAM&&FAM.doula_id)}catch(e){return false}}
+function blocRecherche(){const el=document.getElementById('rlBloc');if(el&&window.anBlocRelev)el.innerHTML=window.anBlocRelev(texteRelev,blocRecherche)}
+function envoyerRelev(){try{
+  if(!aDoula()){const el=document.getElementById('rlBloc');if(el)el.scrollIntoView({behavior:'smooth',block:'center'});toast('Choisissez d\'abord une doula ci-dessous');return}
+  const txt=texteRelev();
   Promise.resolve(sb.from('fam_messages').insert({famille_id:FAM.id,de_doula:false,texte:txt})).then(r2=>{if(r2&&r2.error){toast('Pas envoyé : réessayez');return}toast('Demande envoyée à votre doula');try{close()}catch(e){}}).catch(()=>toast('Pas envoyé : réessayez'))}catch(e){toast('Pas envoyé : réessayez')}}
 
 
