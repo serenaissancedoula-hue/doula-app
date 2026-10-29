@@ -1,6 +1,7 @@
 {
- "version": "2026.10.29-266",
+ "version": "2026.10.29-267",
  "nouveautes": [
-  "Mon cycle : la carte « Pour commencer » est remise en ordre (titre, texte et bouton l'un sous l'autre)."
+  "Grossesse : chaque test et vaccin indique s'il est recommandé, facultatif ou obligatoire (France), avec « À quoi ça sert ? ». Liste adaptée à la France. VRS corrigé (32 à 36 semaines).",
+  "Grossesse : nouveau « Résumé pour mon médecin » à imprimer ou enregistrer en PDF."
  ]
 }
