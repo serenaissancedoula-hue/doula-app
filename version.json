@@ -2,10 +2,5 @@
  "version": "2026.10.28-261",
  "nouveautes": [
   "Journal : un crayon permet de modifier une entrée (sommeil, tétée, biberon, couche, poids…)."
- ],
- "maintenance": {
-  "debut": "2026-10-28T17:55",
-  "fin": "2026-10-28T20:30",
-  "message": "Nous ajoutons de nouvelles fonctions à l'appli (dont un cercle de discussion entre mamans). Vos données sont en sécurité. Revenez dans un petit moment 💗"
- }
+ ]
 }
