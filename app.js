@@ -107,7 +107,7 @@ async function demarrer(){
   const q=new URLSearchParams(location.search);
   if(q.get('token_hash')){const {error}=await sb.auth.verifyOtp({token_hash:q.get('token_hash'),type:q.get('type')||'magiclink'});history.replaceState(null,'',location.pathname+location.hash);
     if(error){ecranConnexion('Ce lien a expiré ou a déjà servi. Entrez votre courriel pour en recevoir un nouveau.');return}S.nouveauCompte=q.get('type')==='invite'}
-  if(tropInactif()){await sb.auth.signOut();try{localStorage.removeItem('sere-app-derniere')}catch(e){}}
+  if(tropInactif()){await sb.auth.signOut();try{localStorage.removeItem('sere-app-derniere');localStorage.removeItem('sere-nav-'+ESPACE)}catch(e){}}
   const {data:{session}}=await sb.auth.getSession();S.meta=session&&session.user&&session.user.user_metadata||{};if(!session){ecranConnexion('');return}
   $('#app').innerHTML='<p class="small muted" style="text-align:center;padding:40px">Chargement de votre espace…</p>';
   const {data,error}=await sb.rpc('fam_moi');if(error){ecranConnexion('Une erreur est survenue : '+esc(error.message));return}MOI=data;try{if(MOI&&MOI.admin&&String(MOI.courriel||(MOI.doula&&MOI.doula.courriel)||'').toLowerCase()!==OWNER_EMAIL)MOI.admin=false}catch(e){}
@@ -311,7 +311,7 @@ document.addEventListener('click',async e=>{const b=e.target.closest('[data-act]
   case 'inscriptionDoula':{const em=$('#sCourriel').value.trim(),pr=$('#sPrenom').value.trim();if(!pr){toast('Entrez votre prénom');return}if(!/^\S+@\S+\.\S+$/.test(em)){toast('Entrez un courriel valide');return}await chargerPlaces();if(inscriptionsFermees()){S.vueCx='doula';ecranConnexion();return}b.disabled=true;const corps={type:'doula',courriel:em,prenom:pr,nom:$('#sNom').value.trim()};const {data}=await sb.functions.invoke('fam-acces',{body:corps});if(data&&data.ok){ecranCode(em,corps)}else{b.disabled=false;toast((data&&data.erreur)||'L\'envoi n\'a pas fonctionné, réessayez')}return}
   case 'devenirDoula':{const pr=$('#nPrenom').value.trim();if(!pr){toast('Entrez votre prénom');return}await chargerPlaces();if(inscriptionsFermees()){toast('Les inscriptions sont complètes pour la période de test');return}b.disabled=true;const {data,error}=await sb.rpc('fam_devenir_doula',{p_prenom:pr,p_nom:$('#nNom').value,p_tel:$('#nTel').value,p_region:$('#nRegion').value});if(error){toast(error.message);b.disabled=false;return}MOI=data;S.role='doula';await charger();render();if(!S.mdpOk&&!(S.meta&&S.meta.mdp))motDePasseSheet(true);return}
   case 'deconnexion':{b.disabled=true;try{await Promise.race([sb.auth.signOut({scope:'local'}),new Promise(r=>setTimeout(r,3000))])}catch(e){}
-    try{Object.keys(localStorage).filter(k=>k.indexOf(CLE_AUTH)===0||k==='sere-app-derniere').forEach(k=>localStorage.removeItem(k))}catch(e){}
+    try{Object.keys(localStorage).filter(k=>k.indexOf(CLE_AUTH)===0||k==='sere-app-derniere'||k.indexOf('sere-nav-')===0).forEach(k=>localStorage.removeItem(k))}catch(e){}
     location.replace(location.pathname);return}
   case 'mdp':motDePasseSheet(false);return;
   case 'saveMdp':{const p1=$('#mdp1').value,p2=$('#mdp2').value;if(p1.length<8){toast('8 caractères ou plus');return}if(p1!==p2){toast('Les deux mots de passe diffèrent');return}const {error}=await sb.auth.updateUser({password:p1,data:{mdp:true}});if(error){toast(error.message);return}S.mdpOk=true;close();try{window.cguVerifier&&cguVerifier()}catch(x){}toast('Mot de passe enregistré : la prochaine fois, entrez avec votre courriel et ce mot de passe');return}
