@@ -5,5 +5,10 @@
   "Vos propres contrats et fiches : bien en vue dans Mes modèles et dans le dossier de suivi.",
   "Une famille archivée ou supprimée disparaît de l'accueil et de l'agenda.",
   "Chaque nouvel onglet s'ouvre en haut de la page."
- ]
+ ],
+ "maintenance": {
+  "debut": "2026-10-30T18:00",
+  "fin": "2026-10-30T20:00",
+  "message": "Nous transférons l'appli vers des serveurs au Canada pour mieux protéger vos données. Vos données sont en sécurité et tout sera de retour à 20 h."
+ }
 }
