@@ -2,17 +2,19 @@
    Le statut vient de fam_doulas (rempli par le webhook Stripe). La propriétaire n'est jamais suspendue. */
 if(window.ESPACE==='doula'){
 const ABO_LIENS={mensuel:'https://buy.stripe.com/aFabIUaPC7J6doM7jsffy0m',annuel:'https://buy.stripe.com/3cI8wI4regfCgAY47gffy0n'};
-const aboLien=k=>((PRIX.info('doula').liens||{})[k]||ABO_LIENS[k])+'?client_reference_id='+encodeURIComponent(ME_DOULA.id)+'&prefilled_email='+encodeURIComponent(ME_DOULA.courriel||'');
+const aboLien=k=>((PRIX.info('doula').liens||{})[k]||ABO_LIENS[k])+'?client_reference_id='+encodeURIComponent(ME_DOULA.id)+'&prefilled_email='+encodeURIComponent(ME_DOULA.courriel||'')+(ME_DOULA.rabais&&ME_DOULA.rabais_code?'&prefilled_promo_code='+encodeURIComponent(ME_DOULA.rabais_code):'');
 function aboStatut(){const D=ME_DOULA;if(!D)return {ok:true,type:'inconnu'};
   if(MOI&&MOI.admin)return {ok:true,type:'proprio'};
   if(D.acces_gratuit)return {ok:true,type:'offert'};
   if(D.abonnement_statut==='actif'||D.abonnement_statut==='impaye')return {ok:true,type:'abonnee',fin:D.abonnement_fin};
   if(D.essai_fin){const fin=new Date(D.essai_fin),jours=Math.ceil((fin-Date.now())/864e5);return jours>0?{ok:true,type:'essai',jours,fin}:{ok:false,type:'expire',fin}}
-  if(D.essai_gratuit===false)return {ok:false,type:'sansEssai'};
+  if(D.essai_gratuit===false||!D.essai_fin)return {ok:false,type:'sansEssai'};
   const debut=new Date(D.created_at||Date.now()),fin=new Date(debut);fin.setMonth(fin.getMonth()+6);
   const jours=Math.ceil((fin-Date.now())/864e5);
   return jours>0?{ok:true,type:'essai',jours,fin}:{ok:false,type:'expire',fin}}
-const aboBoutons=()=>{const aboI=PRIX.info('doula');return '<a class="btn" style="width:100%;text-align:center;margin:6px 0;text-decoration:none" target="_blank" rel="noopener" href="'+aboLien('mensuel')+'">'+aboI.fmt(aboI.p.m)+' par mois</a><a class="btn ghost" style="width:100%;text-align:center;margin:6px 0;text-decoration:none" target="_blank" rel="noopener" href="'+aboLien('annuel')+'">'+aboI.fmt(aboI.p.a)+' par an <span class="xs">(économisez '+aboI.fmt(aboI.p.e)+')</span></a><p class="xs muted">'+(aboI.reg==='CA'?'Taxes en sus':'Taxes éventuelles en sus')+'. Paiement sécurisé par Stripe. Annulable en tout temps.'+(aboI.note?' '+aboI.note:'')+'</p>';}
+const aboOffre=()=>{const D=ME_DOULA||{},r=+D.rabais||0;if(!r)return '';const i=PRIX.info('doula'),m=i.p.m*(100-r)/100,a=i.p.a*(100-r)/100;
+  return '<div class="card" style="border:2px solid var(--accent);background:color-mix(in srgb,var(--accent) 8%,var(--card));text-align:center;margin:4px 0 8px"><div style="font-size:28px">🎁</div><b style="font-size:1.1rem">Offre spéciale pour vous : '+r+' % de rabais</b><p class="small" style="margin:6px 0 0">Les places gratuites étaient complètes : Sabrina vous offre <b>'+i.fmt(m)+' par mois</b> au lieu de '+i.fmt(i.p.m)+', ou <b>'+i.fmt(a)+' par an</b> au lieu de '+i.fmt(i.p.a)+'. Le rabais s\'applique automatiquement au paiement.</p></div>'};
+const aboBoutons=()=>{const aboI=PRIX.info('doula'),r=+((ME_DOULA||{}).rabais)||0,px=x=>r?'<s style="opacity:.6">'+aboI.fmt(x)+'</s> '+aboI.fmt(x*(100-r)/100):aboI.fmt(x);return aboOffre()+'<a class="btn" style="width:100%;text-align:center;margin:6px 0;text-decoration:none" target="_blank" rel="noopener" href="'+aboLien('mensuel')+'">'+px(aboI.p.m)+' par mois</a><a class="btn ghost" style="width:100%;text-align:center;margin:6px 0;text-decoration:none" target="_blank" rel="noopener" href="'+aboLien('annuel')+'">'+px(aboI.p.a)+' par an'+(r?'':' <span class="xs">(économisez '+aboI.fmt(aboI.p.e)+')</span>')+'</a><p class="xs muted">'+(aboI.reg==='CA'?'Taxes en sus':'Taxes éventuelles en sus')+'. Paiement sécurisé par Stripe. Annulable en tout temps.'+(aboI.note?' '+aboI.note:'')+'</p>';}
 function aboVerifier(){['ecranAbo','bandeauAbo'].forEach(i=>document.getElementById(i)?.remove());
   const s=aboStatut();if(s.ok&&s.type==='essai'&&s.jours<=30){const b=document.createElement('div');b.id='bandeauAbo';b.className='bandeau-maj';
     b.innerHTML='<span>Il vous reste <b>'+s.jours+' jour'+(s.jours>1?'s':'')+'</b> gratuits : votre 7e mois commence le '+new Date(s.fin).toLocaleDateString('fr-CA',{day:'numeric',month:'long'})+'.</span><button class="btn sm" data-act="aboVoir">S\'abonner</button>';document.body.appendChild(b);return}
