@@ -7,8 +7,8 @@
   "Chaque nouvel onglet s'ouvre en haut de la page."
  ],
  "maintenance": {
-  "debut": "2026-10-30T20:30",
-  "fin": "2026-10-30T22:00",
-  "message": "Nous transférons l'appli vers des serveurs au Canada pour mieux protéger vos données. Vos données sont en sécurité et tout sera de retour vers 22 h."
+  "debut": "2026-10-30T19:00",
+  "fin": "2026-10-30T20:30",
+  "message": "Nous transférons l'appli vers des serveurs au Canada pour mieux protéger vos données. Vos données sont en sécurité et tout sera de retour vers 20 h 30."
  }
 }
