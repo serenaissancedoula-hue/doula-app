@@ -21,6 +21,30 @@
     for (var i = 0; i < s.length; i++) u[i] = s.charCodeAt(i);
     return u;
   }
+
+  /* Abonnement lié à la clé VAPID actuelle : si l'appareil en garde un ancien (autre clé, après le transfert des serveurs), on le remplace. */
+  function memeCle(ab) {
+    try {
+      var k = ab.options && ab.options.applicationServerKey; if (!k) return false;
+      var a = new Uint8Array(k), b = cleVapid(opts.vapid); if (a.length !== b.length) return false;
+      for (var i = 0; i < a.length; i++) if (a[i] !== b[i]) return false;
+      return true;
+    } catch (e) { return false; }
+  }
+  function abonner(reg) {
+    return reg.pushManager.getSubscription().then(function (ab) {
+      if (ab && memeCle(ab)) return ab;
+      var p = ab ? ab.unsubscribe().catch(function () {}) : Promise.resolve();
+      return p.then(function () { return reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: cleVapid(opts.vapid) }); });
+    });
+  }
+  /* Au démarrage : si les notifications sont déjà permises, on remet l'abonnement à jour sans rien demander. */
+  window.srnReabonner = function () {
+    if (!('Notification' in window) || !('serviceWorker' in navigator) || !('PushManager' in window) || Notification.permission !== 'granted') return Promise.resolve();
+    var tmp = false;
+    if (!opts) { try { opts = { sb: sb, vapid: VAPID }; tmp = true; } catch (x) { return Promise.resolve(); } }
+    return navigator.serviceWorker.ready.then(function (reg) { return abonner(reg); }).then(enregistrer).catch(function () {}).then(function () { if (tmp) opts = null; });
+  };
   function q(sel) { return racine.querySelector(sel); }
 
   /* ---- Contexte audio partagé : débloqué dès le premier toucher (exigé par iOS/Android) ---- */
@@ -119,7 +143,7 @@
     return Notification.requestPermission().then(function (p) {
       if (p !== 'granted') return p;
       return navigator.serviceWorker.ready.then(function (reg) {
-        return reg.pushManager.getSubscription().then(function (ab) { return ab || reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: cleVapid(opts.vapid) }); });
+        return abonner(reg);
       }).then(enregistrer).then(function (r) { return r && r.error ? 'erreur' : 'granted'; });
     }).catch(function () { return 'erreur'; }).then(function (r) { if (tmp) opts = null; return r; });
   };
@@ -184,7 +208,7 @@
       Notification.requestPermission().then(function (p) {
         if (p !== 'granted') { etat(); return; }
         return navigator.serviceWorker.ready.then(function (reg) {
-          return reg.pushManager.getSubscription().then(function (ab) { return ab || reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: cleVapid(opts.vapid) }); });
+          return abonner(reg);
         }).then(enregistrer).then(function (r) {
           if (r && r.error) alert(L('Abonnement non enregistré : ', 'Subscription not saved: ') + r.error.message);
           etat();

@@ -1,9 +1,9 @@
 /* Académie Sérénaissance — appli Famille (parents et doulas).
    Données dans Supabase (tables fam_*), protégées par RLS : une famille ne voit que son dossier, une doula que ses familles.
    Les photos et minuteurs restent sur l'appareil. */
-const SB_URL='https://zeptirfcwstufcpgvkzx.supabase.co';
-const SB_CLE='sb_publishable_OBeZ61m6gGF5tGPUokeS_A_nCZvpdpl';
-const VAPID='BA1eSxrp55R_nk6-rHpCI0Pi6OjPh-0MIOmlG2XZOLEptXG0xFUS4eB9aKAl3qQelLJqfouEq3FXWkYf02YhKMc';
+const SB_URL='https://cbehmsoisqfimcafuyau.supabase.co';
+const SB_CLE='sb_publishable_m_VFAjDVg0gFpArtUQ8k5g_GjtT7w-e';
+const VAPID='BJC1fnvWds8ctpR0X-wqEgbawrXCQ13_LibuAnvaSwSmeWu39GtwyZCDChj2_E_Ua7fqXz3QJnGrm-CqfU1905c';
 /* Deux applis séparées : l'Espace Doula (racine) et l'Espace Famille (/parents/). Chacune garde sa propre session. */
 const ESPACE=window.ESPACE==='parent'?'parent':'doula';
 const CLE_AUTH='sere-'+ESPACE+'-auth';
@@ -146,6 +146,7 @@ function render(){if(!S.role)return;$('#gear').hidden=false;
   h+=pied();
   $('#app').innerHTML=h;
   if(window.Reglages&&$('#rg'))try{Reglages.monter($('#rg'),{sb,vapid:VAPID,admin:false,surPush:rafraichir})}catch(e){}
+  if(window.srnReabonner&&!window.__reab){window.__reab=1;try{srnReabonner()}catch(e){}}
   if(S.role==='parent'&&S.tab==='souvenirs'&&!S.sub)fillPhotos();
   const fil=$('#fil');if(fil)fil.scrollTop=fil.scrollHeight;
   document.querySelectorAll('canvas.sig').forEach(initSig);
