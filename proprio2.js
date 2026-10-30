@@ -31,13 +31,22 @@ const _dOutAT=dOutils;dOutils=function(){if(MOI&&MOI.admin&&!DOUT.find(x=>x[0]==
 
 /* ---------- Places des testeuses (propriétaire) ---------- */
 async function carteInscriptions(){const el=$('#placesCard');if(!el)return;
-  const [{data:CP},{data:UT},{data:DL},{data:FM}]=await Promise.all([sb.from('fam_coupons').select('code,pour,max_utilisations,utilisations'),sb.from('fam_coupons_util').select('compte'),sb.from('fam_doulas').select('id,test'),sb.from('fam_familles').select('id,doula_id,test')]);
-  const mxD=((CP||[]).find(c=>c.pour==='doula')||{}).max_utilisations||10,mxM=((CP||[]).find(c=>c.pour==='famille')||{}).max_utilisations||10;
-  const prD=(DL||[]).filter(d=>!d.test).length,deja=new Set((UT||[]).map(x=>x.compte));
-  const prM=(FM||[]).filter(f=>!f.test&&(deja.has(f.id)||f.doula_id)).length;
+  const [{data:CP},{data:UT},{data:DL},{data:FM}]=await Promise.all([sb.from('fam_coupons').select('code,pour,max_utilisations,utilisations'),sb.from('fam_coupons_util').select('compte,pour'),sb.from('fam_doulas').select('id,prenom,nom,test,essai_fin,abonnement_statut,acces_gratuit'),sb.from('fam_familles').select('id,doula_id,test')]);
+  const mxD=((CP||[]).find(c=>c.pour==='doula')||{}).max_utilisations||5,mxM=((CP||[]).find(c=>c.pour==='famille')||{}).max_utilisations||5;
+  const code=new Set((UT||[]).map(x=>x.compte)),maint=Date.now();
+  const D=(DL||[]).filter(d=>!d.test),prD=D.filter(d=>code.has(d.id)).length;
+  const payees=D.filter(d=>['actif','impaye'].includes(d.abonnement_statut)),offertes=D.filter(d=>d.acces_gratuit&&!code.has(d.id));
+  const bloquees=D.filter(d=>!code.has(d.id)&&!d.acces_gratuit&&!['actif','impaye'].includes(d.abonnement_statut)&&!(d.essai_fin&&new Date(d.essai_fin)>maint));
+  const prM=(UT||[]).filter(x=>x.pour==='famille').length,viaDoula=(FM||[]).filter(f=>!f.test&&f.doula_id&&!code.has(f.id)).length;
+  const nom=d=>esc([d.prenom,d.nom].filter(Boolean).join(' ')||'Doula');
   const barre=(n,m)=>'<div style="height:10px;border-radius:10px;background:var(--soft2);margin:6px 0 12px"><div style="height:10px;border-radius:10px;background:var(--accent);width:'+Math.min(100,Math.round(100*n/m))+'%"></div></div>';
   const ligne=(t,n,m)=>'<div class="row between"><b>'+t+' : '+n+' sur '+m+'</b><span class="pill '+(n<m?'ok':'')+'">'+(n<m?'Places libres':'Complètes')+'</span></div>'+barre(n,m);
-  el.innerHTML='<span class="eyebrow acc">Places d\'essai gratuit</span>'+ligne('Doulas',prD,mxD)+ligne('Mamans',prM,mxM)+'<p class="xs muted">Une doula qui s\'inscrit et ajoute sa maman prend une place doula et une place maman. Votre compte et les comptes test ne sont pas comptés.</p>'}
+  el.innerHTML='<span class="eyebrow acc">Places d\'essai gratuit (codes promo)</span>'+ligne('Doulas',prD,mxD)+ligne('Mamans',prM,mxM)+
+   '<div class="list" style="margin-top:4px"><div class="li"><div class="tx"><b>'+payees.length+' doula'+(payees.length>1?'s':'')+' abonnée'+(payees.length>1?'s':'')+' (payante'+(payees.length>1?'s':'')+')</b></div></div>'+
+   (offertes.length?'<div class="li"><div class="tx"><b>'+offertes.length+' accès offert'+(offertes.length>1?'s':'')+' par vous</b><span>'+offertes.map(nom).join(', ')+'</span></div></div>':'')+
+   (bloquees.length?'<div class="li"><div class="tx"><b>'+bloquees.length+' inscrite'+(bloquees.length>1?'s':'')+' sans accès : elle'+(bloquees.length>1?'s doivent':' doit')+' s\'abonner</b><span>'+bloquees.map(nom).join(', ')+' · elles voient l\'écran d\'abonnement et ne peuvent pas utiliser l\'appli</span></div></div>':'')+
+   '<div class="li"><div class="tx"><b>'+viaDoula+' maman'+(viaDoula>1?'s':'')+' gratuite'+(viaDoula>1?'s':'')+' grâce à leur doula</b><span>Ne prennent pas de place</span></div></div></div>'+
+   '<p class="xs muted">Votre compte et les comptes test ne sont pas comptés.</p>'}
 const _pp2=DSUB.proprio;DSUB.proprio=function(){const h=_pp2();if(!MOI||!MOI.admin)return h;setTimeout(async()=>{await chargerPlaces();carteInscriptions();boiteSupport()},0);return h.replace('<div class="card" id="statsProprio">','<div class="card" id="boiteSup"><p class="small muted">Chargement…</p></div><div class="card" id="placesCard"><p class="small muted">Chargement…</p></div><div class="card" id="statsProprio">')};
 async function boiteSupport(){const el=$('#boiteSup');if(!el)return;
   const [r1,r2]=await Promise.all([sb.from('fam_support').select('*').eq('de_admin',false).order('created_at',{ascending:false}).limit(15),sb.rpc('fam_admin_stats')]);
