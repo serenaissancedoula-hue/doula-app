@@ -6,7 +6,7 @@
 if(window.ESPACE==='parent')return;
 document.documentElement.classList.add('esp-doula');
 const E=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-function chiffres(){const L=S.clients||[];let nbF=0,garde=0,jours=null;
+function chiffres(){const L=(S.clients||[]).filter(c=>!['archivee','non_retenue'].includes(c.statut));let nbF=0,garde=0,jours=null;
   L.forEach(c=>{if(c.statut==='active'||c.statut==='invitee'||!c.statut)nbF++;try{if(enGarde(c))garde++;const st=cStage(c);if(st.k==='preg'&&st.left>=0&&(jours==null||st.left<jours))jours=st.left}catch(e){}});
   return {nbF,garde,jours}}
 function enTete(){const D=S.doula||{},prenom=String(D.prenomD||D.nom||'').split(' ')[0],C=chiffres();
@@ -45,7 +45,18 @@ function restaurer(m){const app=document.getElementById('app');if(!app)return;re
   app.querySelectorAll('details').forEach(d=>{const n=nomD(d);if(!n)return;const o=m.ouverts.includes(n);if(d.open!==o)d.open=o});
   const aller=()=>window.scrollTo(0,m.y);aller();requestAnimationFrame(aller);setTimeout(aller,60);setTimeout(()=>{aller();retour=0},180)}
 const _r=render;render=function(){noter(1);const r=_r.apply(this,arguments);try{harmoniser();requestAnimationFrame(harmoniser);
-  const k=cle();if(k!==cle0){const m=MEM[k];cle0=k;if(m)restaurer(m)}}catch(e){}return r};
+  const k=cle();if(k!==cle0){const m=MEM[k];cle0=k;const ret=RETOUR&&Date.now()-RETOUR<1500;RETOUR=0;
+    /* bouton « retour » : on revient où on était ; nouvel onglet ou nouvelle page : on arrive en haut */
+    if(ret&&m)restaurer(m);else{retour=1;const haut=()=>window.scrollTo(0,0);haut();requestAnimationFrame(haut);setTimeout(()=>{haut();retour=0},120)}}}catch(e){}return r};
+let RETOUR=0;
+document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-act]');if(!b)return;const a=b.dataset.act;
+  if(a==='clientBack'||(a==='dsub'&&!b.dataset.v)||a==='back'||b.classList.contains('back')||(a==='sub'&&!b.dataset.v))RETOUR=Date.now()},true);
+window.addEventListener('popstate',()=>{RETOUR=Date.now()});
+/* familles archivées ou « n'a pas retenu mes services » : elles restent dans Familles, mais disparaissent de l'accueil, de l'agenda et des gardes */
+const actif=c=>!['archivee','non_retenue'].includes(c&&c.statut);
+function avecActives(fn){return function(){const tout=S.clients,rv=(typeof CRDV!=='undefined')?CRDV:null;try{S.clients=(tout||[]).filter(actif);if(rv){const ok=new Set(S.clients.map(c=>c.id));CRDV=rv.filter(r=>ok.has(r.famille_id))}return fn.apply(this,arguments)}finally{S.clients=tout;if(rv)CRDV=rv}}}
+if(typeof dAccueil==='function')dAccueil=avecActives(dAccueil);
+if(typeof dAgenda==='function')dAgenda=avecActives(dAgenda);
 const css=document.createElement('style');css.textContent=`
 .esp-doula .ab-top{margin-bottom:14px}.esp-doula .ab-tete{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin:4px 2px 12px}
 .esp-doula .ab-date{display:block;font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}.esp-doula .ab-tete h1{font-size:2rem;margin:0}

@@ -1,6 +1,9 @@
 {
- "version": "2026.10.29-277",
+ "version": "2026.10.30-278",
  "nouveautes": [
-  "L'appli s'ouvre plus vite."
+  "Choisissez votre période de garde (Paramètres).",
+  "Vos propres contrats et fiches : bien en vue dans Mes modèles et dans le dossier de suivi.",
+  "Une famille archivée ou supprimée disparaît de l'accueil et de l'agenda.",
+  "Chaque nouvel onglet s'ouvre en haut de la page."
  ]
 }

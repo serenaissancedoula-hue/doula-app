@@ -80,4 +80,6 @@ annuaire-doula.js
 params-ordre.js
 doula-harmonie.js
 cgu-admin.js
+garde.js
+fiches-perso.js
 avis-etoiles.js

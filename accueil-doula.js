@@ -4,7 +4,7 @@ const MOTS_DOULA=['Votre présence calme est déjà un soutien.','Observer, rass
 function adSalut(){const h=new Date().getHours();return h>=18||h<4?'Bonsoir':'Bonjour'}
 function adMot(){const d=new Date();return MOTS_DOULA[(d.getFullYear()*372+d.getMonth()*31+d.getDate())%MOTS_DOULA.length]}
 window._pvAtt=window._pvAtt||{n:null};
-async function adChargerAtt(){try{if(window._pvAtt.n!==null&&Date.now()-(window._pvAtt.t||0)<60000)return;const {data}=await sb.from('fam_versements_declares').select('famille_id').eq('statut','a_valider');window._pvAtt={n:(data||[]).length,t:Date.now(),f:(data||[])[0]&&(data||[])[0].famille_id};if(S.role==='doula'&&S.dtab==='accueil'&&!S.vue&&!S.dsub&&!S.openClient&&!(document.getElementById('layer')||{}).innerHTML)render()}catch(e){window._pvAtt={n:0,t:Date.now()}}}
+async function adChargerAtt(){try{if(window._pvAtt.n!==null&&Date.now()-(window._pvAtt.t||0)<60000)return;const {data}=await sb.from('fam_versements_declares').select('famille_id').eq('statut','a_valider');{const ok=new Set((S.clients||[]).filter(c=>!['archivee','non_retenue'].includes(c.statut)).map(c=>c.id)),L=(data||[]).filter(x=>ok.has(x.famille_id));window._pvAtt={n:L.length,t:Date.now(),f:L[0]&&L[0].famille_id}}if(S.role==='doula'&&S.dtab==='accueil'&&!S.vue&&!S.dsub&&!S.openClient&&!(document.getElementById('layer')||{}).innerHTML)render()}catch(e){window._pvAtt={n:0,t:Date.now()}}}
 window._adDem=window._adDem||{n:null,t:0};
 async function adChargerDem(){try{if(window._adDem.n!==null&&Date.now()-(window._adDem.t||0)<60000)return;const {data}=await sb.from('fam_demandes').select('id').eq('statut','nouvelle');const n=(data||[]).length,ch=window._adDem.n!==n;window._adDem={n,t:Date.now()};if(ch&&S.role==='doula'&&S.dtab==='accueil'&&!S.vue&&!S.openClient)render()}catch(e){window._adDem={n:window._adDem.n||0,t:Date.now()}}}
 /* répertoire « Trouver ma doula » : où j'en suis, et quoi faire ensuite */
@@ -62,14 +62,14 @@ dAccueil=function(){const D=S.doula,L=S.clients||[];const prenom=esc(String(D.no
   if(L.length)h+=aeFrise(L);
   /* mes familles en un coup d'œil */
   h+='<div class="card"><span class="eyebrow acc">Mes familles en un coup d\'œil</span><div class="grid3"><div class="stat acc"><b>'+pre.length+'</b><span>en prénatal</span></div><div class="stat '+(garde.length?'warn':'')+'"><b>'+garde.length+'</b><span>en garde</span></div><div class="stat ok"><b>'+pp.length+'</b><span>en post-partum</span></div></div>'+
-    (next.length?'<div class="list" style="margin-top:8px">'+next.map(c=>'<div class="li"><div class="ic">'+icon('fa-baby')+'</div><div class="tx"><b>'+esc(cName(c))+'</b><span>Prévu le '+fmtD(parseD(c.dpa),{day:'numeric',month:'long'})+' · garde dès le '+fmtS(addD(parseD(c.dpa),-14))+'</span></div></div>').join('')+'</div>':'<p class="small muted" style="margin-top:6px">Vos prochaines naissances prévues apparaîtront ici.</p>')+'</div>';
+    (next.length?'<div class="list" style="margin-top:8px">'+next.map(c=>'<div class="li"><div class="ic">'+icon('fa-baby')+'</div><div class="tx"><b>'+esc(cName(c))+'</b><span>Prévu le '+fmtD(parseD(c.dpa),{day:'numeric',month:'long'})+' · garde dès le '+fmtS(addD(parseD(c.dpa),-(40-gardeSA().de)*7))+'</span></div></div>').join('')+'</div>':'<p class="small muted" style="margin-top:6px">Vos prochaines naissances prévues apparaîtront ici.</p>')+'</div>';
   h+='<div class="card" data-act="dgo" data-v="outils|paiements" style="cursor:pointer" role="button" tabindex="0"><div class="row between"><span class="eyebrow acc">Paiements</span><span class="xs muted">Voir les paiements '+icon('fa-chevron-right')+'</span></div><div class="grid3"><div class="stat"><b>'+money(total)+'</b><span>forfaits signés</span></div><div class="stat ok"><b>'+money(paid)+'</b><span>reçus</span></div><div class="stat '+(total-paid>0?'warn':'')+'"><b>'+money(total-paid)+'</b><span>solde à recevoir</span></div></div></div>';
   return h};
 
 /* ---------- étape par étape : un bandeau qui défile, un toucher ouvre la liste des familles de l'étape ---------- */
 function aeEtapes(L){const E=[
-  {ico:'🤰',t:'Prénatal',s:'Avant 38 sem.',c:'#e3f3e6',f:c=>{const x=cStage(c);return x.k==='preg'&&x.w<38}},
-  {ico:'🔔',t:'En garde',s:'Dès 38 sem.',c:'#fdf3d6',f:c=>{const x=cStage(c);return x.k==='preg'&&x.w>=38}},
+  {ico:'🤰',t:'Prénatal',s:'Avant '+gardeSA().de+' sem.',c:'#e3f3e6',f:c=>{const x=cStage(c);return x.k==='preg'&&x.w<gardeSA().de}},
+  {ico:'🔔',t:'En garde',s:'Dès '+gardeSA().de+' sem.',c:'#fdf3d6',f:c=>{const x=cStage(c);return x.k==='preg'&&x.w>=gardeSA().de}},
   {ico:'🍼',t:'Post-partum',s:'0 à 6 sem.',c:'#fbe0e6',f:c=>{const x=cStage(c);return x.k==='pp'&&x.day<=42}},
   {ico:'🌿',t:'Suivi',s:'Après 6 sem.',c:'#e6eefc',f:c=>{const x=cStage(c);return x.k==='pp'&&x.day>42}}];
   E.forEach(e=>{e.l=L.filter(c=>{try{return e.f(c)}catch(x){return false}})});return E}

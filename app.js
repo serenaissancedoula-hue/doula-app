@@ -397,7 +397,7 @@ document.addEventListener('click',async e=>{const b=e.target.closest('[data-act]
     const dos={};for(const k in o)if(!ALIAS.includes(k)&&!['ddr'].includes(k))dos[k]=o[k];dos.parcours={contact:iso(new Date())};dos.docs={};dos.rdv=[];dos.comms=[];dos.paie=[];
     await sb.from('fam_dossiers').insert({famille_id:f.id,data:dos});S.clients.unshift(buildClient(f,dos));S.openClient=f.id;S.ctab='resume';close();render();toast(jumelee?'Cette maman avait déjà son espace : vous êtes jumelées, rien n\'a été effacé':'Famille ajoutée');if(inv)inviteSheet(f.id);return}
   case 'inviter':inviteSheet(id);return;
-  case 'statut':{const c=C();c.statut=v;await saveClient(c.id);await chargerDoula();toast(v==='active'?'Dossier réactivé':'Dossier archivé : conservé au moins un an');break}
+  case 'statut':{const c=C();c.statut=v;await saveClient(c.id);window._pvAtt={n:null,t:0};await chargerDoula();toast(v==='active'?'Dossier réactivé':'Dossier archivé : conservé au moins un an');break}
   case 'clientOpen':S.openClient=id;S.dtab='clientes';S.ctab=v||'resume';scrollTo(0,0);render();await chargerClientDetail(id);break;
   case 'clientBack':S.openClient=null;break;
   case 'ctab':S.ctab=v;if(S.openClient&&['messages','docs','suivi','mots'].includes(v))await chargerClientDetail(S.openClient);break;
@@ -456,7 +456,7 @@ document.addEventListener('click',async e=>{const b=e.target.closest('[data-act]
     b.disabled=true;for(const t of ['fam_messages','fam_rdv','fam_documents','fam_journal','fam_mots','fam_dossiers'])await sb.from(t).delete().eq('famille_id',id);
     const {data:sup,error:es}=await sb.from('fam_familles').delete().eq('id',id).select('id');
     if(es||!sup||!sup.length){toast('Pas supprimée : '+((es&&es.message)||'la base a refusé'));b.disabled=false;return}
-    S.clients=S.clients.filter(x=>x.id!==id);S.openClient=null;toast('Famille supprimée');break}
+    S.clients=S.clients.filter(x=>x.id!==id);try{CRDV=(CRDV||[]).filter(r=>r.famille_id!==id);delete CDOCS[id];if(typeof NONLUS==='object')delete NONLUS[id]}catch(x){}window._pvAtt={n:null,t:0};S.openClient=null;S.dtab='clientes';toast('Famille supprimée');break}
   case 'sacReset':S.doula.sac={};break;
   default:return}
   }catch(err){console.error(err);toast('Une erreur est survenue. Réessayez.')}
