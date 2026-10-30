@@ -57,6 +57,14 @@ const actif=c=>!['archivee','non_retenue'].includes(c&&c.statut);
 function avecActives(fn){return function(){const tout=S.clients,rv=(typeof CRDV!=='undefined')?CRDV:null;try{S.clients=(tout||[]).filter(actif);if(rv){const ok=new Set(S.clients.map(c=>c.id));CRDV=rv.filter(r=>ok.has(r.famille_id))}return fn.apply(this,arguments)}finally{S.clients=tout;if(rv)CRDV=rv}}}
 if(typeof dAccueil==='function')dAccueil=avecActives(dAccueil);
 if(typeof dAgenda==='function')dAgenda=avecActives(dAgenda);
+/* Familles : les dossiers archivés sortent de la liste ; un lien en bas permet de les revoir au besoin */
+if(typeof dClientes==='function'){const _dc=dClientes;dClientes=function(){if(S.openClient)return _dc.apply(this,arguments);
+  const tout=S.clients||[],arch=tout.filter(c=>!actif(c));let h;
+  try{S.clients=S.voirArch?arch:tout.filter(actif);h=_dc.apply(this,arguments)}finally{S.clients=tout}
+  if(S.voirArch)h=h.replace("Du premier contact à l\\'archivage","Familles archivées (fin de l\\'accompagnement)")+'<button class="btn ghost" data-act="voirArch" data-v="0" style="margin-top:12px">'+icon('fa-arrow-left')+'Retour à mes familles</button>';
+  else if(arch.length)h+='<button class="btn sm ghost" data-act="voirArch" data-v="1" style="margin:14px auto 0;display:flex">'+icon('fa-box-archive')+'Voir les archives ('+arch.length+')</button>';
+  return h}}
+document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-act="voirArch"]');if(!b)return;e.stopPropagation();S.voirArch=b.dataset.v==='1';render()},true);
 const css=document.createElement('style');css.textContent=`
 .esp-doula .ab-top{margin-bottom:14px}.esp-doula .ab-tete{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin:4px 2px 12px}
 .esp-doula .ab-date{display:block;font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}.esp-doula .ab-tete h1{font-size:2rem;margin:0}
