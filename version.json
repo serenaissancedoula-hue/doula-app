@@ -4,10 +4,5 @@
   "Vos données sont maintenant hébergées au Canada.",
   "Vous devrez peut-être vous reconnecter une fois, avec le même courriel et le même mot de passe.",
   "Pour les notifications : ouvrez l'appli et acceptez de nouveau si on vous le demande."
- ],
- "maintenance": {
-  "debut": "2026-10-30T19:00",
-  "fin": "2026-10-30T20:30",
-  "message": "Nous transférons l'appli vers des serveurs au Canada pour mieux protéger vos données. Vos données sont en sécurité et tout sera de retour vers 20 h 30."
- }
+ ]
 }
