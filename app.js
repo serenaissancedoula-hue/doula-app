@@ -401,7 +401,7 @@ document.addEventListener('click',async e=>{const b=e.target.closest('[data-act]
   case 'statut':{const c=C();c.statut=v;await saveClient(c.id);window._pvAtt={n:null,t:0};await chargerDoula();toast(v==='active'?'Dossier réactivé':'Dossier archivé : conservé au moins un an');break}
   case 'clientOpen':S.openClient=id;S.dtab='clientes';S.ctab=v||'resume';scrollTo(0,0);render();await chargerClientDetail(id);break;
   case 'clientBack':S.openClient=null;break;
-  case 'ctab':S.ctab=v;if(S.openClient&&['messages','docs','suivi','mots'].includes(v))await chargerClientDetail(S.openClient);break;
+  case 'ctab':S.ctab=v;scrollTo(0,0);if(S.openClient&&['messages','docs','suivi','mots'].includes(v))await chargerClientDetail(S.openClient);break;
   case 'modSel':return;
   case 'envoyerMsgD':{const t=$('#msgTxt').value.trim();if(!t)return;b.disabled=true;const {error}=await sb.from('fam_messages').insert({famille_id:id,de_doula:true,texte:t});if(error){toast('Pas envoyé : '+error.message);b.disabled=false;return}await chargerClientDetail(id);toast('Message déposé dans l\'appli de la famille');break}
   case 'rdvNouveau':rdvSheet(id,null,false);return;
