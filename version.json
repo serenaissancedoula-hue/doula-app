@@ -1,10 +1,9 @@
 {
- "version": "2026.10.30-283",
+ "version": "2026.10.30-284",
  "nouveautes": [
-  "Choisissez votre période de garde (Paramètres).",
-  "Vos propres contrats et fiches : bien en vue dans Mes modèles et dans le dossier de suivi.",
-  "Une famille archivée ou supprimée disparaît de l'accueil et de l'agenda.",
-  "Chaque nouvel onglet s'ouvre en haut de la page."
+  "Vos données sont maintenant hébergées au Canada.",
+  "Vous devrez peut-être vous reconnecter une fois, avec le même courriel et le même mot de passe.",
+  "Pour les notifications : ouvrez l'appli et acceptez de nouveau si on vous le demande."
  ],
  "maintenance": {
   "debut": "2026-10-30T19:00",
