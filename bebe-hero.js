@@ -43,10 +43,10 @@ function vue(w){const f=fruit(w),I=infoSemaine(w)||[],M=mouvement(w),b=bpm(w),st
   const poids=f[2]?(f[2]>=1000?cm((f[2]/1000).toFixed(2))+' kg':f[2]+' g'):'< 1 g';
   const pr=prenomMoi();
   return '<div class="bh-top"><span class="bh-sal">'+salut()+(pr?', <b>'+esc(pr)+'</b>':'')+'</span><button type="button" class="bh-x" data-bh="fermer" aria-label="Fermer">'+icon('fa-xmark')+'</button></div>'+
-    '<div class="bh-img" id="bhImg"><img src="'+img(w)+'" alt="Bébé à '+w+' semaines" draggable="false"></div>'+
+    '<div class="bh-img" id="bhImg"><div class="bh-spin'+(S.bhFlip?' flip':'')+'"><img src="'+img(w)+'" alt="Bébé à '+w+' semaines" draggable="false"></div></div>'+
     '<div class="bh-nav"><button type="button" data-bh="prev" aria-label="Semaine précédente"'+(w<=SEM_MIN?' disabled':'')+'>'+icon('fa-chevron-left')+'</button><span class="bh-rel">'+rel+'</span><button type="button" data-bh="next" aria-label="Semaine suivante"'+(w>=SEM_MAX?' disabled':'')+'>'+icon('fa-chevron-right')+'</button></div>'+
     '<div class="bh-mes"><div><small>Poids</small><b>≈ '+poids+'</b></div><div><small>Longueur</small><b>≈ '+cm(f[1])+' cm</b></div><div class="bh-gs"><b>'+w+'</b><small>semaines</small></div></div>'+
-    '<div class="bh-pan"><div class="bh-pt"><b>'+esc((((window.SEM_PLUS||{})[w])||[])[0]||'Votre bébé cette semaine')+'</b>'+(b?'<button type="button" class="bh-son" data-bh="son" aria-label="Couper ou remettre le son du cœur">'+icon(S.sonCoeur?'fa-volume-high':'fa-volume-xmark')+'</button>':'')+'</div>'+
+    '<div class="bh-pan"><div class="bh-pt"><b>'+esc((((window.SEM_PLUS||{})[w])||[])[0]||'Votre bébé cette semaine')+'</b><span class="bh-btns"><button type="button" class="bh-son" data-bh="tourner" aria-label="Tourner bébé">'+icon('fa-rotate-right')+'</button>'+(b?'<button type="button" class="bh-son" data-bh="son" aria-label="Couper ou remettre le son du cœur">'+icon(S.sonCoeur?'fa-volume-high':'fa-volume-xmark')+'</button>':'')+'</span></div>'+
     '<p>'+esc(I[1]||'')+'</p><p>'+(w>=7?'<b>Ses mouvements :</b> ':'')+esc(M[2])+'</p><p class="bh-note">'+(b?'Son du cœur : une illustration, pas le vrai cœur de votre bébé.':'Le cœur de bébé commence à battre très tôt, mais on ne l\'entend pas encore à cette étape.')+' Glissez le doigt à gauche ou à droite pour changer de semaine.</p></div>'+
     rectangle(g)};
 function coeur(w){try{coeurArreter()}catch(e){}const b=bpm(w);if(b&&S.sonCoeur){try{coeurDemarrer(b)}catch(e){}}}
@@ -60,7 +60,7 @@ ouvrirBebePE=ouvrir;fermerBebePE=fermer;
 document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-bh]');if(!b)return;if(e.target.closest('[data-act]'))return;e.stopPropagation();e.preventDefault();
   const a=b.dataset.bh;
   if(a==='ouvrir')ouvrir();else if(a==='fermer')fermer();else if(a==='prev')aller(SEM-1);else if(a==='next')aller(SEM+1);
-  else if(a==='son'){if(S.sonCoeur){try{coeurArreter()}catch(x){}S.sonCoeur=false}else{S.sonCoeur=true;coeur(SEM)}const bt=document.querySelector('#bhPE .bh-son');if(bt)bt.innerHTML=icon(S.sonCoeur?'fa-volume-high':'fa-volume-xmark')}},true);
+  else if(a==='tourner'){S.bhFlip=!S.bhFlip;const sp=document.querySelector('#bhPE .bh-spin');if(sp)sp.classList.toggle('flip',!!S.bhFlip)}else if(a==='son'){if(S.sonCoeur){try{coeurArreter()}catch(x){}S.sonCoeur=false}else{S.sonCoeur=true;coeur(SEM)}const bt=document.querySelector('#bhPE .bh-son');if(bt)bt.innerHTML=icon(S.sonCoeur?'fa-volume-high':'fa-volume-xmark')}},true);
 /* glisser : à gauche = semaine suivante, à droite = semaine précédente */
 let x0=null,y0=null;
 document.addEventListener('touchstart',e=>{if(!e.target.closest||!e.target.closest('#bhPE .bh-img'))return;const t=e.touches[0];x0=t.clientX;y0=t.clientY},{passive:true});
@@ -78,6 +78,8 @@ const st=document.createElement('style');st.textContent=
 '#bhPE{position:fixed;inset:0;z-index:99990;overflow-y:auto;-webkit-overflow-scrolling:touch;background:linear-gradient(180deg,#e8cdbd 0%,#3b2a24 46%,#1c1714 100%);color:#fff;padding:max(14px,env(safe-area-inset-top)) 16px max(24px,env(safe-area-inset-bottom));display:grid;gap:14px;align-content:start}'+
 '.bh-top{display:flex;justify-content:space-between;align-items:center}.bh-sal{font-size:1rem;color:#3b2a24}.bh-sal b{font-family:var(--serif,inherit);font-size:1.25rem}'+
 '.bh-x,.bh-nav button,.bh-son{border:0;cursor:pointer;display:grid;place-items:center;width:42px;height:42px;border-radius:50%;background:rgba(255,255,255,.9);color:#3b2a24;font-size:1.05rem}.bh-nav button:disabled{opacity:.35}'+
+'.bh-btns{display:flex;gap:8px;align-items:center}.bh-img{perspective:900px}.bh-spin{width:100%;height:100%;transition:transform .9s cubic-bezier(.4,.1,.2,1);transform-style:preserve-3d}.bh-spin.flip{transform:rotateY(180deg)}'+
+'@keyframes bhResp{0%,100%{transform:scale(1) translateY(0)}50%{transform:scale(1.035) translateY(-1.2%)}}.bh-img img,.bh-hero img{animation:bhResp 5s ease-in-out infinite;transform-origin:50% 60%}@media (prefers-reduced-motion:reduce){.bh-img img,.bh-hero img{animation:none}.bh-spin{transition:none}}'+
 '.bh-img{width:min(calc(100vw - 32px),58vh);height:min(calc(100vw - 32px),58vh);margin:0 auto;border-radius:28px;overflow:hidden;background:#120d10;box-shadow:0 12px 34px rgba(0,0,0,.4);touch-action:pan-y}.bh-img img{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none;user-select:none;-webkit-user-select:none}'+
 '.bh-nav{display:flex;justify-content:space-between;align-items:center}.bh-rel{font-weight:700;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.4)}'+
 '.bh-mes{display:grid;grid-template-columns:1fr 1fr auto;gap:12px;align-items:end;color:#fff}.bh-mes small{display:block;font-size:.8rem;opacity:.8}.bh-mes b{font-size:1.25rem}.bh-gs{text-align:right}.bh-gs b{font-family:var(--serif,inherit);font-size:2.6rem;line-height:1;display:block}'+
