@@ -1,14 +1,17 @@
 /* Sérénaissance — appli des doulas et des familles (service worker).
    Toujours la version la plus récente quand il y a Internet; Supabase ne passe jamais par le cache.
    Reçoit les notifications (messages, rendez-vous, documents, rappels, mot du jour). */
-var VERSION = 'sere-app-v113';
+var VERSION = 'sere-app-v114';
 var BASE = self.registration.scope;
 var BEBE3D = 'sere-bebe3d-v1'; /* gros modèles 3D de bébé : gardés sur le téléphone, téléchargés une seule fois */
 self.addEventListener('install', function (e) {
   e.waitUntil(caches.open(VERSION).then(function (c) { return c.addAll(['./', 'style.css', 'logo.png', 'icones/icone-192.png']).catch(function () {}); }).then(function () { return self.skipWaiting(); }));
 });
 self.addEventListener('activate', function (e) {
-  e.waitUntil(caches.keys().then(function (l) { return Promise.all(l.filter(function (k) { return k !== VERSION && k !== BEBE3D; }).map(function (k) { return caches.delete(k); })); }).then(function () { return self.clients.claim(); }));
+  e.waitUntil(caches.keys().then(function (l) { return Promise.all(l.filter(function (k) { return k !== VERSION && k !== BEBE3D; }).map(function (k) { return caches.delete(k); })); })
+    /* la 3D n'existe plus : on libère la place des anciens modèles .glb gardés sur le téléphone (les photos du cache restent) */
+    .then(function () { return caches.open(BEBE3D).then(function (c) { return c.keys().then(function (ks) { return Promise.all(ks.filter(function (r) { return /\.glb(\?|$)/.test(r.url); }).map(function (r) { return c.delete(r); })); }); }).catch(function () {}); })
+    .then(function () { return self.clients.claim(); }));
 });
 self.addEventListener('fetch', function (e) {
   var req = e.request; if (req.method !== 'GET') return;

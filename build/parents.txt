@@ -18,7 +18,6 @@ bebe-donnees.js
 bebe.js
 bebe-rendu.js
 bebe-photo.js
-bebe-3d-carte.js
 bebe-nom.js
 proprio.js
 maj.js

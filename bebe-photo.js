@@ -11,7 +11,7 @@ svgBebe=function(w,id){const src=bebeSerieImage(w);if(!src)return _svgBebeDessin
   const M=mouvement(w),b=bpm(w),zid=id||'bebeZone';
   return '<div class="bebe-zone reel photo '+M[3]+'" id="'+zid+'" data-w="'+w+'" style="--bpm:'+(b?60/b:1)+'s">'+
     '<div class="photo-rond"><img src="'+src+'" alt="Bébé à '+w+' semaines" decoding="async" draggable="false" onerror="bebeSerieSecours(this,'+w+',\''+zid+'\')"></div></div>'};
-/* L'image ne flotte pas. Bébé en 3D (bebe-3d-carte.js) se pose par-dessus dès qu'il est chargé. */
+/* L'image ne flotte pas. (La 3D a été retirée : bébé s'affiche toujours en image fixe.) */
 (function(){const st=document.createElement('style');st.textContent=
   '.bebe-zone.photo{position:relative}'+
   '.bebe-zone.photo .photo-rond{width:100%;height:100%;border-radius:50%;overflow:hidden;background:#120d10;box-shadow:0 0 0 2px rgba(244,199,179,.55),inset 0 0 30px rgba(0,0,0,.5)}'+
