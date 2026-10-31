@@ -36,6 +36,6 @@ pInfos=function(){if(S.sub==='etapes')return page();let h=_pI.apply(this,argumen
 document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-et]');if(!b)return;e.stopPropagation();e.preventDefault();S.etV=b.dataset.et;render()},true);
 /* lien depuis la carte de bébé de l'accueil */
 const _cb=carteBebe;
-carteBebe=function(g){let h=_cb(g);try{if(h.indexOf('class="bh-bas"')>=0){const k=h.indexOf('<h2 class="bb2-h">');const lien='<button class="btn sm ghost" data-act="go" data-v="infos|etapes" style="margin:10px 0 2px;width:100%">'+icon('fa-seedling')+' Étapes du développement : mois par mois, semaine par semaine</button>';
-  const j=h.indexOf('</div></div>',h.indexOf('class="bh-bas"'));if(j>=0)h=h.slice(0,j+12)+lien+h.slice(j+12)}}catch(e){}return h};
+carteBebe=function(g){let h=_cb(g);try{const lien='<button class="btn sm ghost" data-act="go" data-v="infos|etapes" style="margin:10px 0 2px;width:100%">'+icon('fa-seedling')+' Étapes du développement : mois par mois, semaine par semaine</button>';
+  const hi=h.indexOf('class="bh-hero"');if(hi>=0){const j=h.indexOf('</button>',hi);if(j>=0)h=h.slice(0,j+9)+lien+h.slice(j+9)}}catch(e){}return h};
 })();
