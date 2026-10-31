@@ -1,6 +1,6 @@
 {
- "version": "2026.10.31-328",
+ "version": "2026.10.31-329",
  "nouveautes": [
-  "Les dates et les heures suivent le fuseau horaire de la région de la famille ou de la doula."
+  "Un message de félicitations apparaît à chaque nouvelle semaine et chaque nouveau mois de grossesse, avec le lien pour lire."
  ]
 }

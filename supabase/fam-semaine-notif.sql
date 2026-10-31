@@ -1,0 +1,3 @@
+-- Notification « nouvelle semaine / nouveau mois » (tous les jours à 13 h UTC). Déjà appliquée sur le projet cbehmsoisqfimcafuyau.
+-- Semaine = (280 - jours restants jusqu'à la date prévue) / 7, de 5 à 42. Nouveau mois aux semaines 5, 9, 14, 18, 23, 28, 32, 37.
+-- Voir la fonction public.fam_semaine_notif() et la tâche cron « fam-semaine-nouvelle ».
