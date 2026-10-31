@@ -97,4 +97,5 @@ grossesse-ref.js
 style-uniforme.js
 bebe-hero.js
 liste-bebe.js
+etapes-dev.js
 avis-etoiles.js

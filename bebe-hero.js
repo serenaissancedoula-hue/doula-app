@@ -57,7 +57,7 @@ function ouvrir(){const st=stage();if(st.k!=='preg')return;fermer();SEM=cl(st.g.
   document.body.appendChild(d);document.body.style.overflow='hidden';S.sonCoeur=!!bpm(SEM);dessiner()}
 function fermer(){try{coeurArreter()}catch(e){}S.sonCoeur=false;const d=document.getElementById('bhPE');if(d)d.remove();document.body.style.overflow=''}
 ouvrirBebePE=ouvrir;fermerBebePE=fermer;
-document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-bh]');if(!b)return;e.stopPropagation();e.preventDefault();
+document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-bh]');if(!b)return;if(e.target.closest('[data-act]'))return;e.stopPropagation();e.preventDefault();
   const a=b.dataset.bh;
   if(a==='ouvrir')ouvrir();else if(a==='fermer')fermer();else if(a==='prev')aller(SEM-1);else if(a==='next')aller(SEM+1);
   else if(a==='son'){if(S.sonCoeur){try{coeurArreter()}catch(x){}S.sonCoeur=false}else{S.sonCoeur=true;coeur(SEM)}const bt=document.querySelector('#bhPE .bh-son');if(bt)bt.innerHTML=icon(S.sonCoeur?'fa-volume-high':'fa-volume-xmark')}},true);
