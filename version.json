@@ -1,6 +1,6 @@
 {
- "version": "2026.10.30-290",
+ "version": "2026.10.30-291",
  "nouveautes": [
-  "Les notifications disparaissent maintenant dès que tu ouvres l'appli : pas besoin de répondre."
+  "Une notification de message disparaît dès que tu ouvres le message, sans avoir à répondre."
  ]
 }

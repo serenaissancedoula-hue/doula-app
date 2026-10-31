@@ -45,6 +45,7 @@ paiements.js
 forfait-ajust.js
 chat.js
 chat-bulle.js
+notifs-lues.js
 agenda-tel.js
 guides-contenu.js
 accueil-doula.js

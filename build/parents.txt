@@ -37,6 +37,7 @@ envoi-doula.js
 paiements.js
 chat.js
 chat-bulle.js
+notifs-lues.js
 agenda-tel.js
 moderne.js
 journal-bebe.js

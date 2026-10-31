@@ -238,19 +238,3 @@
 
   window.Reglages = { monter: monter, sonner: sonner, lire: lire, tap: tap, regler: function (ch) { var x = lire(); for (var k in ch) x[k] = ch[k]; ecrire(x); }, listes: { touche: SONS_TOUCHE, msg: SONS_MSG } };
 })();
-
-/* Les notifications disparaissent d'elles-mêmes dès que la personne ouvre l'appli : pas besoin de répondre pour les faire partir. */
-(function () {
-  if (!('serviceWorker' in navigator)) return;
-  function effacer() {
-    if (document.visibilityState !== 'visible') return;
-    try { navigator.serviceWorker.ready.then(function (reg) { return reg.getNotifications ? reg.getNotifications() : []; }).then(function (l) { l.forEach(function (n) { if (!/^(test|🌸)/.test(n.title || '')) n.close(); }); }).catch(function () {}); } catch (x) {}
-    try { if (navigator.clearAppBadge) navigator.clearAppBadge(); } catch (x) {}
-  }
-  document.addEventListener('visibilitychange', effacer);
-  window.addEventListener('focus', effacer);
-  window.addEventListener('pageshow', effacer);
-  effacer();
-  /* une notification qui arrive pendant que l'appli est ouverte : elle part après un instant */
-  navigator.serviceWorker.addEventListener('message', function (ev) { if (ev.data && ev.data.type === 'push') setTimeout(effacer, 2500); });
-})();
