@@ -20,7 +20,7 @@ function cohab(g){
 function rectangle(g){
   const n=nomBebe(),tri=g.w<14?'1er trimestre':g.w<28?'2e trimestre':'3e trimestre';
   const dpa=g.dpa?(' · prévu le '+g.dpa.toLocaleDateString('fr-CA',{day:'numeric',month:'long'})):'';
-  return '<div class="bh-bas"><div class="bh-v">Vous et '+(n?esc(n):'bébé')+'</div><div class="bh-c">'+cohab(g)+'</div>'+
+  return '<div class="bh-bas"><div class="bh-v">Semaine '+cl(g.w)+(g.d?' + '+g.d+' j':'')+(n?' · '+esc(n):'')+'</div><div class="bh-c">'+cohab(g)+'</div>'+
     '<div class="prog"><i style="width:'+Math.min(100,Math.max(0,g.gaDays/280*100))+'%"></i></div><div class="xs muted">'+tri+dpa+'</div></div>';
 }
 function hero(g){
@@ -28,7 +28,7 @@ function hero(g){
   return '<button type="button" class="bh-hero" data-bh="ouvrir" aria-label="Voir bébé en grand et entendre son cœur">'+
     '<img src="'+img(w)+'" alt="Bébé à '+w+' semaines" decoding="async">'+
     '<span class="bh-haut"><small>'+salut()+(pr?',':'')+'</small>'+(pr?'<b>'+esc(pr)+'</b>':'')+'</span>'+
-    '<span class="bh-bs"><span class="bh-sem">Semaine '+w+(g.d?' + '+g.d+' j':'')+'</span><span class="bh-ouvrir">Ouvrir '+icon('fa-expand')+'</span></span></button>'+rectangle(g);
+    '<span class="bh-bs"><span class="bh-ouvrir">Ouvrir '+icon('fa-expand')+'</span></span></button>'+rectangle(g);
 }
 const _cb=carteBebe;
 carteBebe=function(g){let h=_cb(g);
@@ -75,7 +75,7 @@ const st=document.createElement('style');st.textContent=
 '.bh-haut{position:absolute;left:18px;top:16px;z-index:1;display:grid;gap:0;color:#fff;text-shadow:0 1px 6px rgba(0,0,0,.45)}.bh-haut small{font-size:.95rem;opacity:.95}.bh-haut b{font-family:var(--serif,inherit);font-size:1.5rem;line-height:1.15}'+
 '.bh-bs{position:absolute;left:18px;right:16px;bottom:16px;z-index:1;display:flex;justify-content:space-between;align-items:center;gap:10px}.bh-sem{font-weight:700;font-size:1.05rem;color:#fff;text-shadow:0 1px 6px rgba(0,0,0,.5)}'+
 '.bh-ouvrir{display:inline-flex;gap:8px;align-items:center;background:rgba(255,255,255,.92);color:#3b2a24;border-radius:999px;padding:9px 16px;font-weight:700;font-size:.92rem}'+
-'.bh-bas{margin-top:12px;border-radius:22px;padding:14px 16px;background:var(--card,#fffaf6);border:1px solid var(--line,#e6d9d0);display:grid;gap:8px;color:var(--ink,#2c221e)}.bh-v{font-family:var(--serif,inherit);font-size:1.2rem;font-weight:700}.bh-c{font-size:.98rem;line-height:1.4}.bh-bas .prog{margin:0}'+
+'.bh-bs{justify-content:flex-end!important}.bh-bas{margin-top:12px;border-radius:22px;padding:14px 16px;background:var(--card,#fffaf6);border:1px solid var(--line,#e6d9d0);display:grid;gap:8px;color:var(--ink,#2c221e)}.bh-v{font-family:var(--serif,inherit);font-size:1.2rem;font-weight:700}.bh-c{font-size:.98rem;line-height:1.4}.bh-bas .prog{margin:0}'+
 '#bhPE{position:fixed;inset:0;z-index:99990;overflow-y:auto;-webkit-overflow-scrolling:touch;background:linear-gradient(180deg,#e8cdbd 0%,#3b2a24 46%,#1c1714 100%);color:#fff;padding:max(14px,env(safe-area-inset-top)) 16px max(24px,env(safe-area-inset-bottom));display:grid;gap:14px;align-content:start}'+
 '.bh-top{display:flex;justify-content:space-between;align-items:center}.bh-sal{font-size:1rem;color:#3b2a24}.bh-sal b{font-family:var(--serif,inherit);font-size:1.25rem}'+
 '.bh-x,.bh-nav button,.bh-son{border:0;cursor:pointer;display:grid;place-items:center;width:42px;height:42px;border-radius:50%;background:rgba(255,255,255,.9);color:#3b2a24;font-size:1.05rem}.bh-nav button:disabled{opacity:.35}'+
