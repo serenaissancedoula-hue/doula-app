@@ -58,7 +58,7 @@ pSuivi=function(){if(!S._svVu){S.wkSel=null;S.ppSel=null;S._svVu=true}return _pS
 
 /* Le cœur qu'on entend (son synthétisé : un « toum-toum » doux et un souffle, comme au doppler) */
 let AUD=null;
-function coeurDemarrer(b){
+function coeurSynthese(b){
   /* Le son est fabriqué en fichier WAV puis joué avec un lecteur audio : sur iPhone, c'est entendu même si le commutateur silencieux est activé. */
   try{if(navigator.audioSession)navigator.audioSession.type='playback'}catch(e){}
   const SR=22050,per=60/b,N=Math.max(4,Math.round(4/per)),len=Math.round(SR*per*N),d=new Float32Array(len);
@@ -77,6 +77,17 @@ function coeurDemarrer(b){
   const p=el.play();if(p&&p.catch)p.catch(()=>{});
   if(navigator.vibrate)try{navigator.vibrate(1)}catch(e){}
   AUD={el,url}}
+/* Vrai enregistrement (img/son/coeur-bebe.mp3, 136 battements/min) joué au rythme de la semaine ; si le fichier ne joue pas, le son fabriqué prend le relais. */
+function coeurDemarrer(b){
+  try{if(navigator.audioSession)navigator.audioSession.type='playback'}catch(e){}
+  const el=new Audio('img/son/coeur-bebe.mp3?v=1');el.loop=true;el.volume=1;el.preload='auto';el.setAttribute('playsinline','');
+  try{el.preservesPitch=true;el.webkitPreservesPitch=true}catch(e){}
+  el.playbackRate=Math.min(1.3,Math.max(.75,(b||136)/136));
+  const me={el,url:null};AUD=me;
+  const secours=()=>{if(AUD!==me)return;try{el.pause()}catch(e){}AUD=null;try{coeurSynthese(b)}catch(e){}};
+  el.addEventListener('error',secours);
+  const p=el.play();if(p&&p.catch)p.catch(err=>{if(err&&err.name==='NotSupportedError')secours()});
+  if(navigator.vibrate)try{navigator.vibrate(1)}catch(e){}}
 function coeurArreter(){if(!AUD)return;try{AUD.el.pause();AUD.el.src=''}catch(e){}try{URL.revokeObjectURL(AUD.url)}catch(e){}AUD=null}
 function lireReglageSon(){try{return JSON.parse(localStorage.getItem('sere-reglages')||'{}')}catch(e){return {}}}
 
