@@ -1,0 +1,10 @@
+{
+  "doula": {
+    "url": "https://doula.academiesere.ca/",
+    "android": { "package": "ca.academiesere.doula", "sha256": [] }
+  },
+  "famille": {
+    "url": "https://famille.academiesere.ca/",
+    "android": { "package": "ca.academiesere.famille", "sha256": [] }
+  }
+}

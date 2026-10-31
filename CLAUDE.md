@@ -10,3 +10,8 @@
   3. `node build.js N` (met aussi à jour tous les `?v=` des deux pages)
 - Le service worker prend les fichiers `?v=` dans le cache du téléphone : sans nouveau numéro, les changements n'arrivent pas.
 - Une demande pour l'Espace Doula ne doit pas changer l'Espace Parents (et l'inverse).
+- **Deux sites séparés (Google Play)** : `node build-sites.js` (après `node build.js N`) produit `sites/doula/` et `sites/famille/`,
+  chacun avec son `index.html`, son manifeste et son `sw.js` à la racine. Adresses, identifiants Android et empreintes : `sites.json`.
+  `window.SITES` est posé dans les pages par ce script; sans lui (ancien site unique), les liens entre espaces restent comme avant.
+  Le dossier `sites/` est généré (non versionné). Cloudflare Pages : commande `node build-sites.js doula` (ou `famille`), sortie `sites/doula` (ou `sites/famille`).
+- Pas de fichier de plus de 25 Mo dans le dépôt (limite de Cloudflare Pages). La 3D de bébé a été retirée : seulement des images fixes.
