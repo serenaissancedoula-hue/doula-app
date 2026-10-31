@@ -43,7 +43,7 @@ if(window.ESPACE!=='parent'){
     const dejaC=new Set((U||[]).map(x=>x.compte)),viaDoula=(FM||[]).filter(f=>f.doula_id&&!f.test&&!dejaC.has(f.id));
     if(error){el.innerHTML='<p class="small muted">Les codes promo ne sont pas encore installés (fichier mise-a-jour.sql à coller dans Supabase).</p>';return}
     const base=location.origin+location.pathname.replace(/parents\/?$/,'').replace(/[^/]*$/,'');
-    el.innerHTML=(C||[]).map(c=>{const u=(U||[]).filter(x=>x.code===c.code),lien=base+(c.pour==='famille'?'parents/':'')+'?code='+encodeURIComponent(c.code);
+    el.innerHTML=(C||[]).map(c=>{const u=(U||[]).filter(x=>x.code===c.code),lien=(window.SITES?(c.pour==='famille'?window.SITES.famille:window.SITES.doula):base+(c.pour==='famille'?'parents/':''))+'?code='+encodeURIComponent(c.code);
       return '<div class="soft" style="margin:6px 0;gap:4px"><div class="row between"><b>'+esc(c.code)+'</b><span class="pill '+(c.actif?'sage':'line')+'">'+(c.pour==='doula'?'Doulas':'Mamans')+' · '+(c.utilisations+(c.pour==='famille'?viaDoula.length:0))+' / '+c.max_utilisations+'</span></div><span class="xs muted">'+c.mois+' mois gratuits'+(c.actif?'':' · désactivé')+'</span>'+
       (c.pour==='famille'&&viaDoula.length?'<span class="xs">Ajoutées par une doula (comptent aussi comme place maman) : '+viaDoula.map(f=>esc([f.prenom,f.nom].filter(Boolean).join(' ')||'Sans nom')).join(', ')+'</span>':'')+
       (u.length?'<span class="xs">'+u.map(x=>esc(x.nom||'Sans nom')+' ('+new Date(x.le).toLocaleDateString('fr-CA',{day:'numeric',month:'short'})+')').join(', ')+'</span>':'')+

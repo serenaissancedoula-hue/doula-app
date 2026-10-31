@@ -8,7 +8,8 @@ const VAPID='BJC1fnvWds8ctpR0X-wqEgbawrXCQ13_LibuAnvaSwSmeWu39GtwyZCDChj2_E_Ua7f
 const ESPACE=window.ESPACE==='parent'?'parent':'doula';
 const CLE_AUTH='sere-'+ESPACE+'-auth';
 try{if(ESPACE==='doula'&&!localStorage.getItem(CLE_AUTH)&&localStorage.getItem('sere-app-auth'))localStorage.setItem(CLE_AUTH,localStorage.getItem('sere-app-auth'))}catch(e){}
-const URL_DOULA=new URL('./',document.baseURI).href,URL_PARENTS=URL_DOULA+'parents/';
+/* Sites séparés (doula.… et famille.…) : window.SITES est posé dans la page par build-sites.js. Sans lui (ancien site unique) : comme avant. */
+const URL_DOULA=(window.SITES&&window.SITES.doula)||new URL('./',document.baseURI).href,URL_PARENTS=(window.SITES&&window.SITES.famille)||URL_DOULA+'parents/';
 const sb=window.supabase.createClient(SB_URL,SB_CLE,{auth:{storageKey:CLE_AUTH,storage:window.localStorage,persistSession:true,autoRefreshToken:true,detectSessionInUrl:false}});
 /* Connexion qui reste ouverte sur le téléphone : familles déconnectées après 30 jours sans utiliser l'appli, doulas après 7 jours. */
 const INACTIF={parent:30,doula:7};

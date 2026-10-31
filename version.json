@@ -1,8 +1,6 @@
 {
- "version": "2026.10.30-285",
+ "version": "2026.10.30-286",
  "nouveautes": [
-  "Mes tests et vaccins : on voit d'abord ceux à faire à votre stade de grossesse; les autres sont dans des menus déroulants (à venir, passés, déjà faits).",
-  "En cochant un test, la page reste là où vous étiez.",
-  "Dans le dossier d'une famille, chaque onglet s'ouvre en haut de la page."
+  "Petites améliorations en coulisses."
  ]
 }
