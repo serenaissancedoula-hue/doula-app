@@ -30,7 +30,7 @@ function rectangle(g){
 function hero(g){
   const w=cl(g.w),pr=prenomMoi();
   return '<button type="button" class="bh-hero" data-bh="ouvrir" aria-label="Voir bébé en grand et entendre son cœur">'+
-    (VID.indexOf(w)>=0?'<video src="'+vid(w)+'" poster="'+img(w)+'" autoplay muted loop playsinline webkit-playsinline disablepictureinpicture draggable="false"></video>':'<img src="'+img(w)+'" alt="Bébé à '+w+' semaines" decoding="async">')+
+    (VID.indexOf(w)>=0?'<video src="'+vid(w)+'" poster="'+img(w)+'" autoplay muted loop playsinline webkit-playsinline preload="auto" disablepictureinpicture draggable="false" style="background:url(\''+img(w)+'\') center/cover"></video>':'<img src="'+img(w)+'" alt="Bébé à '+w+' semaines" decoding="async">')+
     '<span class="bh-haut"><small>'+salut()+(pr?',':'')+'</small>'+(pr?'<b>'+esc(pr)+'</b>':'')+'</span>'+'<span class="bh-tri">'+(w<14?'1er':w<28?'2e':'3e')+' trimestre</span>'+
     '<span class="bh-bs"><span class="bh-txt"><span class="bh-sem">Vous et '+esc(nomBebe()||'bébé')+' êtes à <b>'+w+' semaine'+(w>1?'s':'')+'</b>'+(g.d?' et <b>'+g.d+' jour'+(g.d>1?'s':'')+'</b>':'')+'</span><span class="bh-res">'+cohab(g)+'</span></span><span class="bh-ouvrir" aria-hidden="true">'+icon('fa-expand')+'</span></span></button>';
 }
@@ -42,20 +42,24 @@ carteBebe=function(g){let h=_cb(g);
   return h};
 
 /* ---------- plein écran ---------- */
+/* Les vidéos de bébé doivent démarrer seules; en mode économie d'énergie (iPhone) elles attendent un toucher : on réessaie souvent. */
+function jouer(){try{document.querySelectorAll('.bh-hero video,#bhPE video').forEach(v=>{v.muted=true;v.setAttribute('playsinline','');if(v.paused){const p=v.play();if(p&&p.catch)p.catch(()=>{})}})}catch(e){}}
+setInterval(jouer,1200);['touchstart','touchend','click','scroll'].forEach(ev=>document.addEventListener(ev,jouer,{capture:true,passive:true}));
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)jouer()});
 let SEM=0;
 function vue(w){const f=fruit(w),I=infoSemaine(w)||[],M=mouvement(w),b=bpm(w),st=stage(),g=st.g,cur=cl(g.w);
   const rel=w===cur?'Cette semaine':w<cur?'Il y a '+(cur-w)+' semaine'+(cur-w>1?'s':''):'Dans '+(w-cur)+' semaine'+(w-cur>1?'s':'');
   const poids=f[2]?(f[2]>=1000?cm((f[2]/1000).toFixed(2))+' kg':f[2]+' g'):'< 1 g';
   const pr=prenomMoi();
   return '<div class="bh-top"><span class="bh-sal">'+salut()+(pr?', <b>'+esc(pr)+'</b>':'')+'</span><button type="button" class="bh-x" data-bh="fermer" aria-label="Fermer">'+icon('fa-xmark')+'</button></div>'+
-    '<div class="bh-img" id="bhImg"'+(VID.indexOf(w)>=0?'':w>=28?' data-k="2"':w>=20?' data-k="1"':'')+'><div class="bh-fond" style="background-image:url(\''+img(w)+'\')"></div><div class="bh-spin'+(VID.indexOf(w)>=0?' vid':'')+'">'+(VID.indexOf(w)>=0?'<video src="'+vid(w)+'" poster="'+img(w)+'" autoplay muted loop playsinline webkit-playsinline disablepictureinpicture draggable="false"></video>':'<img src="'+img(w)+'" alt="Bébé à '+w+' semaines" draggable="false">')+'</div>'+(b?'<button type="button" class="bh-coeur'+(S.sonCoeur?'':' off')+'" data-bh="son" aria-label="Arrêter ou remettre le son du cœur" style="animation-duration:'+(60/b*2).toFixed(2)+'s">'+icon('fa-heart')+'</button>':'')+'</div>'+
+    '<div class="bh-img" id="bhImg"'+(VID.indexOf(w)>=0?'':w>=28?' data-k="2"':w>=20?' data-k="1"':'')+'><div class="bh-fond" style="background-image:url(\''+img(w)+'\')"></div><div class="bh-spin'+(VID.indexOf(w)>=0?' vid':'')+'">'+(VID.indexOf(w)>=0?'<video src="'+vid(w)+'" poster="'+img(w)+'" autoplay muted loop playsinline webkit-playsinline preload="auto" disablepictureinpicture draggable="false" style="background:url(\''+img(w)+'\') center/cover"></video>':'<img src="'+img(w)+'" alt="Bébé à '+w+' semaines" draggable="false">')+'</div>'+(b?'<button type="button" class="bh-coeur'+(S.sonCoeur?'':' off')+'" data-bh="son" aria-label="Arrêter ou remettre le son du cœur" style="animation-duration:'+(60/b*2).toFixed(2)+'s">'+icon('fa-heart')+'</button>':'')+'</div>'+
     '<div class="bh-nav"><button type="button" data-bh="prev" aria-label="Semaine précédente"'+(w<=SEM_MIN?' disabled':'')+'>'+icon('fa-chevron-left')+'</button><span class="bh-rel">'+rel+'</span><button type="button" data-bh="next" aria-label="Semaine suivante"'+(w>=SEM_MAX?' disabled':'')+'>'+icon('fa-chevron-right')+'</button></div>'+
     '<div class="bh-mes"><div><small>Poids</small><b>≈ '+poids+'</b></div><div><small>Longueur</small><b>≈ '+cm(f[1])+' cm</b></div><div class="bh-gs"><b>'+w+'</b><small>semaines</small></div></div>'+
     '<div class="bh-pan"><div class="bh-pt"><b>'+esc((((window.SEM_PLUS||{})[w])||[])[0]||'Votre bébé cette semaine')+'</b></div>'+
     '<p>'+esc(I[1]||'')+'</p><p>'+(w>=7?'<b>Ses mouvements :</b> ':'')+esc(M[2])+'</p><p class="bh-note">'+(b?'Son du cœur : une illustration, pas le vrai cœur de votre bébé.':'Le cœur de bébé commence à battre très tôt, mais on ne l\'entend pas encore à cette étape.')+' Glissez le doigt à gauche ou à droite pour changer de semaine.</p></div>'+
     rectangle(g)};
 function coeur(w){try{coeurArreter()}catch(e){}const b=bpm(w);if(b&&S.sonCoeur){try{coeurDemarrer(b)}catch(e){}}}
-function dessiner(){const d=document.getElementById('bhPE');if(!d)return;d.innerHTML=vue(SEM);coeur(SEM);d.scrollTop=0}
+function dessiner(){const d=document.getElementById('bhPE');if(!d)return;d.innerHTML=vue(SEM);coeur(SEM);d.scrollTop=0;jouer()}
 function aller(w){w=cl(w);if(w===SEM)return;SEM=w;dessiner()}
 function ouvrir(){const st=stage();if(st.k!=='preg')return;fermer();SEM=cl(st.g.w);
   const d=document.createElement('div');d.id='bhPE';d.setAttribute('role','dialog');d.setAttribute('aria-label','Mon bébé en plein écran');
@@ -74,6 +78,7 @@ document.addEventListener('keydown',e=>{if(!document.getElementById('bhPE'))retu
 
 const st=document.createElement('style');st.textContent=
 '.bh-hero{position:relative;display:block;width:100%;padding:0;border:0;border-radius:28px;overflow:hidden;aspect-ratio:4/5;max-height:68vh;cursor:pointer;background:#2a1f1b;color:#fff;font:inherit;text-align:left;box-shadow:0 8px 24px rgba(60,30,20,.22)}'+
+'video::-webkit-media-controls-start-playback-button,video::-webkit-media-controls-overlay-play-button,video::-webkit-media-controls{display:none!important;-webkit-appearance:none}'+
 '.bh-hero img,.bh-hero video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;pointer-events:none}'+
 '.bh-hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.45) 0%,rgba(0,0,0,0) 30%,rgba(0,0,0,0) 62%,rgba(0,0,0,.55) 100%);pointer-events:none}'+
 '.bh-haut{position:absolute;left:18px;top:16px;z-index:1;display:grid;gap:0;color:#fff;text-shadow:0 1px 6px rgba(0,0,0,.45)}.bh-haut small{font-size:.95rem;opacity:.95}.bh-haut b{font-family:var(--serif,inherit);font-size:1.5rem;line-height:1.15}'+
