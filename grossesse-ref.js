@@ -28,7 +28,7 @@ function feuilleSemaine(w){w=Math.max(4,Math.min(42,w));const c=cur(),f=fruit(w)
   let ex=[];try{ex=EXAMS.filter(e=>w>=e[0]-1&&w<=e[1]+1)}catch(e){}
   let ar=[];try{ar=(window.LECT_SEM?LECT_SEM(w):[]).slice(0,4)}catch(e){}
   let h=selecteur(w)+'<div class="gr-sem">'+
-   '<div class="gr-top"><div class="gr-img"><img src="img/bebe/semaine-'+String(w).padStart(2,'0')+'.jpg?v=7" alt="Bébé à '+w+' semaines" loading="lazy" onerror="this.parentNode.innerHTML=\'<span class=gr-big>'+emo(w)+'</span>\'"></div>'+
+   '<div class="gr-top"><div class="gr-img"><img src="img/bebe/semaine-'+String(w).padStart(2,'0')+'.jpg?v=8" alt="Bébé à '+w+' semaines" loading="lazy" onerror="this.parentNode.innerHTML=\'<span class=gr-big>'+emo(w)+'</span>\'"></div>'+
    '<div class="gr-taille"><div class="gr-tt">Bébé en chiffres</div><div class="gr-tl"><span>Longueur<small>cm</small></span><b>'+cm(f[1])+'</b></div>'+(kg?'<div class="gr-tl"><span>Poids<small>'+(g>=1000?'kilos':'grammes')+'</small></span><b>'+(g>=1000?cm((g/1000).toFixed(2)):g)+'</b></div>':'')+(bpm(w)?'<div class="gr-tl"><span>Cœur<small>battements/min ≈</small></span><b>'+bpm(w)+'</b></div>':'')+'<div class="gr-fr2">'+emo(w)+' Taille de bébé : '+E(f[0])+'</div></div></div>'+
    (rel?'<p class="xs muted" style="margin:0">'+rel+'</p>':'')+
    plus(w)+'<div class="gr-det"><button type="button" class="gr-detb" data-gr="det">Lire plus en détail</button><div class="gr-detc">'+
