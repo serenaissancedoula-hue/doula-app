@@ -1,6 +1,6 @@
 {
- "version": "2026.10.31-326",
+ "version": "2026.10.31-327",
  "nouveautes": [
-  "La date du jour suit le fuseau horaire de la région de la famille."
+  "Accueil : la date du jour est entre la photo et « Vous »."
  ]
 }
