@@ -6,10 +6,8 @@
 (function(){
 if(window.ESPACE!=='parent')return;
 const NOMS={NB:'Nouveau-Brunswick',QC:'Québec',ON:'Ontario',NS:'Nouvelle-Écosse',PE:'Île-du-Prince-Édouard',NL:'Terre-Neuve-et-Labrador',MB:'Manitoba',SK:'Saskatchewan',AB:'Alberta',BC:'Colombie-Britannique',YT:'Yukon',NT:'Territoires du Nord-Ouest',NU:'Nunavut',FR:'France',US:'États-Unis'};
-/* Tous les autres pays du monde : code « W-XX » (XX = code ISO du pays) */
-const PAYS_ISO='AF AX AL DZ AS AD AO AI AG AR AM AW AU AT AZ BS BH BD BB BY BE BZ BJ BM BT BO BA BW BR VG BN BG BF BI KH CM CV KY CF TD CL CN CO KM CG CD CK CR CI HR CU CW CY CZ DK DJ DM DO EC EG SV GQ ER EE SZ ET FK FO FJ FI PF GA GM GE DE GH GI GR GL GD GU GT GG GN GW GY HT HN HK HU IS IN ID IR IQ IE IM IL IT JM JP JE JO KZ KE KI XK KW KG LA LV LB LS LR LY LI LT LU MO MG MW MY MV ML MT MH MQ MR MU YT MX FM MD MC MN ME MS MA MZ MM NA NR NP NL NC NZ NI NE NG NU KP MK MP NO OM PK PW PS PA PG PY PE PH PL PT PR QA RE RO RU RW WS SM ST SA SN RS SC SL SG SX SK SI SB SO ZA KR SS ES LK BL SH KN LC MF PM VC SD SR SE CH SY TW TJ TZ TH TL TG TK TO TT TN TR TM TC TV UG UA AE GB UY UZ VU VA VE VN WF EH YE ZM ZW GP GF'.split(' ');
-let DN=null;try{DN=new Intl.DisplayNames(['fr'],{type:'region'})}catch(e){}
-const PAYS_W=PAYS_ISO.filter(c=>c!=='CA'&&c!=='FR'&&c!=='US').map(c=>{let n=c;try{n=(DN&&DN.of(c))||c}catch(e){}return ['W-'+c,n]}).sort((a,b)=>a[1].localeCompare(b[1],'fr'));
+/* Tous les autres pays du monde : code « W-XX » (XX = code ISO du pays), liste commune définie dans fuseau.js */
+const PAYS_W=window.PAYS_MONDE||[];
 PAYS_W.forEach(p=>{NOMS[p[0]]=p[1]});
 const estW=r=>typeof r==='string'&&r.indexOf('W-')===0;
 const LIGNE={NB:['Télé-Soins','811'],QC:['Info-Santé et Info-Social','811'],ON:['Santé811','811'],NS:['811 Nouvelle-Écosse','811'],PE:['811 Île-du-Prince-Édouard','811'],NL:['HealthLine','811'],MB:['Health Links – Info Santé','1-888-315-9257'],SK:['HealthLine','811'],AB:['Health Link','811'],BC:['HealthLinkBC','811'],YT:['Yukon HealthLine','811'],NT:['Ligne de conseils santé','811']};
