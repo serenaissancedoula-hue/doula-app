@@ -96,4 +96,5 @@ contenu-riche.js
 grossesse-ref.js
 style-uniforme.js
 bebe-hero.js
+liste-bebe.js
 avis-etoiles.js
