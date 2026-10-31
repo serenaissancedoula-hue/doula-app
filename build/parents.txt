@@ -102,3 +102,4 @@ etapes-dev.js
 felicitations.js
 avis-etoiles.js
 suivi-ordre.js
+avis-note.js

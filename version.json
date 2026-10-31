@@ -1,6 +1,7 @@
 {
- "version": "2026.10.31-341",
+ "version": "2026.10.31-342",
  "nouveautes": [
-  "Calendrier : un petit + à côté de la date remplace le gros bouton, et la date prévue est en petit."
+  "Calendrier : plus simple. Touchez un jour pour voir ou ajouter un rendez-vous.",
+  "Page de connexion : la note des mamans qui ont évalué l'appli."
  ]
 }

@@ -84,3 +84,4 @@ cgu-admin.js
 garde.js
 fiches-perso.js
 avis-etoiles.js
+avis-note.js
