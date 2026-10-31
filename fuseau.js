@@ -6,7 +6,9 @@ function region(){try{
   if(window.ESPACE==='doula')return (typeof ME_DOULA!=='undefined'&&ME_DOULA&&ME_DOULA.region)||(typeof S!=='undefined'&&S.doula&&S.doula.region)||'';
   return (window.maRegion&&window.maRegion())||(typeof S!=='undefined'&&S.parent&&S.parent.region)||(typeof FAM!=='undefined'&&FAM&&FAM.region)||'';
 }catch(e){return ''}}
-window.fuseauApp=function(){try{const z=FUSEAUX[region()];if(z){new Intl.DateTimeFormat('fr-CA',{timeZone:z});return z}}catch(e){}return undefined};
+window.fuseauApp=function(){try{const z=FUSEAUX[region()];if(z){new Intl.DateTimeFormat('fr-CA',{timeZone:z});
+  /* Région et appareil sur deux continents différents (ex. France choisie, téléphone au Canada) : on garde l'heure de l'appareil */
+  const ap=Intl.DateTimeFormat().resolvedOptions().timeZone||'';if(ap&&ap.split('/')[0]!==z.split('/')[0])return undefined;return z}}catch(e){}return undefined};
 const P=Date.prototype,D=P.toLocaleDateString,T=P.toLocaleTimeString,L=P.toLocaleString;
 const seule=d=>d.getHours()===0&&d.getMinutes()===0&&d.getSeconds()===0&&d.getMilliseconds()===0;
 const avec=(o,force,d)=>{const z=window.fuseauApp();if(!z||(o&&o.timeZone))return o;if(!force&&seule(d))return o;return Object.assign({},o||{},{timeZone:z})};

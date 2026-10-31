@@ -1,6 +1,6 @@
 {
- "version": "2026.10.31-329",
+ "version": "2026.10.31-330",
  "nouveautes": [
-  "Un message de félicitations apparaît à chaque nouvelle semaine et chaque nouveau mois de grossesse, avec le lien pour lire."
+  "L'heure garde celle de l'appareil quand la région choisie est sur un autre continent."
  ]
 }
