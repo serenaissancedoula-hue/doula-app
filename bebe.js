@@ -59,22 +59,24 @@ pSuivi=function(){if(!S._svVu){S.wkSel=null;S.ppSel=null;S._svVu=true}return _pS
 /* Le cœur qu'on entend (son synthétisé : un « toum-toum » doux et un souffle, comme au doppler) */
 let AUD=null;
 function coeurDemarrer(b){
-  /* iPhone/iPad : jouer même si le commutateur silencieux est activé (iOS 16.4+) */
+  /* Le son est fabriqué en fichier WAV puis joué avec un lecteur audio : sur iPhone, c'est entendu même si le commutateur silencieux est activé. */
   try{if(navigator.audioSession)navigator.audioSession.type='playback'}catch(e){}
-  const C=new (window.AudioContext||window.webkitAudioContext)();try{C.resume()}catch(e){}
-  /* les haut-parleurs de téléphone et de tablette ne reproduisent presque rien sous 150 Hz : le « toum-toum » est donc construit autour de 150–600 Hz (comme un doppler) */
-  const comp=C.createDynamicsCompressor();comp.threshold.value=-18;comp.ratio.value=6;const sortie=C.createGain();sortie.gain.value=1;sortie.connect(comp);comp.connect(C.destination);
-  const n=C.createBuffer(1,C.sampleRate*2,C.sampleRate),d=n.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;
-  const per=60/b;let t=C.currentTime+.15;
-  const coup=(at,fort,f0)=>{
-    const o=C.createOscillator(),g=C.createGain();o.type='triangle';o.frequency.setValueAtTime(f0*1.5,at);o.frequency.exponentialRampToValueAtTime(f0,at+.1);
-    g.gain.setValueAtTime(0,at);g.gain.linearRampToValueAtTime(.9*fort,at+.012);g.gain.exponentialRampToValueAtTime(.001,at+.2);o.connect(g).connect(sortie);o.start(at);o.stop(at+.25);
-    const s=C.createBufferSource();s.buffer=n;const bp=C.createBiquadFilter();bp.type='bandpass';bp.frequency.value=380;bp.Q.value=.9;const gn=C.createGain();
-    gn.gain.setValueAtTime(0,at);gn.gain.linearRampToValueAtTime(.55*fort,at+.02);gn.gain.exponentialRampToValueAtTime(.001,at+.22);s.connect(bp).connect(gn).connect(sortie);s.start(at,Math.random());s.stop(at+.3)};
-  const prog=()=>{while(t<C.currentTime+.8){coup(t,1,150);coup(t+per*.3,.65,120);t+=per}};prog();const id=setInterval(()=>{try{if(C.state==='suspended')C.resume()}catch(e){}prog()},200);
+  const SR=22050,per=60/b,N=Math.max(4,Math.round(4/per)),len=Math.round(SR*per*N),d=new Float32Array(len);
+  const coup=(at,fort,f0)=>{const i0=Math.round(at*SR),L=Math.round(SR*.22);let ph=0;
+    for(let i=0;i<L&&i0+i<len;i++){const t=i/SR,f=f0*(1+.5*Math.exp(-t*30));ph+=2*Math.PI*f/SR;
+      const env=Math.min(1,t/.008)*Math.exp(-t*20);
+      const bruit=(Math.random()*2-1)*Math.exp(-t*40)*.5;
+      d[i0+i]+=fort*env*(Math.sin(ph)*.8+Math.sin(ph*2)*.35)+fort*bruit}};
+  for(let k=0;k<N;k++){coup(k*per,1,170);coup(k*per+per*.3,.7,140)}
+  let m=0;for(let i=0;i<len;i++)m=Math.max(m,Math.abs(d[i]));
+  const buf=new ArrayBuffer(44+len*2),v=new DataView(buf),w=(o,t)=>{for(let i=0;i<t.length;i++)v.setUint8(o+i,t.charCodeAt(i))};
+  w(0,'RIFF');v.setUint32(4,36+len*2,true);w(8,'WAVEfmt ');v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,1,true);v.setUint32(24,SR,true);v.setUint32(28,SR*2,true);v.setUint16(32,2,true);v.setUint16(34,16,true);w(36,'data');v.setUint32(40,len*2,true);
+  for(let i=0;i<len;i++)v.setInt16(44+i*2,Math.max(-1,Math.min(1,d[i]/m*.95))*32767,true);
+  const url=URL.createObjectURL(new Blob([buf],{type:'audio/wav'})),el=new Audio(url);el.loop=true;el.volume=1;el.setAttribute('playsinline','');
+  const p=el.play();if(p&&p.catch)p.catch(()=>{});
   if(navigator.vibrate)try{navigator.vibrate(1)}catch(e){}
-  AUD={C,id}}
-function coeurArreter(){if(!AUD)return;clearInterval(AUD.id);try{AUD.C.close()}catch(e){}AUD=null}
+  AUD={el,url}}
+function coeurArreter(){if(!AUD)return;try{AUD.el.pause();AUD.el.src=''}catch(e){}try{URL.revokeObjectURL(AUD.url)}catch(e){}AUD=null}
 function lireReglageSon(){try{return JSON.parse(localStorage.getItem('sere-reglages')||'{}')}catch(e){return {}}}
 
 document.addEventListener('click',e=>{const b=e.target.closest('[data-act]');if(!b)return;const a=b.dataset.act;
