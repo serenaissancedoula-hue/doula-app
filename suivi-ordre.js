@@ -25,10 +25,10 @@ function ordonner(){try{
   /* calendrier de la semaine et rendez-vous médicaux juste sous la fiche */
   const carte=re=>[...app.querySelectorAll(':scope>.card')].find(c=>re.test((c.querySelector('.eyebrow')||{}).textContent||''));
   const cal=carte(/^\s*Mon calendrier/i),rdv=carte(/Mes rendez-vous médicaux/i);
-  if(rdv)place(rdv);
-  if(cal)place(cal);
+  if(rdv)rdv.remove(); /* on ajoute un rendez-vous en touchant un jour du calendrier */
   if(fiche)place(fiche);
   if(suivi)place(suivi);
+  if(cal)place(cal);
 }catch(e){}}
 const _r=render;render=function(){const x=_r.apply(this,arguments);try{ordonner();setTimeout(ordonner,400)}catch(e){}return x};
 })();

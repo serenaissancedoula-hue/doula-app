@@ -1,6 +1,6 @@
 {
- "version": "2026.10.31-337",
+ "version": "2026.10.31-338",
  "nouveautes": [
-  "Suivi : le calendrier de la semaine et les rendez-vous sont tout en haut."
+  "Suivi : le calendrier de la semaine est tout en haut. On ajoute un rendez-vous en touchant un jour."
  ]
 }
