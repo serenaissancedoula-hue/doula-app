@@ -1,10 +1,6 @@
 {
- "version": "2026.10.31-345",
+ "version": "2026.10.31-346",
  "nouveautes": [
-  "Bébé : il flotte, donne des coups à partir de la semaine 20 et on entend son cœur (touchez le cœur pour l'arrêter).",
-  "Accueil : vous voyez votre semaine et le temps qu'il reste, et un message de félicitations à chaque nouvelle semaine.",
-  "Suivi : le calendrier de la semaine est en haut. Touchez un jour pour ajouter un rendez-vous.",
-  "Inscription : vous pouvez ajouter vos autres enfants et suivre leur développement.",
-  "L'appli fonctionne maintenant dans tous les pays."
+  "Nouveau look : l'illustration d'Espace Famille remplace le logo (icône, en-tête et page de connexion)."
  ]
 }

@@ -11,7 +11,7 @@ const fs = require('fs'), path = require('path');
 const CFG = JSON.parse(fs.readFileSync('sites.json', 'utf8'));
 const ADRESSES = { doula: CFG.doula.url, famille: CFG.famille.url };
 
-const COMMUN_FICHIERS = ['style.css', 'moderne.css', 'polissage.css', 'logo.png', 'reglages.js', 'sw.js', 'version.json', 'couple.jpg', 'doula.jpg', 'parents.jpg'];
+const COMMUN_FICHIERS = ['style.css', 'moderne.css', 'polissage.css', 'logo.png', 'reglages.js', 'sw.js', 'version.json', 'couple.jpg', 'doula.jpg', 'parents.jpg', 'logo-famille.png'];
 const COMMUN_DOSSIERS = ['icones', 'img', 'lib', 'tr'];
 const SITES = {
   doula: { html: 'index.html', manifeste: 'manifest.webmanifest', bundle: 'app-doula.js', en_plus: [] },
@@ -65,6 +65,7 @@ for (const nom of aFaire) {
   fs.rmSync(dir, { recursive: true, force: true }); fs.mkdirSync(dir, { recursive: true });
   for (const f of COMMUN_FICHIERS.concat(def.en_plus)) copier(f, path.join(dir, f));
   for (const d of COMMUN_DOSSIERS) fs.cpSync(d, path.join(dir, d), { recursive: true });
+  if (nom === 'famille' && fs.existsSync('icones-famille')) fs.cpSync('icones-famille', path.join(dir, 'icones'), { recursive: true }); /* icône propre à l'Espace Famille */
   copier(bundle, path.join(dir, 'dist', def.bundle));
   fs.writeFileSync(path.join(dir, 'index.html'), page(nom, def));
   fs.writeFileSync(path.join(dir, 'manifest.webmanifest'), manifeste(nom, def));
