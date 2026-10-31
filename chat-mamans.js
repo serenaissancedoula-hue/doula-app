@@ -224,7 +224,7 @@ function menuSignal(id){
 /* ---------- clics ---------- */
 document.addEventListener('click',async e=>{
   const b=e.target.closest&&e.target.closest('[data-cm]');
-  if(!b){const mn=document.getElementById('cmMenu');if(mn&&!mn.hidden&&!e.target.closest('#cmMenu'))mn.hidden=true;return}
+  if(!b){const mn=document.getElementById('cmMenu');if(mn&&!mn.hidden&&!e.target.closest('#cmMenu')){mn.hidden=true;e.stopPropagation();e.preventDefault()}return}
   e.preventDefault();e.stopPropagation();const a=b.dataset.cm;
   try{
     if(a==='doula'){fermer();setTimeout(()=>{try{CB.ouvert=true;cbOuvrir()}catch(x){}},30)}
@@ -426,7 +426,7 @@ document.addEventListener('submit',async e=>{const f=e.target;if(!f||!f.classLis
   const {data,error}=await sb.from('feed_commentaires').insert({post_id:id,auteur:CM.uid,texte:t}).select('*').single();
   if(error){toast(/Doucement/.test(error.message)?'Doucement : un petit instant avant le prochain commentaire.':'Commentaire non envoyé');return}
   i.value='';(FIL.coms[id]=FIL.coms[id]||[]).push(data);const x=FIL.posts.find(y=>y.id===id);if(x)x.coms=(+x.coms||0)+1;filDessiner();const ni=document.getElementById('flc-'+id);if(ni)ni.focus()},true);
-document.addEventListener('click',e=>{const m=document.getElementById('flMenu');if(m&&!e.target.closest('#flMenu')&&!e.target.closest('[data-cm="fl-menu"]'))m.remove()},true);
+document.addEventListener('click',e=>{const m=document.getElementById('flMenu');if(m&&!e.target.closest('#flMenu')&&!e.target.closest('[data-cm="fl-menu"]')){m.remove();e.stopPropagation();e.preventDefault()}},true);
 
 /* ---------- style ---------- */
 const st=document.createElement('style');
