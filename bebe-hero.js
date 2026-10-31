@@ -6,7 +6,7 @@
 if(typeof carteBebe!=='function'||typeof stage!=='function'||typeof coeurDemarrer!=='function')return;
 const SEM_MIN=4,SEM_MAX=42;
 const cl=w=>Math.max(SEM_MIN,Math.min(SEM_MAX,w));
-const VID=[];const vid=w=>'img/bebe/semaine-'+String(cl(w)).padStart(2,'0')+'.mp4';
+const VID=[12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40];const vid=w=>'img/bebe/semaine-'+String(cl(w)).padStart(2,'0')+'.mp4';
 const img=w=>'img/bebe/semaine-'+String(cl(w)).padStart(2,'0')+'.jpg?v=11';
 const nomBebe=()=>{try{return ((S.parent.naissance||{}).prenomBebe||'').trim()}catch(e){return ''}};
 function prenomMoi(){try{let p=(typeof PAPA!=='undefined'&&PAPA)?(PAPA.prenom||'Papa'):((S.parent&&S.parent.prenom)||'');return p&&p!=='Exemple'?p:''}catch(e){return ''}}
@@ -30,7 +30,7 @@ function rectangle(g){
 function hero(g){
   const w=cl(g.w),pr=prenomMoi();
   return '<button type="button" class="bh-hero" data-bh="ouvrir" aria-label="Voir bébé en grand et entendre son cœur">'+
-    '<img src="'+img(w)+'" alt="Bébé à '+w+' semaines" decoding="async">'+
+    (VID.indexOf(w)>=0?'<video src="'+vid(w)+'" poster="'+img(w)+'" autoplay muted loop playsinline webkit-playsinline disablepictureinpicture draggable="false"></video>':'<img src="'+img(w)+'" alt="Bébé à '+w+' semaines" decoding="async">')+
     '<span class="bh-haut"><small>'+salut()+(pr?',':'')+'</small>'+(pr?'<b>'+esc(pr)+'</b>':'')+'</span>'+'<span class="bh-tri">'+(w<14?'1er':w<28?'2e':'3e')+' trimestre</span>'+
     '<span class="bh-bs"><span class="bh-txt"><span class="bh-sem">Vous et '+esc(nomBebe()||'bébé')+' êtes à <b>'+w+' semaine'+(w>1?'s':'')+'</b>'+(g.d?' et <b>'+g.d+' jour'+(g.d>1?'s':'')+'</b>':'')+'</span><span class="bh-res">'+cohab(g)+'</span></span><span class="bh-ouvrir" aria-hidden="true">'+icon('fa-expand')+'</span></span></button>';
 }
@@ -48,7 +48,7 @@ function vue(w){const f=fruit(w),I=infoSemaine(w)||[],M=mouvement(w),b=bpm(w),st
   const poids=f[2]?(f[2]>=1000?cm((f[2]/1000).toFixed(2))+' kg':f[2]+' g'):'< 1 g';
   const pr=prenomMoi();
   return '<div class="bh-top"><span class="bh-sal">'+salut()+(pr?', <b>'+esc(pr)+'</b>':'')+'</span><button type="button" class="bh-x" data-bh="fermer" aria-label="Fermer">'+icon('fa-xmark')+'</button></div>'+
-    '<div class="bh-img" id="bhImg"'+(w>=28?' data-k="2"':w>=20?' data-k="1"':'')+'><div class="bh-fond" style="background-image:url(\''+img(w)+'\')"></div><div class="bh-spin'+(VID.indexOf(w)>=0?' vid':'')+'">'+(VID.indexOf(w)>=0?'<video src="'+vid(w)+'" poster="'+img(w)+'" autoplay muted loop playsinline webkit-playsinline disablepictureinpicture draggable="false"></video>':'<img src="'+img(w)+'" alt="Bébé à '+w+' semaines" draggable="false">')+'</div>'+(b?'<button type="button" class="bh-coeur'+(S.sonCoeur?'':' off')+'" data-bh="son" aria-label="Arrêter ou remettre le son du cœur" style="animation-duration:'+(60/b*2).toFixed(2)+'s">'+icon('fa-heart')+'</button>':'')+'</div>'+
+    '<div class="bh-img" id="bhImg"'+(VID.indexOf(w)>=0?'':w>=28?' data-k="2"':w>=20?' data-k="1"':'')+'><div class="bh-fond" style="background-image:url(\''+img(w)+'\')"></div><div class="bh-spin'+(VID.indexOf(w)>=0?' vid':'')+'">'+(VID.indexOf(w)>=0?'<video src="'+vid(w)+'" poster="'+img(w)+'" autoplay muted loop playsinline webkit-playsinline disablepictureinpicture draggable="false"></video>':'<img src="'+img(w)+'" alt="Bébé à '+w+' semaines" draggable="false">')+'</div>'+(b?'<button type="button" class="bh-coeur'+(S.sonCoeur?'':' off')+'" data-bh="son" aria-label="Arrêter ou remettre le son du cœur" style="animation-duration:'+(60/b*2).toFixed(2)+'s">'+icon('fa-heart')+'</button>':'')+'</div>'+
     '<div class="bh-nav"><button type="button" data-bh="prev" aria-label="Semaine précédente"'+(w<=SEM_MIN?' disabled':'')+'>'+icon('fa-chevron-left')+'</button><span class="bh-rel">'+rel+'</span><button type="button" data-bh="next" aria-label="Semaine suivante"'+(w>=SEM_MAX?' disabled':'')+'>'+icon('fa-chevron-right')+'</button></div>'+
     '<div class="bh-mes"><div><small>Poids</small><b>≈ '+poids+'</b></div><div><small>Longueur</small><b>≈ '+cm(f[1])+' cm</b></div><div class="bh-gs"><b>'+w+'</b><small>semaines</small></div></div>'+
     '<div class="bh-pan"><div class="bh-pt"><b>'+esc((((window.SEM_PLUS||{})[w])||[])[0]||'Votre bébé cette semaine')+'</b></div>'+
@@ -74,7 +74,7 @@ document.addEventListener('keydown',e=>{if(!document.getElementById('bhPE'))retu
 
 const st=document.createElement('style');st.textContent=
 '.bh-hero{position:relative;display:block;width:100%;padding:0;border:0;border-radius:28px;overflow:hidden;aspect-ratio:4/5;max-height:68vh;cursor:pointer;background:#2a1f1b;color:#fff;font:inherit;text-align:left;box-shadow:0 8px 24px rgba(60,30,20,.22)}'+
-'.bh-hero img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}'+
+'.bh-hero img,.bh-hero video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;pointer-events:none}'+
 '.bh-hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.45) 0%,rgba(0,0,0,0) 30%,rgba(0,0,0,0) 62%,rgba(0,0,0,.55) 100%);pointer-events:none}'+
 '.bh-haut{position:absolute;left:18px;top:16px;z-index:1;display:grid;gap:0;color:#fff;text-shadow:0 1px 6px rgba(0,0,0,.45)}.bh-haut small{font-size:.95rem;opacity:.95}.bh-haut b{font-family:var(--serif,inherit);font-size:1.5rem;line-height:1.15}'+
 '.bh-bs{position:absolute;left:18px;right:16px;bottom:16px;z-index:1;display:flex;justify-content:space-between;align-items:center;gap:10px}.bh-sem{font-weight:700;font-size:1.05rem;color:#fff;text-shadow:0 1px 6px rgba(0,0,0,.5)}'+
