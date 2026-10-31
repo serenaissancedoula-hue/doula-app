@@ -5,7 +5,7 @@
    À chaque publication : changer APP_VERSION ici ET dans version.json, et le ?v= des scripts dans index.html et parents/index.html (sinon le téléphone garde les anciens fichiers). */
 /* Comptes autorisés à passer l'écran de maintenance pour tester (en plus de la propriétaire). */
 const MAINT_OK=['sabrinac9779@gmail.com'];
-const APP_VERSION='2026.10.31-344';
+const APP_VERSION='2026.10.31-345';
 async function versionEnLigne(){try{const r=await fetch('version.json?t='+Date.now(),{cache:'no-store'});if(!r.ok)return null;return await r.json()}catch(e){return null}}
 async function majForcer(){try{toast('Mise à jour en cours…')}catch(e){}
   try{sessionStorage.setItem('sere-maj-ok','1')}catch(e){}
@@ -17,7 +17,7 @@ async function majForcer(){try{toast('Mise à jour en cours…')}catch(e){}
 function afficherMaj(v){try{
   if(document.getElementById('msgMaj'))return;
   try{if(sessionStorage.getItem('sere-maj-plustard')===v.version)return}catch(e){}
-  const N=(v.nouveautes||[]).slice(0,3).map(x=>'<li>'+String(x).replace(/</g,'&lt;')+'</li>').join('');
+  const N=(v.nouveautes||[]).slice(0,5).map(x=>'<li>'+String(x).replace(/</g,'&lt;')+'</li>').join('');
   const d=document.createElement('div');d.id='msgMaj';d.dataset.v=v.version;d.setAttribute('role','dialog');d.setAttribute('aria-modal','true');
   d.style.cssText='position:fixed;inset:0;z-index:99998;display:grid;place-items:center;padding:20px;background:rgba(20,12,10,.55)';
   d.innerHTML='<div style="width:min(100%,360px);background:var(--card,#fffaf6);color:var(--ink,#2c221e);border-radius:24px;padding:22px 20px;box-shadow:0 18px 50px rgba(0,0,0,.4);text-align:center;display:grid;gap:10px"><div style="font-size:36px">✨</div><h2 style="margin:0">Une nouvelle version est prête</h2>'+(N?'<ul style="text-align:left;margin:0;padding-left:20px;font-size:.92rem">'+N+'</ul>':'<p class="small" style="margin:0">Des améliorations ont été ajoutées à l\'appli.</p>')+'<p class="xs muted" style="margin:0">Voulez-vous la mettre à jour maintenant ? L\'appli va se recharger.</p><button class="btn" data-act="majMaintenant" style="width:100%">Mettre à jour</button><button class="btn sm ghost" data-act="majPlusTard" style="width:100%">Plus tard</button></div>';
