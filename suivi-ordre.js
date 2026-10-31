@@ -22,6 +22,11 @@ function ordonner(){try{
       fiche.innerHTML='<span class="eyebrow acc">Pour mon médecin</span><p class="xs muted" style="margin:4px 0 8px">Un résumé de votre grossesse et de vos tests, prêt à imprimer ou à montrer à votre rendez-vous.</p>';
       fiche.appendChild(bt)}}
   const suivi=app.querySelector('.gp-suivi');
+  /* calendrier de la semaine et rendez-vous médicaux juste sous la fiche */
+  const carte=re=>[...app.querySelectorAll(':scope>.card')].find(c=>re.test((c.querySelector('.eyebrow')||{}).textContent||''));
+  const cal=carte(/^\s*Mon calendrier/i),rdv=carte(/Mes rendez-vous médicaux/i);
+  if(rdv)place(rdv);
+  if(cal)place(cal);
   if(fiche)place(fiche);
   if(suivi)place(suivi);
 }catch(e){}}
