@@ -215,11 +215,11 @@ const MOTS_POSTPARTUM = [
 const LETTRES_MERCI = [
   { nom: 'Chaleureuse', texte: `Chère {{prenom}}{{partenaire_et}},
 
-Merci de m'avoir choisie pour vous accompagner dans l'arrivée de votre bébé. C'est un vrai privilège que vous m'ouvriez la porte de cette période si précieuse de votre vie.
+Merci d'avoir pris le temps de me rencontrer. C'est un vrai privilège que vous m'ayez ouvert la porte de cette période si précieuse de votre vie.
 
-Notre rencontre m'a beaucoup touchée. J'ai hâte d'apprendre à mieux vous connaître et de préparer avec vous une naissance qui vous ressemble.
+Notre rencontre m'a beaucoup touchée. Si vous décidez d'avancer avec moi, j'aurai hâte d'apprendre à mieux vous connaître et de préparer avec vous une naissance qui vous ressemble.
 
-Vous trouverez dans votre appli votre contrat et quelques formulaires à remplir. Prenez le temps de les lire : je réponds avec plaisir à toutes vos questions, directement dans l'appli.
+Vous trouverez dans votre appli un contrat et quelques formulaires. Prenez le temps de les lire : je réponds avec plaisir à toutes vos questions, directement dans l'appli.
 
 D'ici notre prochaine rencontre, prenez bien soin de vous.
 
@@ -238,9 +238,9 @@ Tendrement,
 {{doula_prenom}}` },
   { nom: 'Simple et claire', texte: `Bonjour {{prenom}}{{partenaire_et}},
 
-Merci de m'avoir choisie comme doula ! Je suis très heureuse de vous accompagner.
+Merci d'avoir pris le temps de me rencontrer ! Ce fut un plaisir de faire votre connaissance.
 
-Voici les prochaines étapes :
+Si vous souhaitez poursuivre avec moi, voici les prochaines étapes :
 1. Lire et signer votre contrat dans l'appli (Ma doula › Documents).
 2. Remplir le formulaire d'accueil confidentiel et le consentement.
 3. Demander le moment de notre première rencontre prénatale (Ma doula › Rendez-vous).
@@ -259,9 +259,9 @@ Votre contrat et vos documents sont dans l'appli. On se reparle très bientôt.
 
 Avec toute ma reconnaissance,
 {{doula_prenom}}` },
-  { nom: 'Courte', texte: `{{prenom}}, merci de m'avoir choisie !
+  { nom: 'Courte', texte: `{{prenom}}, merci pour notre rencontre !
 
-C'est un honneur de faire partie de votre histoire. Votre pochette de bienvenue est dans l'appli : contrat, formulaire d'accueil et quelques documents à lire et signer.
+Ce fut un plaisir de faire votre connaissance. Votre pochette de bienvenue est dans l'appli : contrat, formulaire d'accueil et quelques documents à lire et signer.
 
 On se reparle très bientôt.
 {{doula_prenom}}` }
