@@ -36,7 +36,10 @@ function fondAncetre(el){for(let e=el.parentElement;e;e=e.parentElement){const c
 function adoucir(){if(!sombre())return;try{
   document.querySelectorAll('#app *,#layer *').forEach(el=>{if(el.dataset.dk||el.closest(EXC))return;const cs=getComputedStyle(el);if(cs.backgroundImage==='none'&&cs.backgroundColor==='rgba(0, 0, 0, 0)')return;const r=el.getBoundingClientRect();if(r.width<30||r.height<30)return;
     const L=cols(cs.backgroundImage).concat(cols(cs.backgroundColor));if(!L.length)return;
-    if(L.every(a=>lumRgb(a[0],a[1],a[2])>.55)){el.dataset.dk='1';el.style.setProperty('background','linear-gradient(160deg,var(--card),var(--soft))','important')}});
+    if(L.every(a=>lumRgb(a[0],a[1],a[2])>.55)){el.dataset.dk='1';el.style.setProperty('background','linear-gradient(160deg,var(--card),var(--soft))','important');
+      /* le texte très foncé (écrit en dur dans le CSS) devient clair sur ce fond désormais sombre; les couleurs d'accent ne sont pas touchées */
+      el.querySelectorAll('*').forEach(x=>{if(x.dataset.dt||x.closest(EXC))return;const c=cols(getComputedStyle(x).color)[0];if(c&&lumRgb(c[0],c[1],c[2])<.08){x.dataset.dt='1';x.style.setProperty('color','var(--ink)','important')}});
+      {const c=cols(cs.color)[0];if(c&&lumRgb(c[0],c[1],c[2])<.08&&!el.dataset.dt){el.dataset.dt='1';el.style.setProperty('color','var(--ink)','important')}}}});
   document.querySelectorAll('#app [style*="color"],#layer [style*="color"]').forEach(el=>{if(el.closest(EXC)||el.dataset.dt)return;const c=cols(getComputedStyle(el).color)[0];if(!c||lumRgb(c[0],c[1],c[2])>.25)return;
     const b=fondAncetre(el);if(lumRgb(b[0],b[1],b[2])<.2){el.dataset.dt='1';el.style.setProperty('color','var(--ink)','important')}})}catch(e){}}
 let tm=0;const prog=()=>{clearTimeout(tm);tm=setTimeout(adoucir,60)};
