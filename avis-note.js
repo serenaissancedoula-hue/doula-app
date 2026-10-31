@@ -2,7 +2,7 @@
 (function(){
   var _e=ecranConnexion;
   function ligne(r){
-    if(!r||!r.n)return'';
+    if(!r||!r.n||r.n<5)return'';
     var m=Number(r.moyenne)||0,pl=Math.round(m),e='';
     for(var i=1;i<=5;i++)e+='<span style="color:'+(i<=pl?'#d9a441':'#d8cfc6')+'">★</span>';
     return '<div id="avisNote" style="text-align:center;margin:10px 0 2px"><div style="font-size:1.35rem;letter-spacing:2px;line-height:1">'+e+'</div><div class="small muted" style="margin-top:4px"><b>'+String(m.toFixed(1)).replace('.',',')+' / 5</b> · '+r.n+' avis de mamans</div></div>';
