@@ -1,4 +1,5 @@
 # Ordre de chargement des fichiers de l'Espace doula (assemblés par build.js)
+fuseau.js
 donnees.js
 donnees-docs.js
 parent.js

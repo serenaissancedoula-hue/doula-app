@@ -1,6 +1,6 @@
 {
- "version": "2026.10.31-327",
+ "version": "2026.10.31-328",
  "nouveautes": [
-  "Accueil : la date du jour est entre la photo et « Vous »."
+  "Les dates et les heures suivent le fuseau horaire de la région de la famille ou de la doula."
  ]
 }
