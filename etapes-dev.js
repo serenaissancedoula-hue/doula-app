@@ -18,7 +18,7 @@ const poids=g=>!g?'< 1 g':g>=1000?(g/1000).toFixed(1).replace('.',',')+' kg':g+'
 function vueMois(c){
   return MOIS.map(m=>{const fin=fruit(m[2]),ici=c!=null&&c>=m[1]&&c<=m[2];
     return '<div class="card"><div class="row between"><span class="eyebrow acc">'+m[0]+' · semaines '+m[1]+' à '+m[2]+'</span>'+(ici?'<span class="pill acc">Vous êtes ici</span>':'')+'</div>'+
-     '<div class="row" style="gap:12px;align-items:flex-start;flex-wrap:nowrap"><img src="img/bebe/semaine-'+String(m[2]).padStart(2,'0')+'.jpg?v=5" alt="Bébé à la semaine '+m[2]+'" loading="lazy" style="width:92px;height:92px;border-radius:16px;object-fit:cover;flex:0 0 auto"><div><p class="small" style="margin:0 0 4px"><b>'+m[3]+'</b></p><p class="xs muted" style="margin:0">À la fin du mois : environ '+(fin[1]).toString().replace('.',',')+' cm · '+poids(fin[2])+'</p></div></div>'+
+     '<div class="row" style="gap:12px;align-items:flex-start;flex-wrap:nowrap"><img src="img/bebe/semaine-'+String(m[2]).padStart(2,'0')+'.jpg?v=6" alt="Bébé à la semaine '+m[2]+'" loading="lazy" style="width:92px;height:92px;border-radius:16px;object-fit:cover;flex:0 0 auto"><div><p class="small" style="margin:0 0 4px"><b>'+m[3]+'</b></p><p class="xs muted" style="margin:0">À la fin du mois : environ '+(fin[1]).toString().replace('.',',')+' cm · '+poids(fin[2])+'</p></div></div>'+
      '<ul class="clean small" style="margin-top:10px">'+m[4].map(x=>'<li>'+x+'</li>').join('')+'</ul>'+
      '<button class="btn sm ghost" data-gr="sem" data-w="'+m[2]+'" style="margin-top:6px">Voir la semaine '+m[2]+'</button></div>'}).join('')}
 function vueSemaines(c){

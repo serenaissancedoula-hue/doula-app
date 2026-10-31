@@ -6,7 +6,7 @@
 if(typeof carteBebe!=='function'||typeof stage!=='function'||typeof coeurDemarrer!=='function')return;
 const SEM_MIN=4,SEM_MAX=42;
 const cl=w=>Math.max(SEM_MIN,Math.min(SEM_MAX,w));
-const img=w=>'img/bebe/semaine-'+String(cl(w)).padStart(2,'0')+'.jpg?v=5';
+const img=w=>'img/bebe/semaine-'+String(cl(w)).padStart(2,'0')+'.jpg?v=6';
 const nomBebe=()=>{try{return ((S.parent.naissance||{}).prenomBebe||'').trim()}catch(e){return ''}};
 function prenomMoi(){try{let p=(typeof PAPA!=='undefined'&&PAPA)?(PAPA.prenom||'Papa'):((S.parent&&S.parent.prenom)||'');return p&&p!=='Exemple'?p:''}catch(e){return ''}}
 const salut=()=>{const h=new Date().getHours();return h>=5&&h<18?'Bonjour':'Bonsoir'};
