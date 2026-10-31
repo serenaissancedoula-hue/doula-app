@@ -36,6 +36,8 @@ if(typeof cRdvs==='function'){const _crAG=cRdvs;cRdvs=function(c){return _crAG(c
 document.addEventListener('click',e=>{const b=e.target.closest('[data-pclr]');if(!b)return;e.stopPropagation();e.preventDefault();const i=b.parentElement.querySelector('input[type=date]');if(!i)return;i.value='';i.dispatchEvent(new Event('input',{bubbles:true}));i.dispatchEvent(new Event('change',{bubbles:true}));toast('Date effacée')},true);
 /* les sections dépliables restent ouvertes quand on coche une case (le rendu ne les referme plus) */
 (function(){const cle=d=>{const s=d.querySelector('summary');return s?s.textContent.replace(/[\d\/()]+/g,'').replace(/\s+/g,' ').trim():''};
+  const page=()=>{try{return JSON.stringify([S.role,S.vue,S.tab,S.sub,S.seg,S.jbTab,S.dtab,S.dsub,S.openClient,S.ctab,S.devSel,S.devEnfant,(S.parent||{}).profil])}catch(e){return ''}};
   const _rD=render;render=function(){let ouverts=[];try{ouverts=[...document.querySelectorAll('#app details[open]')].map(cle).filter(Boolean)}catch(e){}
-    const y=window.scrollY;const x=_rD.apply(this,arguments);
-    try{if(ouverts.length){document.querySelectorAll('#app details').forEach(d=>{if(!d.open&&ouverts.includes(cle(d)))d.open=true});window.scrollTo(0,y)}}catch(e){}return x}})();
+    const y=window.scrollY,k0=page();const x=_rD.apply(this,arguments);
+    /* seulement sur la même page : quand on change de page, on arrive en haut */
+    try{if(ouverts.length&&page()===k0&&!(window.__navRecent&&window.__navRecent())){document.querySelectorAll('#app details').forEach(d=>{if(!d.open&&ouverts.includes(cle(d)))d.open=true});window.scrollTo(0,y)}}catch(e){}return x}})();

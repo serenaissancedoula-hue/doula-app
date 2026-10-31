@@ -31,7 +31,7 @@ retrouver();aplique();
 /* ---- Mode sombre : adoucit les fonds clairs écrits « en dur » et les textes foncés sans variable ---- */
 const lumRgb=(r,g,b)=>{const f=c=>{c/=255;return c<=.03928?c/12.92:Math.pow((c+.055)/1.055,2.4)};return .2126*f(r)+.7152*f(g)+.0722*f(b)};
 const cols=t=>(t.match(/rgba?\([^)]*\)/g)||[]).map(x=>x.match(/[\d.]+/g).map(Number)).filter(a=>a.length<4||a[3]>.5);
-const EXC='.papier,.fid-pg,#docImp,canvas,.pad-zone,.sigbox,.ph,#bebePE,#felic,svg,img,figure.illu';
+const EXC='.papier,.fid-pg,#docImp,canvas,.pad-zone,.sigbox,.ph,#bebePE,#bhPE,.bh-hero,#felic,svg,img,figure.illu';
 function fondAncetre(el){for(let e=el.parentElement;e;e=e.parentElement){const c=cols(getComputedStyle(e).backgroundColor);if(c.length)return c[0]}return [28,23,20]}
 function adoucir(){if(!sombre())return;try{
   document.querySelectorAll('#app *,#layer *').forEach(el=>{if(el.dataset.dk||el.closest(EXC))return;const cs=getComputedStyle(el);if(cs.backgroundImage==='none'&&cs.backgroundColor==='rgba(0, 0, 0, 0)')return;const r=el.getBoundingClientRect();if(r.width<30||r.height<30)return;
@@ -43,8 +43,9 @@ function adoucir(){if(!sombre())return;try{
   document.querySelectorAll('#app [style*="color"],#layer [style*="color"]').forEach(el=>{if(el.closest(EXC)||el.dataset.dt)return;const c=cols(getComputedStyle(el).color)[0];if(!c||lumRgb(c[0],c[1],c[2])>.25)return;
     const b=fondAncetre(el);if(lumRgb(b[0],b[1],b[2])<.2){el.dataset.dt='1';el.style.setProperty('color','var(--ink)','important')}})}catch(e){}}
 let tm=0;const prog=()=>{clearTimeout(tm);tm=setTimeout(adoucir,60)};
-try{new MutationObserver(prog).observe(document.documentElement,{childList:true,subtree:true})}catch(e){}
-const _rr=render;render=function(){const x=_rr.apply(this,arguments);retrouver();prog();return x};
+/* adoucir tout de suite (avant que l'écran se redessine) : plus de flash blanc quand une page se rafraîchit */
+try{new MutationObserver(()=>{adoucir()}).observe(document.documentElement,{childList:true,subtree:true})}catch(e){}
+const _rr=render;render=function(){const x=_rr.apply(this,arguments);retrouver();adoucir();prog();return x};
 prog();
 const NOMS={auto:['Auto','Suit votre téléphone'],clair:['Clair','Fond clair'],sombre:['Sombre','Fond sombre, plus doux le soir']};
 function carte(){const c=lire();return '<div class="card"><span class="eyebrow acc">Mode clair ou sombre</span><div class="row" style="gap:8px;flex-wrap:wrap;margin-top:6px">'+Object.keys(NOMS).map(k=>'<button class="chip '+(c===k?'on':'')+'" data-act="thTheme" data-v="'+k+'">'+NOMS[k][0]+'</button>').join('')+'</div><p class="xs muted" style="margin-top:6px">'+NOMS[c][1]+'. Les documents à signer restent clairs pour rester lisibles.</p></div>'}
