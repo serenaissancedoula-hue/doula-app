@@ -45,10 +45,10 @@ document.addEventListener('click',e=>{const b=e.target.closest('#tabs [data-v="m
   '.md-urg{margin:2px 0 0;text-align:left}'+
   '.md-tete.compact{flex-direction:row;text-align:left;padding:12px 14px;gap:12px;border-radius:20px;margin-bottom:12px}.md-tete.compact .md-av{width:48px;height:48px;font-size:1.2rem;border-width:2px}.md-tete.compact .md-id{align-items:flex-start}.md-tete.compact b{font-size:1.05rem}'+
   '.md-titre{margin:4px 2px 12px;font-size:1.4rem}'+
-  '.md-grille{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}'+
-  '.md-carre{position:relative;aspect-ratio:1;display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-end;gap:3px;padding:14px;border:0;border-radius:22px;background:var(--card);color:var(--ink);box-shadow:var(--shadow);font:inherit;text-align:left;cursor:pointer}'+
-  '.md-carre .md-ic{position:absolute;top:14px;left:14px;width:46px;height:46px;border-radius:14px;display:grid;place-items:center;color:#7a4a3a;font-size:1.15rem}'+
-  '.md-carre b{font-size:1rem;line-height:1.2}.md-carre small{color:var(--muted);font-size:.78rem;line-height:1.25}'+
+  '.md-grille{display:grid;grid-template-columns:1fr;gap:10px;margin-bottom:16px}'+
+  '.md-carre{position:relative;display:grid;grid-template-columns:46px 1fr;grid-template-rows:auto auto;column-gap:14px;row-gap:2px;align-items:center;align-content:center;min-height:70px;padding:12px 14px;border:0;border-radius:20px;background:var(--card);color:var(--ink);box-shadow:var(--shadow);font:inherit;text-align:left;cursor:pointer;width:100%}'+
+  '.md-carre .md-ic{grid-row:1/3;grid-column:1;width:46px;height:46px;border-radius:14px;display:grid;place-items:center;color:#7a4a3a;font-size:1.15rem}'+
+  '.md-carre b{grid-column:2;font-size:1rem;line-height:1.2;align-self:end}.md-carre small{grid-column:2;color:var(--muted);font-size:.82rem;line-height:1.25;align-self:start}'+
   '.md-badge{position:absolute;top:12px;right:12px;min-width:22px;height:22px;padding:0 6px;border-radius:11px;background:var(--accent);color:#fff;font-size:.75rem;font-weight:700;display:grid;place-items:center}'+
   '[data-theme=dark] .md-carre .md-ic{background:rgba(232,150,125,.2)!important;color:#f4cdbd!important}';
   document.head.appendChild(st)})();
