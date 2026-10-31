@@ -10,6 +10,9 @@ const LIGNE={NB:['Télé-Soins','811'],QC:['Info-Santé et Info-Social','811'],O
 const sauver=()=>{try{if(typeof saveParent==='function')saveParent();else save()}catch(e){}};
 function region(){const p=S.parent||{};return NOMS[p.region]?p.region:NOMS[p.vacRegion]&&p.regionChoisie?p.vacRegion:''}
 window.maRegion=region;
+/* Fuseau horaire selon la région de la famille (sinon : celui du téléphone) */
+const FUSEAUX={NB:'America/Moncton',NS:'America/Halifax',PE:'America/Halifax',QC:'America/Toronto',ON:'America/Toronto',NL:'America/St_Johns',MB:'America/Winnipeg',SK:'America/Regina',AB:'America/Edmonton',BC:'America/Vancouver',YT:'America/Whitehorse',NT:'America/Yellowknife',NU:'America/Iqaluit',FR:'Europe/Paris',US:'America/New_York'};
+window.fuseauApp=function(){try{const z=FUSEAUX[region()];if(z){new Intl.DateTimeFormat('fr-CA',{timeZone:z});return z}}catch(e){}return undefined};
 function choisir(r){if(!NOMS[r])return;S.parent.region=r;S.parent.regionChoisie=true;S.parent.vacRegion=r;sauver()}
 const sel=(id,v)=>'<select '+id+'><option value="">Choisir…</option><optgroup label="Canada">'+Object.keys(NOMS).filter(k=>k!=='FR'&&k!=='US').map(k=>'<option value="'+k+'"'+(v===k?' selected':'')+'>'+NOMS[k]+'</option>').join('')+'</optgroup><option value="FR"'+(v==='FR'?' selected':'')+'>France</option><option value="US"'+(v==='US'?' selected':'')+'>États-Unis</option></select>';
 const tel=(n,lab)=>'<a class="so-tel" href="tel:'+n.replace(/[^\d+]/g,'')+'">'+icon('fa-phone')+(lab||n)+'</a>';

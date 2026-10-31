@@ -1,6 +1,6 @@
 {
- "version": "2026.10.31-325",
+ "version": "2026.10.31-326",
  "nouveautes": [
-  "Accueil : « Étapes du développement » sous « Tout lire », avec la date du jour."
+  "La date du jour suit le fuseau horaire de la région de la famille."
  ]
 }
