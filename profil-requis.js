@@ -21,10 +21,10 @@ if(window.ESPACE==='parent'&&typeof chargerParent==='function'){const _cp=charge
     if(!vide(FAM.prenom)&&!vide(FAM.nom)&&reg)return;
     const o=ecran('Bienvenue !','Quelques informations pour créer votre espace. Elles restent privées.',
       '<div class="grid2"><label class="f">Prénom *<input id="prP" autocomplete="given-name" value="'+esc(vide(FAM.prenom)?(vide(p.prenom)?'':p.prenom):FAM.prenom)+'"></label><label class="f">Nom *<input id="prN" autocomplete="family-name" value="'+esc(FAM.nom||'')+'"></label></div>'+
-      '<label class="f">Où habitez-vous ? *'+sel('prR',reg)+'</label><p class="xs muted" style="margin:-4px 0 0">Pour vous montrer le bon suivi, les vaccins et le soutien de votre région.</p>');
+      '<label class="f">Où habitez-vous ? *'+sel('prR',reg)+'</label><label class="f">Ville (facultatif)<input id="prV" autocomplete="address-level2" value="'+esc(p.ville||'')+'"></label><p class="xs muted" style="margin:-4px 0 0">Pour vous montrer le bon suivi, les vaccins et le soutien de votre région.</p>');
     o.querySelector('#prOk').onclick=async()=>{try{const pr=req('prP','Entrez votre prénom'),no=req('prN','Entrez votre nom'),rg=req('prR','Choisissez votre région');
       const b=o.querySelector('#prOk');b.disabled=true;
-      p.prenom=pr;p.nom=no;p.region=rg;p.regionChoisie=true;p.vacRegion=rg;
+      p.prenom=pr;p.nom=no;p.region=rg;p.ville=((o.querySelector('#prV')||{}).value||'').trim();p.regionChoisie=true;p.vacRegion=rg;
       try{await sb.from('fam_familles').update({prenom:pr,nom:no}).eq('id',FAM.id)}catch(e){}FAM.prenom=pr;FAM.nom=no;
       try{await saveParent()}catch(e){}
       const c=(o.querySelector('#prCode').value||'').trim();o.remove();

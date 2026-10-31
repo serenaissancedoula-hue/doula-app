@@ -6,19 +6,25 @@
 (function(){
 if(window.ESPACE!=='parent')return;
 const NOMS={NB:'Nouveau-Brunswick',QC:'Québec',ON:'Ontario',NS:'Nouvelle-Écosse',PE:'Île-du-Prince-Édouard',NL:'Terre-Neuve-et-Labrador',MB:'Manitoba',SK:'Saskatchewan',AB:'Alberta',BC:'Colombie-Britannique',YT:'Yukon',NT:'Territoires du Nord-Ouest',NU:'Nunavut',FR:'France',US:'États-Unis'};
+/* Tous les autres pays du monde : code « W-XX » (XX = code ISO du pays) */
+const PAYS_ISO='AF AX AL DZ AS AD AO AI AG AR AM AW AU AT AZ BS BH BD BB BY BE BZ BJ BM BT BO BA BW BR VG BN BG BF BI KH CM CV KY CF TD CL CN CO KM CG CD CK CR CI HR CU CW CY CZ DK DJ DM DO EC EG SV GQ ER EE SZ ET FK FO FJ FI PF GA GM GE DE GH GI GR GL GD GU GT GG GN GW GY HT HN HK HU IS IN ID IR IQ IE IM IL IT JM JP JE JO KZ KE KI XK KW KG LA LV LB LS LR LY LI LT LU MO MG MW MY MV ML MT MH MQ MR MU YT MX FM MD MC MN ME MS MA MZ MM NA NR NP NL NC NZ NI NE NG NU KP MK MP NO OM PK PW PS PA PG PY PE PH PL PT PR QA RE RO RU RW WS SM ST SA SN RS SC SL SG SX SK SI SB SO ZA KR SS ES LK BL SH KN LC MF PM VC SD SR SE CH SY TW TJ TZ TH TL TG TK TO TT TN TR TM TC TV UG UA AE GB UY UZ VU VA VE VN WF EH YE ZM ZW GP GF'.split(' ');
+let DN=null;try{DN=new Intl.DisplayNames(['fr'],{type:'region'})}catch(e){}
+const PAYS_W=PAYS_ISO.filter(c=>c!=='CA'&&c!=='FR'&&c!=='US').map(c=>{let n=c;try{n=(DN&&DN.of(c))||c}catch(e){}return ['W-'+c,n]}).sort((a,b)=>a[1].localeCompare(b[1],'fr'));
+PAYS_W.forEach(p=>{NOMS[p[0]]=p[1]});
+const estW=r=>typeof r==='string'&&r.indexOf('W-')===0;
 const LIGNE={NB:['Télé-Soins','811'],QC:['Info-Santé et Info-Social','811'],ON:['Santé811','811'],NS:['811 Nouvelle-Écosse','811'],PE:['811 Île-du-Prince-Édouard','811'],NL:['HealthLine','811'],MB:['Health Links – Info Santé','1-888-315-9257'],SK:['HealthLine','811'],AB:['Health Link','811'],BC:['HealthLinkBC','811'],YT:['Yukon HealthLine','811'],NT:['Ligne de conseils santé','811']};
 const sauver=()=>{try{if(typeof saveParent==='function')saveParent();else save()}catch(e){}};
 function region(){const p=S.parent||{};return NOMS[p.region]?p.region:NOMS[p.vacRegion]&&p.regionChoisie?p.vacRegion:''}
 window.maRegion=region;
 
 function choisir(r){if(!NOMS[r])return;S.parent.region=r;S.parent.regionChoisie=true;S.parent.vacRegion=r;sauver()}
-const sel=(id,v)=>'<select '+id+'><option value="">Choisir…</option><optgroup label="Canada">'+Object.keys(NOMS).filter(k=>k!=='FR'&&k!=='US').map(k=>'<option value="'+k+'"'+(v===k?' selected':'')+'>'+NOMS[k]+'</option>').join('')+'</optgroup><option value="FR"'+(v==='FR'?' selected':'')+'>France</option><option value="US"'+(v==='US'?' selected':'')+'>États-Unis</option></select>';
+const sel=(id,v)=>'<select '+id+'><option value="">Choisir…</option><optgroup label="Canada">'+Object.keys(NOMS).filter(k=>k!=='FR'&&k!=='US').map(k=>'<option value="'+k+'"'+(v===k?' selected':'')+'>'+NOMS[k]+'</option>').join('')+'</optgroup><option value="FR"'+(v==='FR'?' selected':'')+'>France</option><option value="US"'+(v==='US'?' selected':'')+'>États-Unis</option><optgroup label="Autres pays">'+PAYS_W.map(p=>'<option value="'+p[0]+'"'+(v===p[0]?' selected':'')+'>'+p[1]+'</option>').join('')+'</optgroup></select>';
 const tel=(n,lab)=>'<a class="so-tel" href="tel:'+n.replace(/[^\d+]/g,'')+'">'+icon('fa-phone')+(lab||n)+'</a>';
 const web=(u,lab)=>'<a class="so-web" href="'+u+'" target="_blank" rel="noopener">'+icon('fa-arrow-up-right-from-square')+lab+'</a>';
 /* une ressource : [icône, titre, description, liens html] */
-function ressources(r,k){const R=[],CA=r&&r!=='FR'&&r!=='US';
+function ressources(r,k){const R=[],CA=r&&r!=='FR'&&r!=='US'&&!estW(r);
   const ur=r==='FR'?['🚑','Urgence','SAMU, accouchement qui commence vite, saignement abondant, bébé qui respire mal.',tel('15','15')+tel('112','112')]:['🚑','Urgence','Saignement abondant, difficulté à respirer, douleur à la poitrine, bébé bleuté ou très mou, pensées de vous faire du mal.',tel('911','911')];
-  R.push(ur);
+  R.push(estW(r)?['🚑','Urgence','Appelez le numéro d\'urgence de votre pays (le 112 fonctionne dans toute l\'Union européenne et dans beaucoup d\'autres pays). Demandez-le à votre clinique ou à votre doula si vous ne le connaissez pas.','']:ur);
   if(CA){const L=LIGNE[r];if(L)R.push(['🩺',L[0]+' ('+L[1]+')','Une infirmière vous répond 24 h sur 24, gratuitement : fièvre, saignements, allaitement, bébé qui pleure beaucoup, inquiétude de grossesse.'+(r==='QC'?' Faites l\'option Info-Social pour parler de ce que vous vivez.':''),tel(L[1])]);
     else if(r==='NU')R.push(['🩺','Votre centre de santé communautaire','Au Nunavut, il n\'y a pas de 811 : appelez votre centre de santé. Pour parler à quelqu\'un en tout temps : Kamatsiaqtut Help Line.',tel('1-800-265-3333','1-800-265-3333')])}
   if(r==='FR')R.push(['🩺','Médecin de garde','Soir, nuit et fin de semaine, quand le cabinet est fermé et que ce n\'est pas une urgence vitale.',tel('116117','116 117')]);

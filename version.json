@@ -1,6 +1,6 @@
 {
- "version": "2026.10.31-330",
+ "version": "2026.10.31-331",
  "nouveautes": [
-  "L'heure garde celle de l'appareil quand la région choisie est sur un autre continent."
+  "Tous les pays du monde sont offerts, avec la ville. Le paiement est converti dans la monnaie de la personne."
  ]
 }
