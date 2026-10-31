@@ -62,12 +62,13 @@ function coeurDemarrer(b){
   /* Le son est fabriqué en fichier WAV puis joué avec un lecteur audio : sur iPhone, c'est entendu même si le commutateur silencieux est activé. */
   try{if(navigator.audioSession)navigator.audioSession.type='playback'}catch(e){}
   const SR=22050,per=60/b,N=Math.max(4,Math.round(4/per)),len=Math.round(SR*per*N),d=new Float32Array(len);
-  const coup=(at,fort,f0)=>{const i0=Math.round(at*SR),L=Math.round(SR*.22);let ph=0;
-    for(let i=0;i<L&&i0+i<len;i++){const t=i/SR,f=f0*(1+.5*Math.exp(-t*30));ph+=2*Math.PI*f/SR;
-      const env=Math.min(1,t/.008)*Math.exp(-t*20);
-      const bruit=(Math.random()*2-1)*Math.exp(-t*40)*.5;
-      d[i0+i]+=fort*env*(Math.sin(ph)*.8+Math.sin(ph*2)*.35)+fort*bruit}};
-  for(let k=0;k<N;k++){coup(k*per,1,170);coup(k*per+per*.3,.7,140)}
+  let l1=0,l2=0;
+  const coup=(at,fort,f0)=>{const i0=Math.round(at*SR),L=Math.round(SR*.25);let ph=0;
+    for(let i=0;i<L&&i0+i<len;i++){const t=i/SR,f=f0*(1+.4*Math.exp(-t*25));ph+=2*Math.PI*f/SR;
+      const env=Math.min(1,t/.006)*Math.exp(-t*16);
+      const x=Math.random()*2-1;l1+=(x-l1)*.35;l2+=(x-l2)*.06;const bruit=(l1-l2)*Math.exp(-t*22)*1.6;
+      d[i0+i]+=fort*env*(Math.sin(ph)*.6+Math.sin(ph*2)*.6+Math.sin(ph*3)*.35)+fort*bruit}};
+  for(let k=0;k<N;k++){coup(k*per,1,230);coup(k*per+per*.3,.75,190)}
   let m=0;for(let i=0;i<len;i++)m=Math.max(m,Math.abs(d[i]));
   const buf=new ArrayBuffer(44+len*2),v=new DataView(buf),w=(o,t)=>{for(let i=0;i<t.length;i++)v.setUint8(o+i,t.charCodeAt(i))};
   w(0,'RIFF');v.setUint32(4,36+len*2,true);w(8,'WAVEfmt ');v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,1,true);v.setUint32(24,SR,true);v.setUint32(28,SR*2,true);v.setUint16(32,2,true);v.setUint16(34,16,true);w(36,'data');v.setUint32(40,len*2,true);
