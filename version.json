@@ -1,6 +1,6 @@
 {
- "version": "2026.10.31-334",
+ "version": "2026.10.31-335",
  "nouveautes": [
-  "Soutien pour la Suisse, la Belgique et le Royaume-Uni ; le prix est aussi montré dans la monnaie du pays (approximatif)."
+  "Suivi : le calendrier montre seulement la semaine, du lundi au dimanche."
  ]
 }
