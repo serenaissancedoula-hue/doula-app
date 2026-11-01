@@ -1,10 +1,18 @@
 {
   "doula": {
     "url": "https://doula.academiesere.ca/",
-    "android": { "package": "ca.academiesere.doula", "sha256": [] }
+    "android": {
+      "package": "ca.academiesere.doula",
+      "sha256": []
+    }
   },
   "famille": {
     "url": "https://famille.academiesere.ca/",
-    "android": { "package": "ca.academiesere.famille", "sha256": [] }
+    "android": {
+      "package": "ca.academiesere.famille",
+      "sha256": [
+        "41:96:F2:92:D8:50:C0:A8:8E:77:4D:44:59:DD:BA:E8:16:5F:BE:D8:7C:D4:ED:CB:72:75:ED:52:6B:4B:CD:66"
+      ]
+    }
   }
 }
