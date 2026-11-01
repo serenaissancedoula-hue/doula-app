@@ -104,3 +104,4 @@ felicitations.js
 avis-etoiles.js
 suivi-ordre.js
 avis-note.js
+play-billing.js
