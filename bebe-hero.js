@@ -6,7 +6,7 @@
 if(typeof carteBebe!=='function'||typeof stage!=='function'||typeof coeurDemarrer!=='function')return;
 const SEM_MIN=4,SEM_MAX=42;
 const cl=w=>Math.max(SEM_MIN,Math.min(SEM_MAX,w));
-const VID=[12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40];const vid=w=>'img/bebe/semaine-'+String(cl(w)).padStart(2,'0')+'.mp4';
+const VID=[];/* vidéos de bébé semaines 12 à 40 prêtes dans img/bebe (semaine-NN.mp4 et .v.jpg) : mettre les numéros ici pour les réactiver */const vid=w=>'img/bebe/semaine-'+String(cl(w)).padStart(2,'0')+'.mp4';
 const vimg=w=>'img/bebe/semaine-'+String(cl(w)).padStart(2,'0')+'.v.jpg?v=1';/* première image de la vidéo : même image que la vidéo, donc aucun saut */
 const img=w=>'img/bebe/semaine-'+String(cl(w)).padStart(2,'0')+'.jpg?v=11';
 const nomBebe=()=>{try{return ((S.parent.naissance||{}).prenomBebe||'').trim()}catch(e){return ''}};
