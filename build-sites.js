@@ -11,7 +11,7 @@ const fs = require('fs'), path = require('path');
 const CFG = JSON.parse(fs.readFileSync('sites.json', 'utf8'));
 const ADRESSES = { doula: CFG.doula.url, famille: CFG.famille.url };
 
-const COMMUN_FICHIERS = ['style.css', 'moderne.css', 'polissage.css', 'logo.png', 'reglages.js', 'sw.js', 'version.json', 'couple.jpg', 'doula.jpg', 'parents.jpg', 'logo-famille.png', 'logo-doula.png'];
+const COMMUN_FICHIERS = ['style.css', 'moderne.css', 'polissage.css', 'logo.png', 'reglages.js', 'sw.js', 'version.json', 'couple.jpg', 'doula.jpg', 'parents.jpg', 'confidentialite.html', 'logo-famille.png', 'logo-doula.png'];
 const COMMUN_DOSSIERS = ['icones', 'img', 'lib', 'tr'];
 const SITES = {
   doula: { html: 'index.html', manifeste: 'manifest.webmanifest', bundle: 'app-doula.js', en_plus: [] },
