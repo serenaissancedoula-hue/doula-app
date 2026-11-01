@@ -31,13 +31,17 @@ if(window.ESPACE==='parent'){
       const sel=S.sub==='devE'?S.devEnfant:-1,app=document.getElementById('app'),t=document.createElement('template');
       t.innerHTML='<div class="en-dev"><span class="eyebrow acc">Suivre le développement de</span><div class="en-chips">'+(bb||!P.length?'<button class="chip'+(sel===-1?' on':'')+'" data-en-dev="-1">'+esc(bb||'Mon suivi')+'</button>':'<button class="chip'+(sel===-1?' on':'')+'" data-en-dev="-1">Mon suivi</button>')+P.map(y=>'<button class="chip'+(sel===y.i?' on':'')+'" data-en-dev="'+y.i+'">'+esc(nomE(y.e))+' · '+age(y.e.date)+'</button>').join('')+'</div></div>';
       const sw=app.querySelector(':scope>.pf-sw');if(sw)sw.after(t.content);else app.prepend(t.content)}catch(e){}return x};
+  /* sur l'accueil : une carte « Mes enfants » pour trouver tout de suite le développement de chaque enfant de moins de 5 ans */
+  const _rA=render;render=function(){const x=_rA.apply(this,arguments);try{if(S.role!=='parent'||S.vue||S.tab!=='accueil'||S.sub)return x;const app=document.getElementById('app');if(!app||app.querySelector('.en-acc'))return x;const P=petits();if(!P.length)return x;
+      const t=document.createElement('template');t.innerHTML='<div class="card en-acc"><span class="eyebrow acc">Mes enfants</span><p class="small muted" style="margin:4px 0 6px">Touchez un enfant pour voir son développement, mois par mois.</p><div class="en-chips">'+P.map(y=>'<button class="chip" data-en-dev="'+y.i+'" data-en-go="1">'+(y.e.sexe==='Fille'?'👧':y.e.sexe==='Garçon'?'👦':'🧒')+' '+esc(nomE(y.e))+' · '+age(y.e.date)+'</button>').join('')+'</div></div>';
+      const ref=app.querySelector('.gr-vous')||app.querySelector('.gr-jour')||app.querySelector('.bh-hero');if(ref)ref.before(t.content);else{const ft=app.querySelector(':scope>.foot');if(ft)ft.before(t.content);else app.append(t.content)}}catch(e){}return x};
   if(typeof pParametres==='function'){const _pp=pParametres;pParametres=function(){const h=_pp.apply(this,arguments);if(S.role!=='parent')return h;return h+carte()}}
   /* une tuile « Doulas près de moi » dans Ma doula */
   const _r=render;render=function(){const x=_r.apply(this,arguments);try{if(S.role==='parent'&&S.tab==='madoula'&&!S.vue&&!(typeof FAM!=='undefined'&&FAM&&FAM.doula_id)){const g=document.querySelector('#app .md-grille');if(g&&!g.querySelector('[data-en-reg]')){const t=document.createElement('template');
       t.innerHTML='<button class="md-carre" data-en-reg="1"><span class="md-ic" data-dk="1" data-dt="1" style="background:#e3ecd9">'+icon('fa-location-dot')+'</span><b>Doulas près de moi</b><small>Le registre des doulas de votre région</small></button>';g.append(t.content)}}}catch(e){}return x};
   document.addEventListener('click',e=>{let b;
     if(e.target.closest('[data-en-reg]')){e.stopPropagation();e.preventDefault();try{close()}catch(x){}S.vue=null;S.tab='madoula';S.sub='';render();scrollTo(0,0);return}
-    if(b=e.target.closest('[data-en-dev]')){e.stopPropagation();const v=+b.dataset.enDev;S.devSel=null;if(v<0){S.sub='';S.devEnfant=null}else{S.sub='devE';S.devEnfant=v}scrollTo(0,0);render();return}
+    if(b=e.target.closest('[data-en-dev]')){e.stopPropagation();const v=+b.dataset.enDev;if(b.dataset.enGo)S.tab='suivi';S.devSel=null;if(v<0){S.sub='';S.devEnfant=null}else{S.sub='devE';S.devEnfant=v}scrollTo(0,0);render();return}
     if(e.target.closest('[data-en-add]')){e.stopPropagation();fiche(null);return}
     if(b=e.target.closest('[data-en-edit]')){e.stopPropagation();fiche(+b.dataset.enEdit);return}
     if(b=e.target.closest('[data-en-save]')){e.stopPropagation();const p=$('#en_p').value.trim();if(!p){toast('Entrez le prénom');return}
