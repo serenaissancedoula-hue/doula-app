@@ -37,6 +37,8 @@ Deno.serve(async (req) => {
     if (!courriel) return rep({ ok: false, erreur: "non connectée" }, 401);
     const { produit, token, paquet } = await req.json();
     if (!produit || !token || !PAQUETS.includes(paquet)) return rep({ ok: false, erreur: "demande invalide" }, 400);
+    const bonProduit = paquet.endsWith(".doula") ? /^(doula|annuaire)_/.test(produit) : /^famille_/.test(produit);
+    if (!bonProduit) return rep({ ok: false, erreur: "produit invalide pour cette appli" }, 400);
 
     const acces = await jetonGoogle();
     const base = `https://androidpublisher.googleapis.com/androidpublisher/v3/applications/${paquet}/purchases`;
@@ -44,7 +46,8 @@ Deno.serve(async (req) => {
     const a = await r.json();
     if (!r.ok) return rep({ ok: false, erreur: "achat introuvable chez Google" }, 400);
 
-    const ligne = (a.lineItems ?? []).find((l: { productId: string }) => l.productId === produit) ?? a.lineItems?.[0];
+    const ligne = (a.lineItems ?? []).find((l: { productId: string }) => l.productId === produit);
+    if (!ligne) return rep({ ok: false, erreur: "produit différent de l'achat" }, 400);
     const fin = ligne?.expiryTime ?? null;
     const etat: string = a.subscriptionState ?? "";
     const actif = ["SUBSCRIPTION_STATE_ACTIVE", "SUBSCRIPTION_STATE_IN_GRACE_PERIOD", "SUBSCRIPTION_STATE_CANCELED"].includes(etat) && fin && new Date(fin) > new Date();
