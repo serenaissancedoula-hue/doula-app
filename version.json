@@ -1,6 +1,6 @@
 {
- "version": "2026.10.31-359",
+ "version": "2026.10.31-360",
  "nouveautes": [
-  "Si vous ajoutez la photo de votre enfant, elle remplace la photo par défaut dans son suivi."
+  "Suivi d'un enfant : la bande d'âges s'ouvre directement sur son âge."
  ]
 }
