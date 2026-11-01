@@ -3,7 +3,9 @@
     "url": "https://doula.academiesere.ca/",
     "android": {
       "package": "ca.academiesere.doula",
-      "sha256": []
+      "sha256": [
+        "E4:E0:28:5D:B4:32:83:5B:34:EE:B7:B7:58:F0:DB:BB:EA:83:35:FB:6C:DF:9B:C7:E1:E2:5C:5A:2D:CB:7B:E8"
+      ]
     }
   },
   "famille": {
