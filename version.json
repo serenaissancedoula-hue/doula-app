@@ -1,6 +1,8 @@
 {
- "version": "2026.10.31-360",
+ "version": "2026.10.31-361",
  "nouveautes": [
-  "Suivi d'un enfant : la bande d'âges s'ouvre directement sur son âge."
+  "Si vous ajoutez la photo de votre enfant, elle remplace la photo par défaut dans son suivi.",
+  "Suivi d'un enfant : la bande d'âges s'ouvre directement sur son âge.",
+  "Développement des enfants : les numéros d'urgence suivent votre pays."
  ]
 }
