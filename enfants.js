@@ -7,15 +7,20 @@ function age(d){const B=new Date(d+'T12:00'),N=new Date();if(isNaN(B))return '';
 const nomE=e=>(e.prenom||e.prenomBebe||'').trim()||'Enfant';
 function liste(p){return (p.enfants||[]).filter(e=>e&&(e.date||e.prenom||e.prenomBebe))}
 /* ---------- côté famille ---------- */
+/* photo d'un enfant : réduite à 320 px pour rester légère (aussi utilisée à l'inscription) */
+window.enfPhoto=function(file){return new Promise(res=>{try{const r=new FileReader();r.onerror=()=>res('');r.onload=()=>{const im=new Image();im.onerror=()=>res('');im.onload=()=>{try{const m=320,k=Math.min(1,m/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);c.getContext('2d').drawImage(im,0,0,c.width,c.height);res(c.toDataURL('image/jpeg',.8))}catch(e){res('')}};im.src=r.result};r.readAsDataURL(file)}catch(e){res('')}})};
+const avatar=e=>e.photo?'<img src="'+e.photo+'" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:inherit">':(e.sexe==='Fille'?'👧':e.sexe==='Garçon'?'👦':'🧒');
+let ENPH=null;
 if(window.ESPACE==='parent'){
   const sauver=()=>{try{if(typeof saveParent==='function')saveParent();else save()}catch(e){}};
   function carte(){const L=liste(S.parent);
     return '<div class="card en-set"><div class="row between"><span class="eyebrow acc">Mes enfants</span><button class="btn sm" data-en-add="1">'+icon('fa-plus')+'Ajouter</button></div><p class="small muted" style="margin:4px 0 8px">Vos autres enfants. Si vous êtes accompagnée par une doula, elle voit ces informations pour mieux vous accompagner.</p>'+
-      (L.length?'<div class="list">'+L.map((e,i)=>'<div class="li"><div class="ic">'+(e.sexe==='Fille'?'👧':e.sexe==='Garçon'?'👦':'🧒')+'</div><div class="tx"><b>'+esc(nomE(e))+(e.date?' · '+age(e.date):'')+'</b><span>'+(e.date?'Né'+(e.sexe==='Fille'?'e':'')+' le '+fdt(e.date):'')+(e.notes?' · '+esc(e.notes):'')+'</span></div><button class="icon-btn" data-en-edit="'+i+'" aria-label="Modifier">'+icon('fa-pen')+'</button></div>').join('')+'</div>':'<p class="small muted">Aucun enfant inscrit pour l\'instant.</p>')+'</div>'+
+      (L.length?'<div class="list">'+L.map((e,i)=>'<div class="li"><div class="ic" style="overflow:hidden">'+avatar(e)+'</div><div class="tx"><b>'+esc(nomE(e))+(e.date?' · '+age(e.date):'')+'</b><span>'+(e.date?'Né'+(e.sexe==='Fille'?'e':'')+' le '+fdt(e.date):'')+(e.notes?' · '+esc(e.notes):'')+'</span></div><button class="icon-btn" data-en-edit="'+i+'" aria-label="Modifier">'+icon('fa-pen')+'</button></div>').join('')+'</div>':'<p class="small muted">Aucun enfant inscrit pour l\'instant.</p>')+'</div>'+
       (typeof FAM!=='undefined'&&FAM&&FAM.doula_id?'':'<div class="card"><span class="eyebrow acc">Registre des doulas</span><p class="small muted" style="margin:4px 0 8px">Trouvez les doulas près de chez vous et écrivez-leur directement depuis votre compte.</p><button class="btn ghost" data-en-reg="1">'+icon('fa-magnifying-glass')+'Voir les doulas près de moi</button></div>')}
-  function fiche(i){const L=S.parent.enfants||[],e=i!=null?L[i]||{}:{};
+  function fiche(i){const L=S.parent.enfants||[],e=i!=null?L[i]||{}:{};ENPH=null;
     sheet(i!=null?'Modifier · '+esc(nomE(e)):'Ajouter un enfant','<label class="f">Prénom<input id="en_p" value="'+esc(e.prenom||e.prenomBebe||'')+'"></label><label class="f">Date de naissance<input type="date" id="en_d" max="'+iso(new Date())+'" value="'+esc(e.date||'')+'"></label>'+
       '<label class="f">Sexe<select id="en_s"><option value="">—</option>'+['Fille','Garçon'].map(x=>'<option'+(e.sexe===x?' selected':'')+'>'+x+'</option>').join('')+'</select></label>'+
+      '<div class="row" style="gap:12px;align-items:center"><span id="en_pv" style="width:64px;height:64px;border-radius:50%;overflow:hidden;display:grid;place-items:center;background:var(--soft);font-size:1.6rem">'+avatar(e)+'</span><label class="btn sm ghost" style="cursor:pointer">'+icon('fa-camera')+'Photo<input type="file" accept="image/*" id="en_f" hidden></label></div>'+
       '<label class="f">Notes pour la doula (allergies, santé, naissance, particularités)<textarea id="en_n" style="min-height:70px">'+esc(e.notes||'')+'</textarea></label>'+
       '<button class="btn" data-en-save="'+(i!=null?i:'')+'">Enregistrer</button>'+(i!=null?'<button class="btn ghost" data-en-del="'+i+'" style="margin-top:8px">Retirer</button>':''))}
   /* développement des enfants de moins de 5 ans : on choisit l'enfant en haut de Suivi */
@@ -31,21 +36,18 @@ if(window.ESPACE==='parent'){
       const sel=S.sub==='devE'?S.devEnfant:-1,app=document.getElementById('app'),t=document.createElement('template');
       t.innerHTML='<div class="en-dev"><span class="eyebrow acc">Suivre le développement de</span><div class="en-chips">'+(bb||!P.length?'<button class="chip'+(sel===-1?' on':'')+'" data-en-dev="-1">'+esc(bb||'Mon suivi')+'</button>':'<button class="chip'+(sel===-1?' on':'')+'" data-en-dev="-1">Mon suivi</button>')+P.map(y=>'<button class="chip'+(sel===y.i?' on':'')+'" data-en-dev="'+y.i+'">'+esc(nomE(y.e))+' · '+age(y.e.date)+'</button>').join('')+'</div></div>';
       const sw=app.querySelector(':scope>.pf-sw');if(sw)sw.after(t.content);else app.prepend(t.content)}catch(e){}return x};
-  /* sur l'accueil : une carte « Mes enfants » pour trouver tout de suite le développement de chaque enfant de moins de 5 ans */
-  const _rA=render;render=function(){const x=_rA.apply(this,arguments);try{if(S.role!=='parent'||S.vue||S.tab!=='accueil'||S.sub)return x;const app=document.getElementById('app');if(!app||app.querySelector('.en-acc'))return x;const P=petits();if(!P.length)return x;
-      const t=document.createElement('template');t.innerHTML='<div class="card en-acc"><span class="eyebrow acc">Mes enfants</span><p class="small muted" style="margin:4px 0 6px">Touchez un enfant pour voir son développement, mois par mois.</p><div class="en-chips">'+P.map(y=>'<button class="chip" data-en-dev="'+y.i+'" data-en-go="1">'+(y.e.sexe==='Fille'?'👧':y.e.sexe==='Garçon'?'👦':'🧒')+' '+esc(nomE(y.e))+' · '+age(y.e.date)+'</button>').join('')+'</div></div>';
-      const ref=app.querySelector('.gr-vous')||app.querySelector('.gr-jour')||app.querySelector('.bh-hero');if(ref)ref.before(t.content);else{const ft=app.querySelector(':scope>.foot');if(ft)ft.before(t.content);else app.append(t.content)}}catch(e){}return x};
   if(typeof pParametres==='function'){const _pp=pParametres;pParametres=function(){const h=_pp.apply(this,arguments);if(S.role!=='parent')return h;return h+carte()}}
   /* une tuile « Doulas près de moi » dans Ma doula */
   const _r=render;render=function(){const x=_r.apply(this,arguments);try{if(S.role==='parent'&&S.tab==='madoula'&&!S.vue&&!(typeof FAM!=='undefined'&&FAM&&FAM.doula_id)){const g=document.querySelector('#app .md-grille');if(g&&!g.querySelector('[data-en-reg]')){const t=document.createElement('template');
       t.innerHTML='<button class="md-carre" data-en-reg="1"><span class="md-ic" data-dk="1" data-dt="1" style="background:#e3ecd9">'+icon('fa-location-dot')+'</span><b>Doulas près de moi</b><small>Le registre des doulas de votre région</small></button>';g.append(t.content)}}}catch(e){}return x};
+  document.addEventListener('change',async e=>{const f=e.target&&e.target.id==='en_f'&&e.target.files&&e.target.files[0];if(!f)return;const u=await window.enfPhoto(f);if(!u){toast('Photo non lue, essayez-en une autre');return}ENPH=u;const pv=document.getElementById('en_pv');if(pv)pv.innerHTML='<img src="'+u+'" alt="" style="width:100%;height:100%;object-fit:cover">'},true);
   document.addEventListener('click',e=>{let b;
     if(e.target.closest('[data-en-reg]')){e.stopPropagation();e.preventDefault();try{close()}catch(x){}S.vue=null;S.tab='madoula';S.sub='';render();scrollTo(0,0);return}
-    if(b=e.target.closest('[data-en-dev]')){e.stopPropagation();const v=+b.dataset.enDev;if(b.dataset.enGo)S.tab='suivi';S.devSel=null;if(v<0){S.sub='';S.devEnfant=null}else{S.sub='devE';S.devEnfant=v}scrollTo(0,0);render();return}
+    if(b=e.target.closest('[data-en-dev]')){e.stopPropagation();const v=+b.dataset.enDev;S.devSel=null;if(v<0){S.sub='';S.devEnfant=null}else{S.sub='devE';S.devEnfant=v}scrollTo(0,0);render();return}
     if(e.target.closest('[data-en-add]')){e.stopPropagation();fiche(null);return}
     if(b=e.target.closest('[data-en-edit]')){e.stopPropagation();fiche(+b.dataset.enEdit);return}
-    if(b=e.target.closest('[data-en-save]')){e.stopPropagation();const p=$('#en_p').value.trim();if(!p){toast('Entrez le prénom');return}
-      const o={prenom:p,date:$('#en_d').value||'',sexe:$('#en_s').value||'',notes:$('#en_n').value.trim()},L=S.parent.enfants=S.parent.enfants||[];
+    if(b=e.target.closest('[data-en-save]')){e.stopPropagation();const v=id=>((document.getElementById(id)||{}).value||'');const p=v('en_p').trim();if(!p){toast('Entrez le prénom');return}
+      const o={prenom:p,date:v('en_d'),sexe:v('en_s'),notes:v('en_n').trim()};if(ENPH)o.photo=ENPH;const L=S.parent.enfants=S.parent.enfants||[];
       if(b.dataset.enSave!=='')L[+b.dataset.enSave]=Object.assign({},L[+b.dataset.enSave],o);else L.push(o);sauver();close();render();toast('Enregistré');return}
     if(b=e.target.closest('[data-en-del]')){e.stopPropagation();if(b.dataset.c!=='1'){b.dataset.c='1';b.textContent='Touchez encore pour retirer';return}(S.parent.enfants||[]).splice(+b.dataset.enDel,1);sauver();close();render();return}},true);
 }
@@ -54,7 +56,7 @@ if(window.ESPACE!=='parent'&&typeof cSuivi==='function'){const _cs=cSuivi;cSuivi
     const suivis=[];if(p.suiviCycle||p.parcours==='conception')suivis.push('🌱 suit son cycle (essais bébé)');if(+p.nbBebesGrossesse>1)suivis.push('🤰 grossesse de '+(+p.nbBebesGrossesse===2?'jumeaux':'triplés'));if(+n.nb>1)suivis.push('👶 '+(+n.nb===2?'jumeaux':'triplés')+' nés le '+fdt(n.date));
     if(!L.length&&!suivis.length)return h;
     return h+'<div class="card"><span class="eyebrow acc">La famille</span>'+(suivis.length?'<p class="small" style="margin:4px 0 8px">'+suivis.join(' · ')+'</p>':'')+
-      (L.length?'<div class="list">'+L.map(e=>'<div class="li"><div class="ic">'+(e.sexe==='Fille'?'👧':e.sexe==='Garçon'?'👦':'🧒')+'</div><div class="tx"><b>'+esc(nomE(e))+(e.date?' · '+age(e.date):'')+'</b><span>'+(e.date?'Né'+(e.sexe==='Fille'?'e':'')+' le '+fdt(e.date):'')+(e.notes?' · '+esc(e.notes):'')+'</span></div></div>').join('')+'</div>':'')+
+      (L.length?'<div class="list">'+L.map(e=>'<div class="li"><div class="ic" style="overflow:hidden">'+avatar(e)+'</div><div class="tx"><b>'+esc(nomE(e))+(e.date?' · '+age(e.date):'')+'</b><span>'+(e.date?'Né'+(e.sexe==='Fille'?'e':'')+' le '+fdt(e.date):'')+(e.notes?' · '+esc(e.notes):'')+'</span></div></div>').join('')+'</div>':'')+
       '<p class="xs muted">Informations inscrites par la famille dans son espace.</p></div>'}catch(e){return h}}}
 (function(){const st=document.createElement('style');st.textContent='.en-set .li .tx span{white-space:normal}.en-dev{margin:0 0 14px}.en-chips{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding:6px 0 2px}.en-chips::-webkit-scrollbar{display:none}.en-chips .chip{flex:none}';document.head.appendChild(st)})();
 })();
