@@ -30,7 +30,8 @@ function dvVisuel(P,avecNum,ic,etat){const mid=Math.round((P.d0+P.d1)/2),M=dvMes
     '<div class="dvx-row"><div class="dvx-img"><span>'+(ic||'🌱')+'</span><img src="'+dvPhotoUrl(k)+'" alt="" fetchpriority="high" decoding="async" onerror="if(this.nextSibling)this.nextSibling.remove();this.remove()"><small>Photo : Unsplash</small></div>'+
     '<div class="dvx-mes"><span class="eyebrow">'+(etat||'')+'</span><b class="dvx-t">'+P.t+'</b><span class="dvx-d">du '+f(addD(st.birth,P.d0))+' au '+f(addD(st.birth,P.d1))+'</span>'+
     '<div class="dvx-m"><small>Taille moyenne</small><b>'+c(M[1])+'–'+c(M[2])+' cm</b></div><div class="dvx-m"><small>Poids moyen</small><b>'+c(M[3])+'–'+c(M[4])+' kg</b></div>'+(E.t?'<span class="pill acc dvx-p">'+E.t+'</span>':'')+'</div></div>'}
-function dvPage(dansSuivi){const st=stage();if(st.k!=='pp')return '';const nom=esc(((S.parent.naissance||{}).prenomBebe||'').trim()||'Bébé'),cur=dvIndex(st.day);
+function dvPage(a){const h=dvPage0(a);return window.dvAdapt?window.dvAdapt(h):h}
+function dvPage0(dansSuivi){const st=stage();if(st.k!=='pp')return '';const nom=esc(((S.parent.naissance||{}).prenomBebe||'').trim()||'Bébé'),cur=dvIndex(st.day);
   const i=S.devSel==null?cur:Math.max(0,Math.min(DV.length-1,S.devSel)),P=DV[i],mid=Math.round((P.d0+P.d1)/2),I=dvInfoPP(P.d0)||[],E=dvPer(mid)||{};
   const deb=addD(st.birth,P.d0),fin=addD(st.birth,P.d1),f=x=>x.toLocaleDateString('fr-CA',{day:'numeric',month:'short',year:P.d0>300?'numeric':undefined});
   const ph=S.parent.photoBebe;

@@ -66,6 +66,7 @@ installer-appli.js
 sons-carte.js
 dev-contenu.js
 developpement.js
+dev-region.js
 madoula-carres.js
 semaine-boires.js
 diversification.js

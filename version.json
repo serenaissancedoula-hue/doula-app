@@ -1,8 +1,6 @@
 {
- "version": "2026.10.31-357",
+ "version": "2026.10.31-358",
  "nouveautes": [
-  "Vos autres enfants : choisissez fille ou garçon et ajoutez une photo, dès l'inscription.",
-  "Correction : le bouton « Enregistrer » d'un enfant fonctionne maintenant.",
-  "Le développement de vos enfants se trouve dans l'onglet Suivi."
+  "Développement des enfants : les numéros d'urgence et les démarches suivent maintenant votre pays (France, Suisse, Belgique, Royaume-Uni, États-Unis)."
  ]
 }
