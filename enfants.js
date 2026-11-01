@@ -28,7 +28,7 @@ if(window.ESPACE==='parent'){
   const petits=()=>liste(S.parent).map((e,i)=>({e,i})).filter(x=>x.e.date&&moisDe(x.e.date)>=0&&moisDe(x.e.date)<60);
   if(typeof pSuivi==='function'){const _ps=pSuivi;pSuivi=function(){if(S.sub!=='devE')return _ps.apply(this,arguments);const x=petits().find(y=>y.i===S.devEnfant);if(!x){S.sub='';return _ps.apply(this,arguments)}
     const B=new Date(x.e.date+'T00:00');B.setHours(0,0,0,0);const day=Math.floor((Date.now()-B)/864e5),st0=stage,n0=S.parent.naissance;let h='';
-    try{stage=()=>({k:'pp',day,birth:B});S.parent.naissance=Object.assign({},n0||{},{date:x.e.date,prenomBebe:nomE(x.e),sexe:x.e.sexe||'',nb:1});S.sub='';h=_ps.apply(this,arguments)}finally{stage=st0;S.parent.naissance=n0;S.sub='devE'}
+    try{stage=()=>({k:'pp',day,birth:B});S.parent.naissance=Object.assign({},n0||{},{date:x.e.date,prenomBebe:nomE(x.e),sexe:x.e.sexe||'',nb:1});S.sub='';window.dvPhotoPerso=x.e.photo||'';h=_ps.apply(this,arguments)}finally{window.dvPhotoPerso='';stage=st0;S.parent.naissance=n0;S.sub='devE'}
     const t=document.createElement('template');t.innerHTML=h;[...t.content.children].forEach(c=>{const e=((c.querySelector('.eyebrow')||{}).textContent||'');if(/vaccins de bébé/i.test(e)||c.classList.contains('dm-tuile'))c.remove()});
     return [...t.content.childNodes].map(n=>n.outerHTML||n.textContent||'').join('')}}
   const _rS=render;render=function(){const x=_rS.apply(this,arguments);try{if(S.role!=='parent'||S.vue||S.tab!=='suivi'||(S.sub&&S.sub!=='devE'))return x;const P=petits();if(!P.length)return x;

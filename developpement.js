@@ -27,7 +27,7 @@ function dvPhoto(d){const m=d/30.44;return d<14?'nouveau-ne':d<28?'sem-3-4':d<56
 function dvVisuel(P,avecNum,ic,etat){const mid=Math.round((P.d0+P.d1)/2),M=dvMes(mid),c=x=>String(x).replace('.',','),k=DV.indexOf(P),st=stage();try{setTimeout(()=>dvPrecharger(k),300)}catch(e){}
   const f=x=>x.toLocaleDateString('fr-CA',{day:'numeric',month:'short',year:P.d0>300?'numeric':undefined}),E=dvPer(mid)||{};
   return (avecNum?'<div class="dvx-num"><i></i><div><b>'+P.lab+'</b><span>'+P.u+'</span></div><i></i></div>':'')+
-    '<div class="dvx-row"><div class="dvx-img"><span>'+(ic||'🌱')+'</span><img src="'+dvPhotoUrl(k)+'" alt="" fetchpriority="high" decoding="async" onerror="if(this.nextSibling)this.nextSibling.remove();this.remove()"><small>Photo : Unsplash</small></div>'+
+    '<div class="dvx-row"><div class="dvx-img"><span>'+(ic||'🌱')+'</span><img src="'+(window.dvPhotoPerso||dvPhotoUrl(k))+'" alt="" fetchpriority="high" decoding="async" onerror="if(this.nextSibling)this.nextSibling.remove();this.remove()">'+(window.dvPhotoPerso?'':'<small>Photo : Unsplash</small>')+'</div>'+
     '<div class="dvx-mes"><span class="eyebrow">'+(etat||'')+'</span><b class="dvx-t">'+P.t+'</b><span class="dvx-d">du '+f(addD(st.birth,P.d0))+' au '+f(addD(st.birth,P.d1))+'</span>'+
     '<div class="dvx-m"><small>Taille moyenne</small><b>'+c(M[1])+'–'+c(M[2])+' cm</b></div><div class="dvx-m"><small>Poids moyen</small><b>'+c(M[3])+'–'+c(M[4])+' kg</b></div>'+(E.t?'<span class="pill acc dvx-p">'+E.t+'</span>':'')+'</div></div>'}
 function dvPage(a){const h=dvPage0(a);return window.dvAdapt?window.dvAdapt(h):h}
