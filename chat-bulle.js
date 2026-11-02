@@ -54,7 +54,9 @@ function cbDessiner(garderTexte){let p=document.getElementById('chatPan');if(!CB
   const t=p.querySelector('textarea');if(t){t.value=brouillon;if(foc)try{t.focus({preventScroll:true})}catch(e){}}
   const f=document.getElementById('cbFil');if(f)f.scrollTop=f.scrollHeight;cbLus();cbRemplirPJ().then(()=>{const f2=document.getElementById('cbFil');if(f2)f2.scrollTop=f2.scrollHeight})}
 function cbLus(){try{if(!CB.ouvert)return;if(S.role==='parent'){if(MSGS.some(m=>m.de_doula&&!m.lu)){sb.rpc('fam_marquer_lus',{p_famille:FAM.id}).then(()=>{},()=>{});MSGS.forEach(m=>{if(m.de_doula)m.lu=true})}}
-  else if(CB.fid&&NONLUS[CB.fid]){sb.rpc('fam_marquer_lus',{p_famille:CB.fid}).then(()=>{},()=>{});NONLUS[CB.fid]=0}
+  else if(CB.fid&&NONLUS[CB.fid]){const fid=CB.fid;NONLUS[fid]=0;
+    /* une fois marqué lu dans la base : remettre à zéro (au cas où un rechargement l'aurait ramené) et rafraîchir l'accueil et les pastilles */
+    sb.rpc('fam_marquer_lus',{p_famille:fid}).then(()=>{NONLUS[fid]=0;if(typeof majBoutonChat==='function')majBoutonChat();if(!CB.ouvert)try{render()}catch(e){}},()=>{})}
   if(typeof majBoutonChat==='function')majBoutonChat()}catch(e){}}
 async function cbOuvrirFamille(id){CB.fid=id;cbDessiner();try{await chargerClientDetail(id)}catch(e){}if(CB.fid===id)cbDessiner();
   setTimeout(()=>{const t=document.getElementById('cbTxt');if(t)try{t.focus({preventScroll:true})}catch(e){}},80)}
@@ -65,15 +67,15 @@ async function cbEnvoyer(b){const t=document.getElementById('cbTxt'),v=t&&t.valu
   const {error}=await sb.from('fam_messages').insert(row);b.disabled=false;if(error){toast('Pas envoyé : '+(error.message||'erreur'));return}
   t.value='';try{if(S.role==='parent')await chargerEchanges();else await chargerClientDetail(CB.fid)}catch(e){}cbDessiner(true)}
 document.addEventListener('click',e=>{const b=e.target.closest('[data-cb]');if(!b)return;e.stopPropagation();const a=b.dataset.cb;
-  if(a==='fermer'){CB.ouvert=false;cbDessiner();return}
+  if(a==='fermer'){CB.ouvert=false;cbDessiner();if(S.role==='doula')try{render()}catch(x){}return}
   if(a==='retour'){CB.fid=null;cbDessiner();return}
   if(a==='fam'){cbOuvrirFamille(b.dataset.id);return}
   if(a==='envoyer')cbEnvoyer(b)},true);
 document.addEventListener('keydown',e=>{if(e.target&&e.target.id==='cbTxt'&&e.key==='Enter'&&!e.shiftKey&&matchMedia('(pointer:fine)').matches){e.preventDefault();const b=document.querySelector('[data-cb=envoyer]');if(b)cbEnvoyer(b)}
-  if(e.key==='Escape'&&CB.ouvert){CB.ouvert=false;cbDessiner()}});
+  if(e.key==='Escape'&&CB.ouvert){CB.ouvert=false;cbDessiner();if(S.role==='doula')try{render()}catch(x){}}});
 document.addEventListener('input',e=>{if(e.target&&e.target.id==='cbTxt'){const t=e.target;t.style.height='auto';t.style.height=Math.min(120,t.scrollHeight)+'px'}});
 /* la bulle « Chat » ouvre ou ferme la fenêtre */
-function chatBulleBasculer(){if(CB.ouvert){CB.ouvert=false;cbDessiner()}else cbOuvrir()}
+function chatBulleBasculer(){if(CB.ouvert){CB.ouvert=false;cbDessiner();if(S.role==='doula')try{render()}catch(x){}}else cbOuvrir()}
 /* nouveau message en direct : la conversation ouverte se met à jour */
 if(typeof chatReleve==='function'){const _crCB=chatReleve;chatReleve=function(){_crCB.apply(this,arguments);
   if(CB.ouvert)setTimeout(async()=>{try{if(S.role==='doula'&&CB.fid)await chargerClientDetail(CB.fid);else if(S.role==='parent')await chargerEchanges()}catch(e){}cbDessiner(true)},700)}}

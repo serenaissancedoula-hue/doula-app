@@ -1,7 +1,6 @@
 {
- "version": "2026.11.01-363",
+ "version": "2026.11.02-364",
  "nouveautes": [
-  "Accueil de bébé : « Tétée à la main » et « Tirage » ajoutés; le chrono de tétée se place tout en haut.",
-  "Appli Android : paiement des abonnements par Google Play."
+  "Espace doula : un message lu disparaît tout de suite de l'accueil et de la pastille Familles."
  ]
 }
